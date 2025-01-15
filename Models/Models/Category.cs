@@ -8,11 +8,12 @@ namespace Models.Models
 {
     public class Category
     {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
+        public int CategoryID { get; set; }
+        public string CategoryName { get; set; }
+        public string Description { get; set; }
 
-        // Navigation property
+        // Navigation Property
         public ICollection<Item> Items { get; set; }
-
     }
+
 }

@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 namespace Models.Models
 {
-    public class Bid
-    {
-        public Guid Id { get; set; }
-        public decimal BidAmount { get; set; }
-        public DateTime Timestamp { get; set; }
+  
+        public class Bid
+        {
+            public int BidID { get; set; }
+            public decimal BidAmount { get; set; }
+            public DateTime BidTime { get; set; }
 
-        // Foreign keys
-        public Guid ItemId { get; set; }
-        public string UserId { get; set; } // Links to IdentityUser
+            // Foreign Keys
+            public int ItemID { get; set; }
+            public int UserID { get; set; }
 
-        // Navigation properties
-        public Item Item { get; set; }
-        //public IdentityUser User { get; set; }
+            // Navigation Properties
+            public Item Item { get; set; }
+        }
+
     }
-}

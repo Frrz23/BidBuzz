@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250114113216_Addtables")]
-    partial class Addtables
+    [Migration("20250115084104_updatedtable")]
+    partial class updatedtable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,80 +27,92 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Models.Models.Bid", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("BidID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("BidID"));
 
                     b.Property<decimal>("BidAmount")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("Timestamp")
+                    b.Property<DateTime>("BidTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ItemID")
+                        .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
 
-                    b.HasIndex("ItemId");
+                    b.HasKey("BidID");
+
+                    b.HasIndex("ItemID");
 
                     b.ToTable("Bids");
                 });
 
             modelBuilder.Entity("Models.Models.Category", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("CategoryID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<string>("Name")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
+
+                    b.Property<string>("CategoryName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("CategoryID");
 
                     b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("Models.Models.Item", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("ItemID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("AuctionEndTime")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ItemID"));
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("SellerId")
+                    b.Property<string>("ItemDescription")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("StartingPrice")
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id");
+                    b.Property<DateTime?>("StartTime")
+                        .HasColumnType("datetime2");
 
-                    b.HasIndex("CategoryId");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("UserID")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemID");
+
+                    b.HasIndex("CategoryID");
 
                     b.ToTable("Items");
                 });
@@ -108,8 +120,8 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Models.Models.Bid", b =>
                 {
                     b.HasOne("Models.Models.Item", "Item")
-                        .WithMany("Bids")
-                        .HasForeignKey("ItemId")
+                        .WithMany()
+                        .HasForeignKey("ItemID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -120,8 +132,8 @@ namespace DataAccess.Migrations
                 {
                     b.HasOne("Models.Models.Category", "Category")
                         .WithMany("Items")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Category");
@@ -130,11 +142,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Models.Models.Category", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Models.Models.Item", b =>
-                {
-                    b.Navigation("Bids");
                 });
 #pragma warning restore 612, 618
         }

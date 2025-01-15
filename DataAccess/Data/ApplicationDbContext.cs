@@ -21,60 +21,36 @@ namespace DataAccess.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Category
-            modelBuilder.Entity<Category>(entity =>
-            {
-                entity.HasKey(c => c.Id); 
-                entity.Property(c => c.Name)
-                      .IsRequired() 
-                      .HasMaxLength(100);
-
-                // Category -> Items (One-to-Many)
-                entity.HasMany(c => c.Items)
-                      .WithOne(i => i.Category)
-                      .HasForeignKey(i => i.CategoryId)
-                      .OnDelete(DeleteBehavior.Cascade); 
-            });
-
+            // Fluent API configurations (if needed)
             modelBuilder.Entity<Item>(entity =>
             {
-                entity.HasKey(i => i.Id); 
-                entity.Property(i => i.Name)
-                      .IsRequired() 
-                      .HasMaxLength(200); 
+                entity.Property(i => i.Price)
+                    .HasPrecision(18, 2); // Precision: 18, Scale: 2
 
-                entity.Property(i => i.Description)
-                      .HasMaxLength(1000); 
-                entity.Property(i => i.StartingPrice)
-                      .HasPrecision(18, 2) 
-                      .IsRequired(); 
+                entity.HasKey(i => i.ItemID);
 
-                entity.Property(i => i.AuctionEndTime)
-                      .IsRequired();
-
-                // Item -> Category (Many-to-One)
                 entity.HasOne(i => i.Category)
-                      .WithMany(c => c.Items)
-                      .HasForeignKey(i => i.CategoryId)
-                      .OnDelete(DeleteBehavior.Restrict); 
+                    .WithMany(c => c.Items)
+                    .HasForeignKey(i => i.CategoryID);
             });
 
-      
             modelBuilder.Entity<Bid>(entity =>
             {
-                entity.HasKey(b => b.Id); 
                 entity.Property(b => b.BidAmount)
-                      .HasPrecision(18, 2) 
-                      .IsRequired(); 
+                    .HasPrecision(18, 2); // Precision: 18, Scale: 2
 
-                entity.Property(b => b.Timestamp)
-                      .IsRequired();
+                entity.HasKey(b => b.BidID);
 
-                // Bid -> Item (Many-to-One)
                 entity.HasOne(b => b.Item)
-                      .WithMany(i => i.Bids)
-                      .HasForeignKey(b => b.ItemId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                    .WithMany()
+                    .HasForeignKey(b => b.ItemID);
+            });
+
+            modelBuilder.Entity<Category>(entity =>
+            {
+                entity.HasMany(c => c.Items)
+                    .WithOne(i => i.Category)
+                    .HasForeignKey(i => i.CategoryID);
             });
         }
     }
