@@ -8,7 +8,7 @@ namespace DataAccess.Repository.IRepository
 {
     public interface IRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync();
+        Task<IEnumerable<T>> GetAllAsync(); 
         Task<T> GetByIdAsync(int id);
         Task AddAsync(T entity);
         void Update(T entity);
@@ -16,3 +16,6 @@ namespace DataAccess.Repository.IRepository
     }
 
 }
+
+
+//Task==asyncronous Operation that may complete in future 
