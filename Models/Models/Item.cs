@@ -18,11 +18,11 @@ namespace Models.Models
         public DateTime? EndTime { get; set; }
 
         // Foreign Keys
-        public int CategoryID { get; set; }
-        public int? UserID { get; set; } // Nullable for Admin-added items
+        //public int CategoryID { get; set; }
+        //public int? UserID { get; set; } // Nullable for Admin-added items
 
-        // Navigation Properties
-        public Category Category { get; set; }
+        //// Navigation Properties
+        //public Category Category { get; set; }
     }
 
 }

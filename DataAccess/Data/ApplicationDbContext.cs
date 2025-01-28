@@ -29,9 +29,9 @@ namespace DataAccess.Data
 
                 entity.HasKey(i => i.ItemID);
 
-                entity.HasOne(i => i.Category)
-                    .WithMany(c => c.Items)
-                    .HasForeignKey(i => i.CategoryID);
+                //entity.HasOne(i => i.Category)
+                //    .WithMany(c => c.Items)
+                //    .HasForeignKey(i => i.CategoryID);
             });
 
             modelBuilder.Entity<Bid>(entity =>
@@ -41,9 +41,9 @@ namespace DataAccess.Data
 
                 entity.HasKey(b => b.BidID);
 
-                entity.HasOne(b => b.Item)
-                    .WithMany()
-                    .HasForeignKey(b => b.ItemID);
+                //entity.HasOne(b => b.Item)
+                //    .WithMany()
+                //    .HasForeignKey(b => b.ItemID);
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -51,14 +51,14 @@ namespace DataAccess.Data
                 entity.HasKey(c => c.CategoryID); // Primary key
                 entity.Property(c => c.CategoryName)
                     .IsRequired() // Make the CategoryName mandatory
-                    .HasMaxLength(100); // Optional: Limit name length to 100 characters
+                    .HasMaxLength(20); // Optional: Limit name length to 100 characters
 
                 entity.Property(c => c.Description)
-                    .HasMaxLength(500); // Optional: Limit description length
+                    .HasMaxLength(50); // Optional: Limit description length
 
-                entity.HasMany(c => c.Items)
-                    .WithOne(i => i.Category)
-                    .HasForeignKey(i => i.CategoryID);
+                //entity.HasMany(c => c.Items)
+                //    .WithOne(i => i.Category)
+                //    .HasForeignKey(i => i.CategoryID);
             });
         }
     }

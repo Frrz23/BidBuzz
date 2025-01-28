@@ -13,7 +13,7 @@ namespace Models.Models
         public string Description { get; set; }
 
         // Navigation Property
-        public ICollection<Item> Items { get; set; }
+        //public ICollection<Item> Items { get; set; }
     }
 
 }
