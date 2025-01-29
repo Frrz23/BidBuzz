@@ -16,9 +16,11 @@ namespace DataAccess.Repository
         {
             _context = context;
             Categories = new CategoryRepository(context);
+            Item = new ItemRepository(context);
         }
 
         public ICategoryRepository Categories { get; private set; }
+        public IItemRepository Item { get; private set; }
 
         public async Task<int> SaveAsync()
         {

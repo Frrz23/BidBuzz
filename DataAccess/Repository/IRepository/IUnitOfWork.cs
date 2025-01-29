@@ -9,6 +9,7 @@ namespace DataAccess.Repositary
     public interface IUnitOfWork : IDisposable
     {
         ICategoryRepository Categories { get; }
+        IItemRepository Item { get; }
         Task<int> SaveAsync();
     }
 
