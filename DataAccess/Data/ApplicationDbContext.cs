@@ -25,10 +25,11 @@ namespace DataAccess.Data
             modelBuilder.Entity<Item>(entity =>
             {
                 entity.HasKey(i => i.ItemID);
-                entity.Property(i => i.Status).HasMaxLength(50);
+                entity.Property(i => i.Status).HasMaxLength(50).IsRequired();
                 entity.Property(i => i.Price).HasPrecision(18, 2); // Precision: 18, Scale: 2
                 entity.Property(i => i.ItemName).IsRequired().HasMaxLength(100);
                 entity.Property(i => i.ItemDescription).HasMaxLength(500);
+ 
 
                 //entity.HasOne(i => i.Category)
                 //    .WithMany(c => c.Items)
@@ -37,7 +38,7 @@ namespace DataAccess.Data
 
             modelBuilder.Entity<Bid>(entity =>
             {
-                entity.Property(b => b.BidAmount).HasPrecision(18, 2); // Precision: 18, Scale: 2
+                entity.Property(b => b.BidAmount).HasPrecision(18, 2).IsRequired(); // Precision: 18, Scale: 2
 
                 entity.HasKey(b => b.BidID);
 

@@ -16,6 +16,7 @@ namespace Models.Models
         public string Status { get; set; } // PendingApproval, Approved, InAuction
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
+        public string? ImageUrl { get; set; }
 
         // Foreign Keys
         //public int CategoryID { get; set; }

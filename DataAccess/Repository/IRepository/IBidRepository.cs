@@ -6,13 +6,9 @@ using System.Threading.Tasks;
 
 namespace DataAccess.Repository.IRepository
 {
-    public interface IRepository<T> where T : class
+    public interface IBidRepository<T> where T : class
     {
-        Task<IEnumerable<T>> GetAllAsync(); 
-        Task<T> GetByIdAsync(int id);
-        Task AddAsync(T entity);
-        Task UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
+        Task GetHighestBid();
     }
 
 }

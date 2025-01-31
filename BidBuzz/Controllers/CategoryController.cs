@@ -57,7 +57,7 @@ namespace BidBuzz.Controllers
 
             if (ModelState.IsValid)
             {
-                _unitOfWork.Categories.Update(category);
+                _unitOfWork.Categories.UpdateAsync(category);
                 await _unitOfWork.SaveAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -81,7 +81,7 @@ namespace BidBuzz.Controllers
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category != null)
             {
-                _unitOfWork.Categories.Delete(category);
+                _unitOfWork.Categories.DeleteAsync(category);
                 await _unitOfWork.SaveAsync();
             }
             return RedirectToAction(nameof(Index));
