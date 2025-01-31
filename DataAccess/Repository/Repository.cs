@@ -40,10 +40,13 @@ namespace DataAccess.Repository
             _dbSet.Update(entity);
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(int id)
         {
-            _dbSet.Remove(entity);
+            var entity = await _dbSet.FindAsync(id);
+            if (entity != null)
+            {
+                _dbSet.Remove(entity);
+            }
         }
-    }
 
 }

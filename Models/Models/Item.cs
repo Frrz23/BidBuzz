@@ -9,21 +9,16 @@ namespace Models.Models
 {
     public class Item
     {
-        public int ItemID { get; set; }
-        public string ItemName { get; set; }
-        public string ItemDescription { get; set; }
-        public decimal Price { get; set; }
-        public string Status { get; set; } // PendingApproval, Approved, InAuction
-        public DateTime? StartTime { get; set; }
-        public DateTime? EndTime { get; set; }
-        public string? ImageUrl { get; set; }
-
-        // Foreign Keys
-        //public int CategoryID { get; set; }
-        //public int? UserID { get; set; } // Nullable for Admin-added items
-
-        //// Navigation Properties
-        //public Category Category { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal StartingPrice { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
+        public int CategoryId { get; set; }
+        public Category Category { get; set; }
+        public bool IsApproved { get; set; } = false;
+        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }
+
 
 }

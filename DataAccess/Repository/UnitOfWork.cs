@@ -1,5 +1,7 @@
 ﻿using DataAccess.Data;
 using DataAccess.Repositary;
+using DataAccess.Repository.IRepository;
+using Models.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,18 +13,21 @@ namespace DataAccess.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
+        public IRepository<Category> Categories { get; private set; }
+        public IRepository<Item> Items { get; private set; }
+        public IRepository<Bid> Bids { get; private set; }
+        public IRepository<Auction> Auctions { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
-            Categories = new CategoryRepository(context);
-            Item = new ItemRepository(context);
+            Categories = new Repository<Category>(_context);
+            Items = new Repository<Item>(_context);
+            Bids = new Repository<Bid>(_context);
+            Auctions = new Repository<Auction>(_context);
         }
 
-        public ICategoryRepository Categories { get; private set; }
-        public IItemRepository Item { get; private set; }
-
-        public async Task<int> SaveAsync()
+        public async Task<int> CompleteAsync()
         {
             return await _context.SaveChangesAsync();
         }
@@ -32,5 +37,6 @@ namespace DataAccess.Repository
             _context.Dispose();
         }
     }
+
 
 }

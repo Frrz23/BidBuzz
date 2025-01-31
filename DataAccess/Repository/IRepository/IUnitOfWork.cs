@@ -1,4 +1,6 @@
-﻿using System;
+﻿using DataAccess.Repository.IRepository;
+using Models.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,9 +10,11 @@ namespace DataAccess.Repositary
 {
     public interface IUnitOfWork : IDisposable
     {
-        ICategoryRepository Categories { get; }
-        IItemRepository Item { get; }
-        Task<int> SaveAsync();
-    }
+        IRepository<Category> Categories { get; }
+        IRepository<Item> Items { get; }
+        IRepository<Bid> Bids { get; }
+        IRepository<Auction> Auctions { get; }
 
+        Task<int> CompleteAsync(); // Saves changes to the database
+    }
 }

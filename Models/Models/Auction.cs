@@ -6,16 +6,14 @@ using System.Threading.Tasks;
 
 namespace Models.Models
 {
-
-    public class Bid
+    public class Auction
     {
         public int Id { get; set; }
         public int ItemId { get; set; }
         public Item Item { get; set; }
-        public decimal Amount { get; set; }
-        public DateTime BidTime { get; set; } = DateTime.UtcNow;
-        public string UserId { get; set; } // To be linked with Identity later
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public bool IsActive { get; set; }
     }
-
 
 }
