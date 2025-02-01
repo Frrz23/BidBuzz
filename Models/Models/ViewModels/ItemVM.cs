@@ -9,6 +9,5 @@ namespace Models.Models.ViewModels
     public class ItemVM
     {
         public Item Item { get; set; }  // Full Item model
-        public string Status { get; set; }  // Extra property for displaying item status
     }
 }

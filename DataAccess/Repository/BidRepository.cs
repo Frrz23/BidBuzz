@@ -18,10 +18,10 @@ namespace DataAccess.Repository
         {
             _context = context;
         }
-        public async Task GetHighestBid()
-        {
+        //public async Task GetHighestBid()
+        //{
            
-        }   
+        //}   
 
 
     }

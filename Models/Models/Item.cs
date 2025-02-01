@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using Utility;
 namespace Models.Models
 {
     public class Item
@@ -16,6 +16,8 @@ namespace Models.Models
         public string ImageUrl { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public Category Category { get; set; }
+        public ItemStatus Status { get; set; }  
+
         public bool IsApproved { get; set; } = false;
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }

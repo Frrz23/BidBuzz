@@ -10,7 +10,7 @@ namespace DataAccess.Repositary
 {
     public interface ICategoryRepository : IRepository<Category>
     {
-        //Task<Category> GetCategoryWithItemsAsync(int categoryId); 
+        Task <IEnumerable<Item>>GetItemsByCategoryAsync(int categoryId);
     }
 
 }

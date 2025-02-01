@@ -5,14 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace DataAccess.Repositary
 {
     public interface IItemRepository : IRepository<Item>
     {
-        IEnumerable<Item> GetApprovedItems();
-        IEnumerable<Item> GetItemsPendingApproval();
-        IEnumerable<Item> GetItemsInAuction();
+        Task <IEnumerable<Item>> GetItemsByStatusAsync(ItemStatus status);
+
     }
 
 }

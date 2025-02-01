@@ -48,5 +48,5 @@ namespace DataAccess.Repository
                 _dbSet.Remove(entity);
             }
         }
-
+    }
 }

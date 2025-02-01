@@ -30,7 +30,7 @@ namespace BidBuzz.Controllers
             if (ModelState.IsValid)
             {
                 await _unitOfWork.Categories.AddAsync(category);
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -50,7 +50,7 @@ namespace BidBuzz.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Category category)
         {
-            if (id != category.CategoryID)
+            if (id != category.Id)
             {
                 return NotFound();
             }
@@ -58,7 +58,7 @@ namespace BidBuzz.Controllers
             if (ModelState.IsValid)
             {
                 _unitOfWork.Categories.UpdateAsync(category);
-                await _unitOfWork.SaveAsync();
+                await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -78,12 +78,10 @@ namespace BidBuzz.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
-            if (category != null)
-            {
-                _unitOfWork.Categories.DeleteAsync(category);
-                await _unitOfWork.SaveAsync();
-            }
+           
+                _unitOfWork.Categories.DeleteAsync(id);
+                await _unitOfWork.CompleteAsync();
+            
             return RedirectToAction(nameof(Index));
         }
     }

@@ -19,12 +19,11 @@ namespace DataAccess.Repository
             _context = context;
         }
 
-        //public async Task<Category> GetCategoryWithItemsAsync(int categoryId)
-        //{
-        //    return await _context.Categories
-        //        .Include(c => c.Items)
-        //        .FirstOrDefaultAsync(c => c.CategoryID == categoryId);
-        //}
+        public async Task <IEnumerable<Item>>GetItemsByCategoryAsync(int categoryId)
+        {
+            return await _context.Items.Where(i=>i.CategoryId==categoryId).ToListAsync();
+
+        }
     }
 
 }

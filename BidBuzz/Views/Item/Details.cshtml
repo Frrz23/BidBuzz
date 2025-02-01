@@ -1,33 +1,33 @@
-﻿@model Models.Models.Item
+﻿@* @model Models.Models.Item *@
 
-<h2>Item Details</h2>
+@* <h2>Item Details</h2> *@
 
-<table class="table">
-    <tr>
-        <th>Item Name</th>
-        <td>@Model.ItemName</td>
-    </tr>
-    <tr>
-        <th>Description</th>
-        <td>@Model.ItemDescription</td>
-    </tr>
-    <tr>
-        <th>Price</th>
-        <td>@Model.Price.ToString("C")</td>
-    </tr>
-    <tr>
-        <th>Status</th>
-        <td>@Model.Status</td>
-    </tr>
-    <tr>
-        <th>Start Time</th>
-        <td>@(Model.StartTime.HasValue ? Model.StartTime.Value.ToString("g") : "N/A")</td>
-    </tr>
-    <tr>
-        <th>End Time</th>
-        <td>@(Model.EndTime.HasValue ? Model.EndTime.Value.ToString("g") : "N/A")</td>
-    </tr>
-</table>
+@* <table class="table"> *@
+@*     <tr> *@
+@*         <th>Item Name</th> *@
+@*         <td>@Model.ItemName</td> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <th>Description</th> *@
+@*         <td>@Model.ItemDescription</td> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <th>Price</th> *@
+@*         <td>@Model.Price.ToString("C")</td> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <th>Status</th> *@
+@*         <td>@Model.Status</td> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <th>Start Time</th> *@
+@*         <td>@(Model.StartTime.HasValue ? Model.StartTime.Value.ToString("g") : "N/A")</td> *@
+@*     </tr> *@
+@*     <tr> *@
+@*         <th>End Time</th> *@
+@*         <td>@(Model.EndTime.HasValue ? Model.EndTime.Value.ToString("g") : "N/A")</td> *@
+@*     </tr> *@
+@* </table> *@
 
-<a asp-action="Edit" asp-route-id="@Model.ItemID" class="btn btn-warning">Edit</a>
-<a asp-action="Index" class="btn btn-secondary">Back to List</a>
+@* <a asp-action="Edit" asp-route-id="@Model.ItemID" class="btn btn-warning">Edit</a> *@
+@* <a asp-action="Index" class="btn btn-secondary">Back to List</a> *@

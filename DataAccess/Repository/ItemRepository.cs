@@ -1,12 +1,15 @@
 ﻿using DataAccess.Data;
 using DataAccess.Repositary;
 using DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
 using Models.Models;
+using Models.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace DataAccess.Repository
 {
@@ -18,20 +21,11 @@ namespace DataAccess.Repository
         {
             _context = context;
         }
-        public IEnumerable<Item> GetApprovedItems()
+        public async Task<IEnumerable<Item>> GetItemsByStatusAsync(ItemStatus status)
         {
-            return _context.Items.Where(i => i.Status == "Approved").ToList();
+            return await _context.Items.Where(i => i.Status == status).ToListAsync();
         }
 
-        public IEnumerable<Item> GetItemsPendingApproval()
-        {
-            return _context.Items.Where(i => i.Status == "PendingApproval").ToList();
-        }
-
-        public IEnumerable<Item> GetItemsInAuction()
-        {
-            return _context.Items.Where(i => i.Status == "InAuction").ToList();
-        }
 
 
     }
