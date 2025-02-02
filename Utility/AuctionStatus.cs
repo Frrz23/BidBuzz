@@ -2,8 +2,11 @@
 {
     public enum AuctionStatus
     {
-        Active = 1,
-        Ended = 2
+        PendingApproval ,
+        Approved ,
+        InAuction,
+        Sold,
+        NotApproved
     }
 
 }

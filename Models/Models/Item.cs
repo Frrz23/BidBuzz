@@ -16,9 +16,12 @@ namespace Models.Models
         public string ImageUrl { get; set; } = string.Empty;
         public int CategoryId { get; set; }
         public Category Category { get; set; }
-        public ItemStatus Status { get; set; }  
-
-        public bool IsApproved { get; set; } = false;
+        public AuctionStatus Status { get; set; }  
+        public int Quantity {  get; set; }
+        public AuctionDuration Duration { get; set; }  // User-selected timeframe
+        public DateTime? AuctionStartTime { get; set; }  // Admin-scheduled start time
+        public DateTime? AuctionEndTime { get; set; }  // Admin-scheduled end time
+        public bool IsApprovedForAuction { get; set; } = false;  // Admin approval flag
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
     }
 

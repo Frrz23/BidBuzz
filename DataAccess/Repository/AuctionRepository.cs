@@ -13,20 +13,18 @@ using Utility;
 
 namespace DataAccess.Repository
 {
-    public class ItemRepository : Repository<Item>,IItemRepository
+    public class AuctionRepository : Repository<Auction>,IAuctionRepository
     {
         private readonly ApplicationDbContext _context;
 
-        public ItemRepository(ApplicationDbContext context) : base(context)
+        public AuctionRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }
-        public async Task<IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status)
+
+        public Task<IEnumerable<Auction>> GetAuctionsByStatusAsync(AuctionStatus status)
         {
-            return await _context.Items.Where(i => i.Status == status).ToListAsync();
+            throw new NotImplementedException();
         }
-
-
-
     }
 }

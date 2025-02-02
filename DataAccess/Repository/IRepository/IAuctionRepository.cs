@@ -9,9 +9,9 @@ using Utility;
 
 namespace DataAccess.Repositary
 {
-    public interface IItemRepository : IRepository<Item>
+    public interface IAuctionRepository : IRepository<Auction>
     {
-        Task <IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status);
+        Task<IEnumerable<Auction>> GetAuctionsByStatusAsync(AuctionStatus status);
 
     }
 

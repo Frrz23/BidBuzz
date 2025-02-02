@@ -1,6 +1,7 @@
 ﻿using DataAccess.Data;
 using DataAccess.Repositary;
 using DataAccess.Repository.IRepository;
+using Microsoft.EntityFrameworkCore;
 using Models.Models;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,17 @@ namespace DataAccess.Repository
         {
             _context = context;
         }
-        //public async Task GetHighestBid()
-        //{
-           
-        //}   
+        public async Task<IEnumerable<Bid>> GetBidsByItemIdAsync(int itemId)
+        {
+            return await _context.Bids.Where(i => i.ItemId == itemId).ToListAsync();
+        }
+        public async Task<Bid> GetHighestBidAsync(int itemId)
+        {
+            return await _context.Bids
+                .Where(b => b.ItemId == itemId)  
+                .OrderByDescending(b => b.Amount) 
+                .FirstOrDefaultAsync(); 
+        }
 
 
     }
