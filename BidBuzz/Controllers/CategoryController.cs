@@ -25,6 +25,7 @@ namespace BidBuzz.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Category category)
         {
             if (ModelState.IsValid)
@@ -57,7 +58,7 @@ namespace BidBuzz.Controllers
 
             if (ModelState.IsValid)
             {
-                _unitOfWork.Categories.UpdateAsync(category);
+                _unitOfWork.Categories.Update(category);
                 await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -79,7 +80,7 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
            
-                _unitOfWork.Categories.DeleteAsync(id);
+                _unitOfWork.Categories.Delete(id);
                 await _unitOfWork.CompleteAsync();
             
             return RedirectToAction(nameof(Index));

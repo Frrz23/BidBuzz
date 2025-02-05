@@ -10,8 +10,8 @@ namespace Models.Models
     public class Bid
     {
         public int Id { get; set; }
-        public int ItemId { get; set; }
-        public Item Item { get; set; }
+        public int AuctionId { get; set; }
+        public Auction Auction { get; set; }
         public decimal Amount { get; set; }
         public DateTime BidTime { get; set; } = DateTime.UtcNow;
         public string UserId { get; set; } // To be linked with Identity later

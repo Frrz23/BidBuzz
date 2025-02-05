@@ -22,7 +22,7 @@ namespace Models.Models
         public DateTime? AuctionStartTime { get; set; }  // Admin-scheduled start time
         public DateTime? AuctionEndTime { get; set; }  // Admin-scheduled end time
         public bool IsApprovedForAuction { get; set; } = false;  // Admin approval flag
-        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+        public ICollection<Auction> Auctions { get; set; }=new List<Auction>();
     }
 
 

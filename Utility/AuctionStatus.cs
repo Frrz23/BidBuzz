@@ -6,7 +6,8 @@
         Approved ,
         InAuction,
         Sold,
-        NotApproved
+        NotApproved,
+        Unsold
     }
 
 }

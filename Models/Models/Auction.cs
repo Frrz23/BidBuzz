@@ -17,9 +17,8 @@ namespace Models.Models
         // Status (Pending, Active, Completed, etc.)
         public AuctionStatus Status { get; set; }
 
-        // Winning bid (nullable, only set after auction ends)
-        public int? WinningBidId { get; set; }
-        public Bid? WinningBid { get; set; }
+        public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+
     }
 
 }

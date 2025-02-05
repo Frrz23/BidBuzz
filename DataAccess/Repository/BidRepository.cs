@@ -19,14 +19,14 @@ namespace DataAccess.Repository
         {
             _context = context;
         }
-        public async Task<IEnumerable<Bid>> GetBidsByItemIdAsync(int itemId)
+        public async Task<IEnumerable<Bid>> GetBidsByAuctionIdAsync(int auctionId)
         {
-            return await _context.Bids.Where(i => i.ItemId == itemId).ToListAsync();
+            return await _context.Bids.Where(i => i.AuctionId == auctionId).OrderByDescending(i=>i.Amount).ToListAsync();
         }
-        public async Task<Bid> GetHighestBidAsync(int itemId)
+        public async Task<Bid> GetHighestBidAsync(int auctionId)
         {
             return await _context.Bids
-                .Where(b => b.ItemId == itemId)  
+                .Where(b => b.AuctionId == auctionId)  
                 .OrderByDescending(b => b.Amount) 
                 .FirstOrDefaultAsync(); 
         }

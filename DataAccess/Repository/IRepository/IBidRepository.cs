@@ -9,8 +9,8 @@ namespace DataAccess.Repository.IRepository
 {
     public interface IBidRepository : IRepository<Bid>
     {
-        Task <IEnumerable<Bid>> GetBidsByItemIdAsync(int itemId);
-        Task<Bid> GetHighestBidAsync(int itemId);
+        Task <IEnumerable<Bid>> GetBidsByAuctionIdAsync(int auctionId);
+        Task<Bid> GetHighestBidAsync(int auctionId);
     }
 
 }

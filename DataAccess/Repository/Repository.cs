@@ -35,14 +35,14 @@ namespace DataAccess.Repository
             await _dbSet.AddAsync(entity);
         }
 
-        public async Task UpdateAsync(T entity)
+        public void Update(T entity)
         {
             _dbSet.Update(entity);
         }
 
-        public async Task DeleteAsync(int id)
+        public void Delete(int id)
         {
-            var entity = await _dbSet.FindAsync(id);
+            var entity =  _dbSet.Find(id);
             if (entity != null)
             {
                 _dbSet.Remove(entity);

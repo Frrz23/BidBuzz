@@ -53,19 +53,22 @@ namespace DataAccess.Data
                 .Property(b => b.Amount)
                 .HasColumnType("decimal(18,2)"); // Decimal configuration for bid amount
             modelBuilder.Entity<Bid>()
-                .HasOne(b => b.Item)
-                .WithMany(i => i.Bids)
-                .HasForeignKey(b => b.ItemId) // Foreign key to Item
-                .OnDelete(DeleteBehavior.Cascade); // When an Item is deleted, its related Bids are deleted too
+                .HasOne(b => b.Auction)
+                .WithMany(a => a.Bids)
+                .HasForeignKey(b => b.AuctionId)
+                .OnDelete(DeleteBehavior.Cascade);  // If auction is deleted, its bids are also deleted.
 
             // Auction Configuration
             modelBuilder.Entity<Auction>()
                 .HasKey(a => a.Id); // Primary key
             modelBuilder.Entity<Auction>()
                 .HasOne(a => a.Item)
-                .WithOne()
-                .HasForeignKey<Auction>(a => a.ItemId) // One-to-one relationship with Item
-                .OnDelete(DeleteBehavior.Cascade); // When an Auction is deleted, its related Item is deleted too
+                .WithMany(i => i.Auctions) 
+                .HasForeignKey(a => a.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);  // If item is deleted, its auctions are also deleted.
+            modelBuilder.Entity<Auction>()
+                .Property(a => a.Status)
+                .HasConversion<int>();  
         }
     }
 }
