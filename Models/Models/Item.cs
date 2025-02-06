@@ -18,6 +18,7 @@ namespace Models.Models
         public Category Category { get; set; }
         public AuctionStatus Status { get; set; }  
         public int Quantity {  get; set; }
+        public ItemCondition Condition { get; set; } // Add this line
         public AuctionDuration Duration { get; set; }  // User-selected timeframe
         public DateTime? AuctionStartTime { get; set; }  // Admin-scheduled start time
         public DateTime? AuctionEndTime { get; set; }  // Admin-scheduled end time

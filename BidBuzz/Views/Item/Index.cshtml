@@ -1,37 +1,62 @@
-﻿@* @model IEnumerable<Models.Models.Item> *@
+﻿@model IEnumerable<Models.Models.Item>
 
-@* <h2>Items List</h2> *@
 
-@* <p> *@
-@*     <a asp-action="Create" class="btn btn-primary">Add New Item</a> *@
-@* </p> *@
+@{
+    ViewData["Title"] = "Items List";
+}
 
-@* <table class="table table-bordered"> *@
-@*     <thead> *@
-@*         <tr> *@
-@*             <th>Item Name</th> *@
-@*             <th>Price</th> *@
-@*             <th>Status</th> *@
-@*             <th>Start Time</th> *@
-@*             <th>End Time</th> *@
-@*             <th>Actions</th> *@
-@*         </tr> *@
-@*     </thead> *@
-@*     <tbody> *@
-@*         @foreach (var item in Model) *@
-@*         { *@
-@*             <tr> *@
-@*                 <td>@item.ItemName</td> *@
-@*                 <td>@item.Price.ToString("C")</td> *@
-@*                 <td>@item.Status</td> *@
-@*                 <td>@(item.StartTime.HasValue ? item.StartTime.Value.ToString("g") : "N/A")</td> *@
-@*                 <td>@(item.EndTime.HasValue ? item.EndTime.Value.ToString("g") : "N/A")</td> *@
-@*                 <td> *@
-@*                     <a asp-action="Edit" asp-route-id="@item.ItemID" class="btn btn-warning btn-sm">Edit</a> *@
-@*                     <a asp-action="Details" asp-route-id="@item.ItemID" class="btn btn-info btn-sm">Details</a> *@
-@*                     <a asp-action="Delete" asp-route-id="@item.ItemID" class="btn btn-danger btn-sm">Delete</a> *@
-@*                 </td> *@
-@*             </tr> *@
-@*         } *@
-@*     </tbody> *@
-@* </table> *@
+<h2>Items List</h2>
+
+<a asp-action="Upsert" asp-route-id="0" class="btn btn-success mb-3">Create New Item</a>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Condition</th>
+            <th>Quantity</th>
+            <th>Starting Price</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Description</td>
+                <td>@item.Condition</td>
+                <td>@item.Quantity</td>
+                <td>$@item.StartingPrice</td>
+                <td>@item.Category?.Name</td>
+                <td>@item.Status</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    {
+                        <img src="@item.ImageUrl" width="100" height="100" />
+                    }
+                </td>
+                <td>
+                    <a asp-action="Upsert" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    @if (item.Status == AuctionStatus.PendingApproval)
+                    {
+                        <a asp-action="Approve" asp-route-id="@item.Id" class="btn btn-success btn-sm">Approve</a>
+                    }
+                    @if (item.Status == AuctionStatus.Approved)
+                    {
+                        <a asp-action="StartAuction" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Start Auction</a>
+                    }
+                    @if (item.Status == AuctionStatus.InAuction)
+                    {
+                        <a asp-action="EndAuction" asp-route-id="@item.Id" class="btn btn-danger btn-sm">End Auction</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

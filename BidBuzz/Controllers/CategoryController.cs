@@ -19,52 +19,51 @@ namespace BidBuzz.Controllers
             return View(categories);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
 
+        public async Task<IActionResult> Upsert(int? id) {
+            
+            if (id == null || id == 0)
+            {
+                return View();
+            }
+            else
+            {
+                var category = await _unitOfWork.Categories.GetByIdAsync(id);
+                if (category == null)
+                {
+                    return NotFound();
+                }
+                return View(category);
+            }
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Category category)
+        public async Task<IActionResult> Upsert(Category category)
         {
-            if (ModelState.IsValid)
-            {
-                await _unitOfWork.Categories.AddAsync(category);
+            if (ModelState.IsValid) {
+                if (category.Id == 0)
+                {
+                    await _unitOfWork.Categories.AddAsync(category);
+                }
+                else
+                {
+                    var existingCategory = await _unitOfWork.Categories.GetByIdAsync(category.Id);
+                    if (existingCategory== null)
+                    {
+                        return NotFound();
+                    }
+                    _unitOfWork.Categories.Update(category);
+
+                }
                 await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
-            }
+            
+
+        }
             return View(category);
         }
 
-        public async Task<IActionResult> Edit(int id)
-        {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-            return View(category);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Category category)
-        {
-            if (id != category.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                _unitOfWork.Categories.Update(category);
-                await _unitOfWork.CompleteAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(category);
-        }
-
+ 
         public async Task<IActionResult> Delete(int id)
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);

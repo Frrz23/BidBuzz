@@ -1,30 +1,29 @@
-﻿@* @model IEnumerable<Models.Models.Category> *@
+﻿@model IEnumerable<Models.Models.Category>  
 
 
 
-@* <h2>Categories</h2> *@
+  <h2>Categories</h2>  
 
-@* <table class="table table-striped"> *@
-@*     <thead> *@
-@*         <tr> *@
-@*             <th>Category Name</th> *@
-@*             <th>Description</th> *@
-@*             <th>Actions</th> *@
-@*         </tr> *@
-@*     </thead> *@
-@*     <tbody> *@
-@*         @foreach (var category in Model) *@
-@*         { *@
-@*             <tr> *@
-@*                 <td>@category.CategoryName</td> *@
-@*                 <td>@category.Description</td> *@
-@*                 <td> *@
-@*                     <a href="@Url.Action("Edit", new { id = category.CategoryID })" class="btn btn-warning btn-sm">Edit</a> *@
-@*                     <a href="@Url.Action("Delete", new { id = category.CategoryID })" class="btn btn-danger btn-sm">Delete</a> *@
-@*                 </td> *@
-@*             </tr> *@
-@*         } *@
-@*     </tbody> *@
-@* </table> *@
+  <table class="table table-striped">  
+      <thead>  
+          <tr>  
+              <th>Category Name</th>  
+              <th>Description</th>  
+              <th>Actions</th>  
+          </tr>  
+      </thead>  
+      <tbody>  
+          @foreach (var category in Model)  
+          {  
+              <tr>  
+                  <td>@category.Name</td>  
+                  <td>@category.Description</td>  
+                  <td>
+                    <a asp-action="Upsert" asp-route-id="@category.Id" class="btn btn-primary">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@category.Id" class="btn btn-danger">Delete</a>
+            </tr>  
+          }  
+      </tbody>  
+  </table>  
 
-@* <a href="@Url.Action("Create")" class="btn btn-primary">Add New Category</a> *@
+<a asp-action="Upsert" asp-route-id="0" class="btn btn-success">Create New Category</a>
