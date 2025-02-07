@@ -24,7 +24,7 @@ namespace BidBuzz.Controllers
             
             if (id == null || id == 0)
             {
-                return View();
+                return View(new Category());
             }
             else
             {
@@ -47,11 +47,6 @@ namespace BidBuzz.Controllers
                 }
                 else
                 {
-                    var existingCategory = await _unitOfWork.Categories.GetByIdAsync(category.Id);
-                    if (existingCategory== null)
-                    {
-                        return NotFound();
-                    }
                     _unitOfWork.Categories.Update(category);
 
                 }

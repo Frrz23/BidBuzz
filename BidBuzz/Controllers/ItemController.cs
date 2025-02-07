@@ -19,9 +19,10 @@ namespace BidBuzz.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var item = await _unitOfWork.Items.GetAllAsync();
-            return View(item);
+            var items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
+            return View(items);
         }
+
         //public IActionResult Create()
         //{
         //    return View();
@@ -124,7 +125,13 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Upsert(int? id)
         {
-            ViewBag.Categories = new SelectList(await _unitOfWork.Categories.GetAllAsync(), "Id", "Name");
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            if (categories == null || !categories.Any())
+            {
+                ModelState.AddModelError("", "No categories available. Please add a category first.");
+                return View(new Item()); // Prevents submitting without valid categories
+            }
+            ViewBag.Categories = categories;
             Item item = new Item();
 
             if (id == null || id == 0)
@@ -197,6 +204,8 @@ namespace BidBuzz.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            ViewBag.Categories = categories;
             return View(item);
         }
 

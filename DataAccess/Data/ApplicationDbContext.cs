@@ -45,6 +45,12 @@ namespace DataAccess.Data
             modelBuilder.Entity<Item>()
                 .Property(i => i.StartingPrice)
                 .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
+            modelBuilder.Entity<Item>().Property(i => i.CategoryId).IsRequired();
+            modelBuilder.Entity<Item>()
+    .HasOne(i => i.Category)
+    .WithMany()
+    .HasForeignKey(i => i.CategoryId)
+    .OnDelete(DeleteBehavior.Restrict);
 
             // Bid Configuration
             modelBuilder.Entity<Bid>()

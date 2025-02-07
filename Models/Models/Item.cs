@@ -15,7 +15,7 @@ namespace Models.Models
         public decimal StartingPrice { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
         public int CategoryId { get; set; }
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
         public AuctionStatus Status { get; set; }  
         public int Quantity {  get; set; }
         public ItemCondition Condition { get; set; } // Add this line
