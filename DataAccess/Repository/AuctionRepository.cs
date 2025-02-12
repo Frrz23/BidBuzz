@@ -24,10 +24,6 @@ namespace DataAccess.Repository
             _bidRepository = bidRepository;
         }
 
-
-
-       
-
         public async Task EndAuctionAsync(int auctionId)
         {
             var auction = await _context.Auctions.FindAsync(auctionId);

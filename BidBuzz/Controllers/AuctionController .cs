@@ -1,6 +1,7 @@
-﻿using DataAccess.Repositary;
+﻿using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Models.Models;
+using Utility;
 
 namespace BidBuzz.Controllers
 {
@@ -15,58 +16,71 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {    
-            var categories = await _unitOfWork.Categories.GetAllAsync();
-            return View(categories);
+            var auction = await _unitOfWork.Auctions.GetAllAsync();
+            return View(auction);
         }
 
 
-        public async Task<IActionResult> Upsert(int? id) {
-            
-            if (id == null || id == 0)
-            {
-                return View(new Category());
-            }
-            else
-            {
-                var category = await _unitOfWork.Categories.GetByIdAsync(id);
-                if (category == null)
-                {
-                    return NotFound();
-                }
-                return View(category);
-            }
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upsert(Category category)
+        public async Task<IActionResult> Details(int id)
         {
-            if (ModelState.IsValid) {
-                if (category.Id == 0)
-                {
-                    await _unitOfWork.Categories.AddAsync(category);
-                }
-                else
-                {
-                    _unitOfWork.Categories.Update(category);
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
+            if (auction == null)
+                return NotFound();
 
-                }
-                await _unitOfWork.CompleteAsync();
-                return RedirectToAction(nameof(Index));
-            
-
-        }
-            return View(category);
+            return View(auction);
         }
 
- 
+        // Approve an auction
+        public async Task<IActionResult> Approve(int id)
+        {
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
+            if (auction == null)
+                return NotFound();
+
+            auction.Status = AuctionStatus.Approved;
+            _unitOfWork.Auctions.Update(auction);
+            await _unitOfWork.CompleteAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // Start an auction
+        public async Task<IActionResult> Start(int id)
+        {
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
+            if (auction == null || auction.Status != AuctionStatus.Approved)
+                return NotFound();
+
+            await _unitOfWork.Auctions.StartAuctionAsync(id);
+            await _unitOfWork.CompleteAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // End an auction
+        public async Task<IActionResult> End(int id)
+        {
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
+            if (auction == null || auction.Status != AuctionStatus.InAuction)
+                return NotFound();
+
+            await _unitOfWork.Auctions.EndAuctionAsync(id);
+            await _unitOfWork.CompleteAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
+
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _unitOfWork.Categories.GetByIdAsync(id);
-            if (category == null)
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
+            if (auction == null)
             {
                 return NotFound();
             }
-            return View(category);
+            return View(auction);
         }
 
         [HttpPost, ActionName("Delete")]
@@ -74,7 +88,7 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
            
-                _unitOfWork.Categories.Delete(id);
+                _unitOfWork.Auctions.Delete(id);
                 await _unitOfWork.CompleteAsync();
             
             return RedirectToAction(nameof(Index));
