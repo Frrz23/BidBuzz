@@ -1,5 +1,4 @@
 ﻿using DataAccess.Data;
-using DataAccess.Repositary;
 using DataAccess.Repository.IRepository;
 using Models.Models;
 using System;
@@ -13,18 +12,18 @@ namespace DataAccess.Repository
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _context;
-        public IRepository<Category> Categories { get; private set; }
-        public IRepository<Item> Items { get; private set; }
-        public IRepository<Bid> Bids { get; private set; }
-        public IRepository<Auction> Auctions { get; private set; }
+        public ICategoryRepository Categories { get; private set; }
+        public IItemRepository Items { get; private set; }
+        public IBidRepository Bids { get; private set; }
+        public IAuctionRepository Auctions { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
-            Categories = new Repository<Category>(_context);
-            Items = new Repository<Item>(_context);
-            Bids = new Repository<Bid>(_context);
-            Auctions = new Repository<Auction>(_context);
+            Categories = new CategoryRepository(_context);
+            Items = new ItemRepository(_context);
+            Bids = new BidRepository(_context);
+            Auctions = new AuctionRepository(_context, new BidRepository(_context));
         }
 
         public async Task<int> CompleteAsync()

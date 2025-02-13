@@ -1,0 +1,36 @@
+﻿@model Models.ViewModels.AuctionVM
+
+@{
+    ViewData["Title"] = Model.Auction.Id == 0 ? "Create Auction" : "Edit Auction";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Upsert" method="post">
+    <input type="hidden" asp-for="Auction.Id" />
+
+    <div class="form-group">
+        <label for="ItemId">Select Item</label>
+        <select asp-for="Auction.ItemId" asp-items="Model.ItemList" class="form-control" required @(Model.Auction.Id != 0 ? "disabled" : "")></select>
+    </div>
+
+    <div class="form-group">
+        <label>Auction Start Time</label>
+        <input type="datetime-local" asp-for="Auction.AuctionStartTime" class="form-control" required @(Model.Auction.Status == Models.Utility.AuctionStatus.InAuction ? "disabled" : "") />
+    </div>
+
+    <div class="form-group">
+        <label>Auction End Time</label>
+        <input type="datetime-local" asp-for="Auction.AuctionEndTime" class="form-control" required @(Model.Auction.Status == Models.Utility.AuctionStatus.InAuction ? "disabled" : "") />
+    </div>
+
+    <div class="form-group">
+        <label>Status</label>
+        <select asp-for="Auction.Status" asp-items="Html.GetEnumSelectList<Models.Utility.AuctionStatus>()" class="form-control" disabled></select>
+    </div>
+
+    <br />
+
+    <button type="submit" class="btn btn-primary" @(Model.Auction.Status == Models.Utility.AuctionStatus.InAuction ? "disabled" : "")>Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

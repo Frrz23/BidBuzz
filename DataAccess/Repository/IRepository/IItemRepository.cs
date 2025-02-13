@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utility;
 
-namespace DataAccess.Repositary
+namespace DataAccess.Repository
 {
     public interface IItemRepository : IRepository<Item>
     {

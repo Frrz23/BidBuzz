@@ -6,14 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataAccess.Repositary
+namespace DataAccess.Repository.IRepository
 {
     public interface IUnitOfWork : IDisposable
     {
-        IRepository<Category> Categories { get; }
-        IRepository<Item> Items { get; }
-        IRepository<Bid> Bids { get; }
-        IRepository<Auction> Auctions { get; }
+        ICategoryRepository Categories { get; }
+        IItemRepository Items { get; }
+        IBidRepository Bids { get; }
+        IAuctionRepository Auctions { get; }
 
         Task<int> CompleteAsync(); // Saves changes to the database
     }
