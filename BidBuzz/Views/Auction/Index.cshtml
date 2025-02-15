@@ -1,51 +1,48 @@
 ﻿@model IEnumerable<Models.Models.Auction>
 
+@{
+    ViewData["Title"] = "Manage Auctions";
+}
 
-<h2>Auction Management</h2>
+<h2>Manage Auctions</h2>
 
 <a asp-action="Upsert" asp-route-id="0" class="btn btn-success mb-3">Create New Auction</a>
 
-@foreach (var status in AuctionStatus)
-{
-    var filteredAuctions = Model.Where(a => a.Status == (Models.Utility.AuctionStatus)status).ToList();
-    if (filteredAuctions.Any())
-    {
-        <h3>@status Auctions</h3>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var auction in filteredAuctions)
-                {
-                    <tr>
-                        <td>@auction.Item.Name</td>
-                        <td>@(auction.AuctionStartTime?.ToString("g") ?? "Not Set")</td>
-                        <td>@(auction.AuctionEndTime?.ToString("g") ?? "Not Set")</td>
-                        <td>@auction.Status</td>
-                        <td>
-                            @if (auction.Status == Models.Utility.AuctionStatus.Approved)
-                            {
-                                <a asp-action="StartAuction" asp-route-id="@auction.Id" class="btn btn-warning btn-sm">Start Auction</a>
-                            }
-                            @if (auction.Status == Models.Utility.AuctionStatus.InAuction)
-                            {
-                                <a asp-action="EndAuction" asp-route-id="@auction.Id" class="btn btn-danger btn-sm">End Auction</a>
-                            }
-                            @if (auction.Status != Models.Utility.AuctionStatus.InAuction)
-                            {
-                                <a asp-action="Upsert" asp-route-id="@auction.Id" class="btn btn-primary btn-sm">Edit</a>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-}
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var auction in Model)
+        {
+            <tr>
+                <td>@auction.Item.Name</td>
+                <td>@auction.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@auction.EndTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@auction.Status</td>
+                <td>
+                    @if (auction.Status != AuctionStatus.InAuction)
+                    {
+                        <a asp-action="Upsert" asp-route-id="@auction.Id" class="btn btn-primary btn-sm">Edit</a>
+                    }
+                    <a asp-action="Delete" asp-route-id="@auction.Id" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+
+                    @if (auction.Status == AuctionStatus.Approved)
+                    {
+                        <a asp-action="StartAuction" asp-route-id="@auction.Id" class="btn btn-warning btn-sm">Start Auction</a>
+                    }
+                    @if (auction.Status == AuctionStatus.InAuction)
+                    {
+                        <a asp-action="EndAuction" asp-route-id="@auction.Id" class="btn btn-danger btn-sm">End Auction</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

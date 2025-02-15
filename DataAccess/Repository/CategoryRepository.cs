@@ -1,5 +1,4 @@
 ﻿using DataAccess.Data;
-using DataAccess.Repositary;
 using Microsoft.EntityFrameworkCore;
 using Models.Models;
 using System;

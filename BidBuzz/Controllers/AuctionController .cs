@@ -30,7 +30,12 @@ namespace BidBuzz.Controllers
             {
                 return NotFound();
             }
+            ViewBag.Items = (await _unitOfWork.Items.GetAllAsync())
+                    .Select(i => new { i.Id, i.Name })
+                    .ToList();
+
             return View(auction);
+
         }
 
         [HttpPost]
