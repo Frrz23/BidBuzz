@@ -79,7 +79,7 @@ namespace DataAccess.Repository
             {
                 auction.Status = AuctionStatus.Approved;  // Ready for next auction
                 auction.StartTime = DateTime.UtcNow.AddDays(7);  // Example: Relist for the next week
-                auction.EndTime = auction.StartTime.AddDays(7);
+                auction.EndTime = auction.StartTime.GetValueOrDefault().AddDays(7);
             }
 
             await _context.SaveChangesAsync();

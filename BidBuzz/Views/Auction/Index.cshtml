@@ -6,15 +6,13 @@
 
 <h2>Manage Auctions</h2>
 
-<a asp-action="Upsert" asp-route-id="0" class="btn btn-success mb-3">Create New Auction</a>
-
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Item</th>
+            <th>Item Name</th>
+            <th>Status</th>
             <th>Start Time</th>
             <th>End Time</th>
-            <th>Status</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -22,24 +20,18 @@
         @foreach (var auction in Model)
         {
             <tr>
-                <td>@auction.Item.Name</td>
-                <td>@auction.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@auction.EndTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@auction.Item?.Name</td>
                 <td>@auction.Status</td>
+                <td>@auction.StartTime?.ToString("g")</td>
+                <td>@auction.EndTime?.ToString("g")</td>
                 <td>
-                    @if (auction.Status != AuctionStatus.InAuction)
-                    {
-                        <a asp-action="Upsert" asp-route-id="@auction.Id" class="btn btn-primary btn-sm">Edit</a>
-                    }
-                    <a asp-action="Delete" asp-route-id="@auction.Id" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
-
-                    @if (auction.Status == AuctionStatus.Approved)
-                    {
-                        <a asp-action="StartAuction" asp-route-id="@auction.Id" class="btn btn-warning btn-sm">Start Auction</a>
-                    }
+                    <a asp-action="Update" asp-route-id="@auction.Id" class="btn btn-primary btn-sm">Update</a>
                     @if (auction.Status == AuctionStatus.InAuction)
                     {
-                        <a asp-action="EndAuction" asp-route-id="@auction.Id" class="btn btn-danger btn-sm">End Auction</a>
+                        <form asp-action="StopAuction" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@auction.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm">Stop Auction</button>
+                        </form>
                     }
                 </td>
             </tr>

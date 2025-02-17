@@ -10,7 +10,6 @@ namespace Models.Models.ViewModels
     {
         public Auction Auction { get; set; }  // Full Auction model
         public Item Item { get; set; }  // Item associated with the auction
-        public string HighestBidder { get; set; }  // Extra property
 
     }
 }

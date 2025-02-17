@@ -1,62 +1,34 @@
 ﻿@model Models.Models.ViewModels.AuctionVM
 
 @{
-    ViewData["Title"] = Model.Auction.Id == 0 ? "Create Auction" : "Edit Auction";
-    bool isEditMode = Model.Auction.Id != 0;
-    bool isAuctionInProgress = Model.Auction.Status == AuctionStatus.InAuction;
+    ViewData["Title"] = "Update Auction";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2>Update Auction</h2>
 
-<form asp-action="Upsert" method="post">
+<form asp-action="Update" method="post">
     <input type="hidden" asp-for="Auction.Id" />
 
-    <div class="form-group">
-        <label for="ItemId">Select Item</label>
-        @if (isEditMode)
-        {
-            <select asp-for="Auction.ItemId" asp-items="@(new SelectList(ViewBag.Items, "Id", "Name"))" class="form-control" required disabled></select>
-        }
-        else
-        {
-            <select asp-for="Auction.ItemId" asp-items="@(new SelectList(ViewBag.Items, "Id", "Name"))" class="form-control" required></select>
-        }
+    <div class="mb-3">
+        <label class="form-label">Item Name</label>
+        <input class="form-control" value="@Model.Item.Name" readonly />
     </div>
 
-    <div class="form-group">
-        <label>Auction Start Time</label>
-        @if (isAuctionInProgress)
-        {
-            <input type="datetime-local" asp-for="Auction.StartTime" class="form-control" required disabled />
-        }
-        else
-        {
-            <input type="datetime-local" asp-for="Auction.StartTime" class="form-control" required />
-        }
+    <div class="mb-3">
+        <label asp-for="Auction.Status" class="form-label">Auction Status</label>
+        <select asp-for="Auction.Status" class="form-control" asp-items="Html.GetEnumSelectList<AuctionStatus>()"></select>
     </div>
 
-    <div class="form-group">
-        <label>Auction End Time</label>
-        @if (isAuctionInProgress)
-        {
-            <input type="datetime-local" asp-for="Auction.EndTime" class="form-control" required disabled />
-        }
-        else
-        {
-            <input type="datetime-local" asp-for="Auction.EndTime" class="form-control" required />
-        }
+    <div class="mb-3">
+        <label asp-for="Auction.StartTime" class="form-label">Auction Start Time</label>
+        <input asp-for="Auction.StartTime" type="datetime-local" class="form-control" />
     </div>
 
-    <div class="form-group">
-        <label>Status</label>
-        <select asp-for="Auction.Status" asp-items="Html.GetEnumSelectList<AuctionStatus>()" class="form-control" disabled></select>
+    <div class="mb-3">
+        <label asp-for="Auction.EndTime" class="form-label">Auction End Time</label>
+        <input asp-for="Auction.EndTime" type="datetime-local" class="form-control" />
     </div>
 
-    <br />
-
-    @if (!isAuctionInProgress)
-    {
-        <button type="submit" class="btn btn-primary">Save</button>
-    }
+    <button type="submit" class="btn btn-success">Save Changes</button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>

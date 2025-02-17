@@ -12,8 +12,8 @@ namespace Models.Models
         public int Id { get; set; }
         public int ItemId { get; set; }
         public Item Item { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
+        public DateTime? StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         // Status (Pending, Active, Completed, etc.)
         public AuctionStatus Status { get; set; }
 

@@ -1,7 +1,8 @@
-﻿using DataAccess.Repository;
-using DataAccess.Repository.IRepository;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Models.Models;
+using Models.Models.ViewModels;
+using System.Threading.Tasks;
+using DataAccess.Repository.IRepository;
 using Utility;
 
 namespace BidBuzz.Controllers
@@ -16,102 +17,76 @@ namespace BidBuzz.Controllers
         }
 
         public async Task<IActionResult> Index()
-        {    
-            var auction = await _unitOfWork.Auctions.GetAllAsync();
-            return View(auction);
+        {
+            var auctions = await _unitOfWork.Auctions.GetAllAsync("Item");
+            if (!auctions.Any())
+            {
+                Console.WriteLine("No auctions found in the database.");
+            }
+            foreach (var auction in auctions)
+            {
+                Console.WriteLine($"Auction ID: {auction.Id}, Item: {auction.Item?.Name ?? "No Item"}");
+            }
+            return View(auctions);
         }
 
-
-        // Upsert (Create/Edit)
-        public async Task<IActionResult> Upsert(int? id)
+        public async Task<IActionResult> Update(int id)
         {
-            Auction auction = id == null || id == 0 ? new Auction() : await _unitOfWork.Auctions.GetByIdAsync(id);
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id, "Item");
+
             if (auction == null)
             {
                 return NotFound();
             }
-            ViewBag.Items = (await _unitOfWork.Items.GetAllAsync())
-                    .Select(i => new { i.Id, i.Name })
-                    .ToList();
 
-            return View(auction);
+            var auctionVM = new AuctionVM
+            {
+                Auction = auction,
+                Item = auction.Item
+            };
 
+            return View(auctionVM);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upsert(Auction auction)
+        public async Task<IActionResult> Update(AuctionVM auctionVM)
         {
             if (ModelState.IsValid)
             {
-                if (auction.Id == 0)
+                var existingAuction = await _unitOfWork.Auctions.GetByIdAsync(auctionVM.Auction.Id);
+                if (existingAuction == null)
                 {
-                    await _unitOfWork.Auctions.AddAsync(auction);
+                    return NotFound();
                 }
-                else
-                {
-                    _unitOfWork.Auctions.Update(auction);
-                }
+
+                existingAuction.Status = auctionVM.Auction.Status;
+                existingAuction.StartTime = auctionVM.Auction.StartTime;
+                existingAuction.EndTime = auctionVM.Auction.EndTime;
+
+                _unitOfWork.Auctions.Update(existingAuction);
                 await _unitOfWork.CompleteAsync();
+
                 return RedirectToAction(nameof(Index));
             }
-            return View(auction);
+
+            return View(auctionVM);
         }
 
-        // Start Auction
-        public async Task<IActionResult> StartAuction(int id)
+        [HttpPost]
+        public async Task<IActionResult> StopAuction(int id)
         {
             var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
-            if (auction == null || auction.Status != AuctionStatus.Approved)
-            {
-                return NotFound();
-            }
-
-            auction.Status = AuctionStatus.InAuction;
-            auction.StartTime = DateTime.Now;
-            _unitOfWork.Auctions.Update(auction);
-            await _unitOfWork.CompleteAsync();
-
-            return RedirectToAction(nameof(Index));
-        }
-
-        // End Auction
-        public async Task<IActionResult> EndAuction(int id)
-        {
-            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
-            if (auction == null || auction.Status != AuctionStatus.InAuction)
+            if (auction == null)
             {
                 return NotFound();
             }
 
             auction.Status = AuctionStatus.Sold;
-            auction.EndTime = DateTime.Now;
             _unitOfWork.Auctions.Update(auction);
             await _unitOfWork.CompleteAsync();
 
             return RedirectToAction(nameof(Index));
         }
-
-
-        public async Task<IActionResult> Delete(int id)
-        {
-            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
-            if (auction == null)
-            {
-                return NotFound();
-            }
-            return View(auction);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-           
-                _unitOfWork.Auctions.Delete(id);
-                await _unitOfWork.CompleteAsync();
-            
-            return RedirectToAction(nameof(Index));
-        }
     }
-  }
+}

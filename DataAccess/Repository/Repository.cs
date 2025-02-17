@@ -36,10 +36,7 @@ namespace DataAccess.Repository
         }
 
 
-        public async Task<T> GetByIdAsync(int? id)
-        {
-            return await _dbSet.FindAsync(id);
-        }
+       
 
         public async Task AddAsync(T entity)
         {
@@ -58,6 +55,21 @@ namespace DataAccess.Repository
             {
                 _dbSet.Remove(entity);
             }
+        }
+
+        public async Task<T> GetByIdAsync(int? id, string includeProperties = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
         }
     }
 }
