@@ -84,6 +84,25 @@ namespace DataAccess.Repository
 
             await _context.SaveChangesAsync();
         }
+        public async Task<IEnumerable<AuctionVM>> GetAllForAuctionManagementAsync()
+        {
+            var auctions = await _context.Auctions.Include(a => a.Item).ToListAsync();
+            var items = await _context.Items.ToListAsync();
+
+            var auctionVMList = new List<AuctionVM>();
+
+            foreach (var item in items)
+            {
+                var auction = auctions.FirstOrDefault(a => a.ItemId == item.Id);
+                auctionVMList.Add(new AuctionVM
+                {
+                    Auction = auction ?? new Auction { ItemId = item.Id },  // If no auction, create an empty one
+                    Item = item
+                });
+            }
+
+            return auctionVMList;
+        }
 
 
 

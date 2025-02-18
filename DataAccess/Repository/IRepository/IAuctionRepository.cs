@@ -1,4 +1,5 @@
 ﻿using Models.Models;
+using Models.Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace DataAccess.Repository.IRepository
         Task StartAuctionAsync(int auctionId);
         Task EndAuctionAsync(int auctionId);
         Task RelistUnsoldItemsAsync();
+        Task<IEnumerable<AuctionVM>> GetAllForAuctionManagementAsync();
 
 
 

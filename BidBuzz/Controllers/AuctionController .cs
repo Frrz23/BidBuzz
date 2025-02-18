@@ -18,35 +18,29 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var auctions = await _unitOfWork.Auctions.GetAllAsync("Item");
-            if (!auctions.Any())
-            {
-                Console.WriteLine("No auctions found in the database.");
-            }
-            foreach (var auction in auctions)
-            {
-                Console.WriteLine($"Auction ID: {auction.Id}, Item: {auction.Item?.Name ?? "No Item"}");
-            }
-            return View(auctions);
+            var auctionVMs = await _unitOfWork.Auctions.GetAllForAuctionManagementAsync();
+            return View(auctionVMs);
         }
 
-        public async Task<IActionResult> Update(int id)
+        public async Task<IActionResult> Update(int itemId)
         {
-            var auction = await _unitOfWork.Auctions.GetByIdAsync(id, "Item");
-
-            if (auction == null)
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId);
+            if (item == null)
             {
                 return NotFound();
             }
 
+            var auction = await _unitOfWork.Auctions.GetByIdAsync (itemId);
+
             var auctionVM = new AuctionVM
             {
-                Auction = auction,
-                Item = auction.Item
+                Auction = auction ?? new Auction { ItemId = itemId },  // Create new if auction doesn't exist
+                Item = item
             };
 
             return View(auctionVM);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]

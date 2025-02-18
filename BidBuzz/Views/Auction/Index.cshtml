@@ -1,38 +1,27 @@
-﻿@model IEnumerable<Models.Models.Auction>
+﻿@model IEnumerable<Models.Models.ViewModels.AuctionVM>
 
-@{
-    ViewData["Title"] = "Manage Auctions";
-}
-
-<h2>Manage Auctions</h2>
+<h2>Auction Management</h2>
 
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>Item Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Status</th>
-            <th>Start Time</th>
-            <th>End Time</th>
             <th>Actions</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var auction in Model)
+        @foreach (var auctionVM in Model)
         {
             <tr>
-                <td>@auction.Item?.Name</td>
-                <td>@auction.Status</td>
-                <td>@auction.StartTime?.ToString("g")</td>
-                <td>@auction.EndTime?.ToString("g")</td>
+                <td>@auctionVM.Item.Name</td>
+                <td>@(auctionVM.Auction?.StartTime?.ToString("yyyy-MM-dd") ?? "Not Set")</td>
+                <td>@(auctionVM.Auction?.EndTime?.ToString("yyyy-MM-dd") ?? "Not Set")</td>
+                <td>@(auctionVM.Auction?.Status.ToString() ?? "Not in Auction")</td>
                 <td>
-                    <a asp-action="Update" asp-route-id="@auction.Id" class="btn btn-primary btn-sm">Update</a>
-                    @if (auction.Status == AuctionStatus.InAuction)
-                    {
-                        <form asp-action="StopAuction" method="post" style="display:inline;">
-                            <input type="hidden" name="id" value="@auction.Id" />
-                            <button type="submit" class="btn btn-danger btn-sm">Stop Auction</button>
-                        </form>
-                    }
+                    <a asp-action="Update" asp-route-id="@auctionVM.Auction?.Id" class="btn btn-primary btn-sm">Update</a>
                 </td>
             </tr>
         }
