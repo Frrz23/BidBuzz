@@ -24,19 +24,7 @@ namespace DataAccess.Repository
             _bidRepository = bidRepository;
         }
 
-        public async Task EndAuctionAsync(int auctionId)
-        {
-            var auction = await _context.Auctions.FindAsync(auctionId);
-            if (auction == null) return;
-
-            if (auction.EndTime <= DateTime.UtcNow)
-            {
-                var highestBid = await _bidRepository.GetHighestBidAsync(auctionId); 
-
-                auction.Status = (highestBid != null) ? AuctionStatus.Sold : AuctionStatus.Unsold;
-                _context.Auctions.Update(auction);
-                await _context.SaveChangesAsync();
-            }
+      
         }
 
 
@@ -56,19 +44,36 @@ namespace DataAccess.Repository
         {
             return await _context.Auctions.Where(i => i.Status == AuctionStatus.Approved && i.StartTime > DateTime.UtcNow).ToListAsync();
         }
-
-        public async Task StartAuctionAsync(int auctionId)
+        public async Task StartAuctionsAsync()
         {
-            var auction = await _context.Auctions.FindAsync(auctionId);
-            if (auction == null) return;  
+            var auctionsToStart = await _context.Auctions
+                .Where(a => a.Status == AuctionStatus.Approved && a.StartTime <= DateTime.UtcNow)
+                .ToListAsync();
 
-            if (auction.StartTime <= DateTime.UtcNow)  
+            foreach (var auction in auctionsToStart)
             {
-                auction.Status = AuctionStatus.InAuction; 
-                _context.Auctions.Update(auction);
-                await _context.SaveChangesAsync();  
+                auction.Status = AuctionStatus.InAuction;
             }
+
+            await _context.SaveChangesAsync();
         }
+
+
+        public async Task EndAuctionsAsync()
+        {
+            var auctionsToEnd = await _context.Auctions
+                .Where(a => a.Status == AuctionStatus.InAuction && a.EndTime <= DateTime.UtcNow)
+                .ToListAsync();
+
+            foreach (var auction in auctionsToEnd)
+            {
+                var highestBid = await _bidRepository.GetHighestBidAsync(auction.Id);
+                auction.Status = (highestBid != null) ? AuctionStatus.Sold : AuctionStatus.Unsold;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task RelistUnsoldItemsAsync()
         {
             var unsoldAuctions = await _context.Auctions
@@ -78,12 +83,13 @@ namespace DataAccess.Repository
             foreach (var auction in unsoldAuctions)
             {
                 auction.Status = AuctionStatus.Approved;  // Ready for next auction
-                auction.StartTime = DateTime.UtcNow.AddDays(7);  // Example: Relist for the next week
-                auction.EndTime = auction.StartTime.GetValueOrDefault().AddDays(7);
+                auction.StartTime = DateTime.UtcNow.AddDays(7);  // Schedule for next cycle
+                auction.EndTime = auction.StartTime.GetValueOrDefault().AddDays(1); // 24-hour auction
             }
 
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<AuctionVM>> GetAllForAuctionManagementAsync()
         {
             var auctions = await _context.Auctions.Include(a => a.Item).ToListAsync();
