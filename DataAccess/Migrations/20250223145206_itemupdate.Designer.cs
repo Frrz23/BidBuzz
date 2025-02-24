@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250201034715_databsechanges")]
-    partial class databsechanges
+    [Migration("20250223145206_itemupdate")]
+    partial class itemupdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,22 +33,21 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId")
-                        .IsUnique();
+                    b.HasIndex("ItemId");
 
                     b.ToTable("Auctions");
                 });
@@ -64,11 +63,11 @@ namespace DataAccess.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("AuctionId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("BidTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -76,7 +75,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("AuctionId");
 
                     b.ToTable("Bids");
                 });
@@ -115,6 +114,9 @@ namespace DataAccess.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<int>("Condition")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -124,7 +126,7 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsApproved")
+                    b.Property<bool>("IsApprovedForAuction")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -132,12 +134,14 @@ namespace DataAccess.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("StartingPrice")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -149,8 +153,8 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Models.Models.Auction", b =>
                 {
                     b.HasOne("Models.Models.Item", "Item")
-                        .WithOne()
-                        .HasForeignKey("Models.Models.Auction", "ItemId")
+                        .WithMany("Auctions")
+                        .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -159,13 +163,13 @@ namespace DataAccess.Migrations
 
             modelBuilder.Entity("Models.Models.Bid", b =>
                 {
-                    b.HasOne("Models.Models.Item", "Item")
+                    b.HasOne("Models.Models.Auction", "Auction")
                         .WithMany("Bids")
-                        .HasForeignKey("ItemId")
+                        .HasForeignKey("AuctionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("Auction");
                 });
 
             modelBuilder.Entity("Models.Models.Item", b =>
@@ -173,15 +177,20 @@ namespace DataAccess.Migrations
                     b.HasOne("Models.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Models.Models.Item", b =>
+            modelBuilder.Entity("Models.Models.Auction", b =>
                 {
                     b.Navigation("Bids");
+                });
+
+            modelBuilder.Entity("Models.Models.Item", b =>
+                {
+                    b.Navigation("Auctions");
                 });
 #pragma warning restore 612, 618
         }

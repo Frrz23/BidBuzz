@@ -25,7 +25,7 @@ namespace DataAccess.Repository
         }
 
       
-        }
+        
 
 
         public async Task<IEnumerable<Auction>> GetActiveAuctionsAsync()
@@ -44,7 +44,7 @@ namespace DataAccess.Repository
         {
             return await _context.Auctions.Where(i => i.Status == AuctionStatus.Approved && i.StartTime > DateTime.UtcNow).ToListAsync();
         }
-        public async Task StartAuctionsAsync()
+        public async Task StartAuctionAsync()
         {
             var auctionsToStart = await _context.Auctions
                 .Where(a => a.Status == AuctionStatus.Approved && a.StartTime <= DateTime.UtcNow)
@@ -59,7 +59,7 @@ namespace DataAccess.Repository
         }
 
 
-        public async Task EndAuctionsAsync()
+        public async Task EndAuctionAsync()
         {
             var auctionsToEnd = await _context.Auctions
                 .Where(a => a.Status == AuctionStatus.InAuction && a.EndTime <= DateTime.UtcNow)

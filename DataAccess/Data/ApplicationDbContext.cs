@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 
 namespace DataAccess.Data
@@ -20,7 +21,18 @@ namespace DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Auction>().HasData(
+         new Auction
+         {
+             Id = 1,
+             ItemId = 1,  // Make sure an item exists with this ID
+             Status = AuctionStatus.Approved,
+             StartTime = new DateTime(2025, 2, 24, 12, 0, 0),  // Static DateTime value for StartTime
+             EndTime = new DateTime(2025, 2, 25, 12, 0, 0)    // Static DateTime value for EndTime
+         }
+     );
+
+
 
             // Category Configuration
             modelBuilder.Entity<Category>().HasKey(c => c.Id); // Primary key

@@ -12,15 +12,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250202125826_Auctionupdate")]
-    partial class Auctionupdate
+    [Migration("20250223145819_auctionupdate")]
+    partial class auctionupdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,29 +33,33 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTime?>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int?>("WinningBidId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId")
-                        .IsUnique();
-
-                    b.HasIndex("WinningBidId");
+                    b.HasIndex("ItemId");
 
                     b.ToTable("Auctions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EndTime = new DateTime(2025, 2, 25, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ItemId = 1,
+                            StartTime = new DateTime(2025, 2, 24, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("Models.Models.Bid", b =>
@@ -69,11 +73,11 @@ namespace DataAccess.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("AuctionId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("BidTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
 
                     b.Property<string>("UserId")
                         .IsRequired()
@@ -81,7 +85,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ItemId");
+                    b.HasIndex("AuctionId");
 
                     b.ToTable("Bids");
                 });
@@ -117,22 +121,16 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("AuctionEndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("AuctionStartTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Condition")
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
@@ -165,24 +163,7 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("Models.Models.Auction", b =>
                 {
                     b.HasOne("Models.Models.Item", "Item")
-                        .WithOne()
-                        .HasForeignKey("Models.Models.Auction", "ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Models.Models.Bid", "WinningBid")
-                        .WithMany()
-                        .HasForeignKey("WinningBidId");
-
-                    b.Navigation("Item");
-
-                    b.Navigation("WinningBid");
-                });
-
-            modelBuilder.Entity("Models.Models.Bid", b =>
-                {
-                    b.HasOne("Models.Models.Item", "Item")
-                        .WithMany("Bids")
+                        .WithMany("Auctions")
                         .HasForeignKey("ItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -190,20 +171,36 @@ namespace DataAccess.Migrations
                     b.Navigation("Item");
                 });
 
+            modelBuilder.Entity("Models.Models.Bid", b =>
+                {
+                    b.HasOne("Models.Models.Auction", "Auction")
+                        .WithMany("Bids")
+                        .HasForeignKey("AuctionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Auction");
+                });
+
             modelBuilder.Entity("Models.Models.Item", b =>
                 {
                     b.HasOne("Models.Models.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Category");
                 });
 
-            modelBuilder.Entity("Models.Models.Item", b =>
+            modelBuilder.Entity("Models.Models.Auction", b =>
                 {
                     b.Navigation("Bids");
+                });
+
+            modelBuilder.Entity("Models.Models.Item", b =>
+                {
+                    b.Navigation("Auctions");
                 });
 #pragma warning restore 612, 618
         }

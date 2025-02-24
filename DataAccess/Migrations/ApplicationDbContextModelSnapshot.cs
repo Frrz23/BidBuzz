@@ -17,7 +17,7 @@ namespace DataAccess.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -47,6 +47,16 @@ namespace DataAccess.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("Auctions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EndTime = new DateTime(2025, 2, 25, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ItemId = 1,
+                            StartTime = new DateTime(2025, 2, 24, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("Models.Models.Bid", b =>
@@ -108,12 +118,6 @@ namespace DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("AuctionEndTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("AuctionStartTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
@@ -124,9 +128,6 @@ namespace DataAccess.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int>("Duration")
-                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
