@@ -12,6 +12,7 @@ namespace DataAccess.Repository
     public interface IItemRepository : IRepository<Item>
     {
         Task <IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status);
+        Task AddItemAsync(Item item);
 
     }
 

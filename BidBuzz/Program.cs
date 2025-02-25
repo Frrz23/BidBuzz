@@ -3,6 +3,8 @@ using DataAccess.Repository;
 using DataAccess.Repository.IRepository;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Models.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +16,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
 builder.Services.AddScoped<IBidRepository, BidRepository>(); // Add this line
-builder.Services.AddHangfire(config =>
-    config.UseSqlServerStorage(builder.Configuration.GetConnectionString("dbcs")));
+builder.Services.AddHangfire(config =>config.UseSqlServerStorage(builder.Configuration.GetConnectionString("dbcs")));
 builder.Services.AddHangfireServer();
+
+builder.Services.Configure<AuctionScheduleConfig>(builder.Configuration.GetSection("AuctionSchedule"));
+
 
 
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -36,19 +41,24 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseHangfireDashboard();  // Enables the Hangfire dashboard
 
-using (var scope = app.Services.CreateScope())
-{
-    var auctionRepo = scope.ServiceProvider.GetRequiredService<IAuctionRepository>();
+var auctionScheduleConfig = app.Services.GetRequiredService<IOptions<AuctionScheduleConfig>>().Value;
 
-    RecurringJob.AddOrUpdate("start-auctions",
-        () => auctionRepo.StartAuctionAsync(), "0 12 * * 6");  // Every Saturday at 12 PM
+var auctionRepo = app.Services.CreateScope().ServiceProvider.GetRequiredService<IAuctionRepository>();
 
-    RecurringJob.AddOrUpdate("end-auctions",
-        () => auctionRepo.EndAuctionAsync(), "0 0 * * 7");  // Every Sunday at 12 AM
 
-    RecurringJob.AddOrUpdate("relist-unsold-items",
-        () => auctionRepo.RelistUnsoldItemsAsync(), "0 1 * * 7");  // Sunday at 1 AM
-}
+RecurringJob.AddOrUpdate("start-auctions",
+    () => auctionRepo.StartAuctionAsync(),
+    $"0 {auctionScheduleConfig.StartHour} * * {auctionScheduleConfig.StartDay}");
+
+RecurringJob.AddOrUpdate("end-auctions",
+    () => auctionRepo.EndAuctionAsync(),
+    $"0 {auctionScheduleConfig.EndHour} * * {auctionScheduleConfig.EndDay}");
+
+RecurringJob.AddOrUpdate("relist-unsold-items",
+    () => auctionRepo.RelistUnsoldItemsAsync(),
+    $"0 {auctionScheduleConfig.RelistHour} * * {auctionScheduleConfig.EndDay}");
+
+
 
 
 

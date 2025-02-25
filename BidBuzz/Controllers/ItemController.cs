@@ -158,6 +158,7 @@ namespace BidBuzz.Controllers
             if (ModelState.IsValid)
             {
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
+               
 
                 if (file != null)
                 {
@@ -197,6 +198,7 @@ namespace BidBuzz.Controllers
                 else
                 {
                     // Editing existing item
+                    
                     _unitOfWork.Items.Update(item);
                 }
 
@@ -213,27 +215,13 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var item = await _unitOfWork.Items.GetByIdAsync(id);
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
             }
             return View(item);
         }
-        public async Task<IActionResult> Approve(int id)
-        {
-            var item = await _unitOfWork.Items.GetByIdAsync(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
-            item.Status = AuctionStatus.Approved;
-            _unitOfWork.Items.Update(item);
-            await _unitOfWork.CompleteAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-  
-
 
         // POST: Item/Delete/5
         [HttpPost, ActionName("Delete")]
@@ -241,6 +229,7 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var item = await _unitOfWork.Items.GetByIdAsync(id);
+            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
             if (item != null)
             {
                 // Delete the associated image file if it exists
@@ -251,7 +240,8 @@ namespace BidBuzz.Controllers
                 }
 
                 // Now delete the item from the database
-                _unitOfWork.Items.Delete(item.Id);
+                _unitOfWork.Items.Delete(item.Id );
+                _unitOfWork.Items.Delete(auction.Id);
                 await _unitOfWork.CompleteAsync();
             }
 

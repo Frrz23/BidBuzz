@@ -25,6 +25,24 @@ namespace DataAccess.Repository
         {
             return await _context.Items.Where(i => i.Status == status).ToListAsync();
         }
+        public async Task AddItemAsync(Item item)
+        {
+            _context.Items.Add(item);
+            await _context.SaveChangesAsync();
+
+            // Create Auction entry automatically
+            var auction = new Auction
+            {
+                ItemId = item.Id,
+                Status = AuctionStatus.PendingApproval,  // Initially Pending Approval
+                StartTime = null, // Will be set when approved
+                EndTime = null
+            };
+
+            _context.Auctions.Add(auction);
+            await _context.SaveChangesAsync();
+        }
+
 
 
 
