@@ -15,6 +15,7 @@ namespace Models.Models
         public int EndDay { get; set; }
         public int EndHour { get; set; }
         public int RelistHour { get; set; }
+        public AuctionScheduleConfig() { }
 
         public AuctionScheduleConfig(IConfiguration configuration)
         {

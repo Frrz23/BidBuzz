@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace DataAccess.Repository.IRepository
     {
         Task<IEnumerable<T>> GetAllAsync(string? includeProperties = null);
         Task<T> GetByIdAsync(int? id, string includeProperties = null);
+        Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter, string includeProperties = null);
         Task AddAsync(T entity);
         void Update(T entity);
         void Delete(int id);

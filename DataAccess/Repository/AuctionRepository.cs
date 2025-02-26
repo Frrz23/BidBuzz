@@ -23,12 +23,7 @@ namespace DataAccess.Repository
             _context = context;
             _bidRepository = bidRepository;
         }
-
-      
-        
-
-
-        public async Task<IEnumerable<Auction>> GetActiveAuctionsAsync()
+       public async Task<IEnumerable<Auction>> GetActiveAuctionsAsync()
         {
             return await _context.Auctions.Where(i => i.Status == AuctionStatus.InAuction && i.StartTime <= DateTime.UtcNow && i.EndTime >= DateTime.UtcNow).ToListAsync();
         }
