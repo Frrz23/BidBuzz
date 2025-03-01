@@ -47,7 +47,6 @@ namespace DataAccess.Repository
             var auctionsToStart = await _context.Auctions
                 .Where(a => a.Status == AuctionStatus.Approved && a.StartTime <= DateTime.UtcNow)
                 .Include(a => a.Item)
-                .AsNoTracking()
                 .ToListAsync();
 
             foreach (var auction in auctionsToStart)

@@ -22,7 +22,7 @@ namespace DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(modelBuilder);             // ensures Identity’s database schema (tables, relationships, indexes) is properly configured.
             modelBuilder.Entity<Auction>().HasData(
          new Auction
          {

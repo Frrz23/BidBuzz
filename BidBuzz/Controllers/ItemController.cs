@@ -169,7 +169,7 @@ namespace BidBuzz.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upsert(Item item, IFormFile? file)
+        public async Task<IActionResult> Upsert(ItemVM item, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
@@ -191,9 +191,9 @@ namespace BidBuzz.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
                     // Delete old image if editing
-                    if (!string.IsNullOrEmpty(item.ImageUrl) && item.Id != 0)
+                    if (!string.IsNullOrEmpty(item.Item.ImageUrl) && item.Item.Id != 0)
                     {
-                        var oldImagePath = Path.Combine(wwwRootPath, item.ImageUrl.TrimStart('\\'));
+                        var oldImagePath = Path.Combine(wwwRootPath, item.Item.ImageUrl.TrimStart('\\'));
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -205,20 +205,20 @@ namespace BidBuzz.Controllers
                         await file.CopyToAsync(fileStream);
                     }
 
-                    item.ImageUrl = @"\images\" + fileName;
+                    item.Item.ImageUrl = @"\images\" + fileName;
                 }
 
-                if (item.Id == 0)
+                if (item.Item.Id == 0)
                 {
                     // Creating new item
                     
-                    await _unitOfWork.Items.AddAsync(item);
+                    await _unitOfWork.Items.AddAsync(item.Item);
                     await _unitOfWork.CompleteAsync();
 
                     // Create auction for the item
                     var auction = new Auction
                     {
-                        ItemId = item.Id,
+                        ItemId = item.Item.Id,
                         StartTime = startTime,
                         EndTime = endTime,
                         Status = AuctionStatus.PendingApproval
@@ -228,13 +228,13 @@ namespace BidBuzz.Controllers
                 else
                 {
                     // Editing existing item
-                    var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
+                    var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Item.Id);
                     if (auction != null)
                     {
                         
                         _unitOfWork.Auctions.Update(auction);
                     }
-                    _unitOfWork.Items.Update(item);
+                    _unitOfWork.Items.Update(item.Item);
                 }
 
                 await _unitOfWork.CompleteAsync();
