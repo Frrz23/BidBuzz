@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using Models.Models;
+using Models.Models.ViewModels;
 using Utility;
 
 namespace BidBuzz.Controllers
@@ -24,9 +25,19 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
-            return View(items);
+            var items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions");
+
+            var itemVMs = items.Select(i => new ItemVM
+            {
+                Item = i,
+                CategoryName = i.Category.Name,
+                AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status
+            }).ToList();
+
+            return View(itemVMs);
         }
+
+
 
         //public IActionResult Create()
         //{
@@ -200,7 +211,7 @@ namespace BidBuzz.Controllers
                 if (item.Id == 0)
                 {
                     // Creating new item
-                    item.Status = AuctionStatus.PendingApproval;
+                    
                     await _unitOfWork.Items.AddAsync(item);
                     await _unitOfWork.CompleteAsync();
 
@@ -220,7 +231,7 @@ namespace BidBuzz.Controllers
                     var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
                     if (auction != null)
                     {
-                        auction.Status = item.Status;
+                        
                         _unitOfWork.Auctions.Update(auction);
                     }
                     _unitOfWork.Items.Update(item);

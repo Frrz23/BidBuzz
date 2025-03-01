@@ -1,7 +1,7 @@
-﻿@model Models.Models.Item
+﻿@model Models.Models.ViewModels.ItemVM
 
 @{
-    ViewData["Title"] = Model.Id == 0 ? "Create Item" : "Edit Item";
+    ViewData["Title"] = Model.Item.Id == 0 ? "Create Item" : "Edit Item";
 }
 
 <h2>@ViewData["Title"]</h2>
@@ -20,72 +20,72 @@
 
 <form asp-action="Upsert" method="post" enctype="multipart/form-data">
     <div class="form-group">
-        <label asp-for="Name" class="control-label"></label>
-        <input asp-for="Name" class="form-control" />
-        <span asp-validation-for="Name" class="text-danger"></span>
+        <label asp-for="Item.Name" class="control-label"></label>
+        <input asp-for="Item.Name" class="form-control" />
+        <span asp-validation-for="Item.Name" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Description" class="control-label"></label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
+        <label asp-for="Item.Description" class="control-label"></label>
+        <textarea asp-for="Item.Description" class="form-control"></textarea>
+        <span asp-validation-for="Item.Description" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Condition" class="control-label"></label>
-        <select asp-for="Condition" class="form-control" asp-items="Html.GetEnumSelectList<ItemCondition>()"></select>
-        <span asp-validation-for="Condition" class="text-danger"></span>
+        <label asp-for="Item.Condition" class="control-label"></label>
+        <select asp-for="Item.Condition" class="form-control" asp-items="Html.GetEnumSelectList<ItemCondition>()"></select>
+        <span asp-validation-for="Item.Condition" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="Quantity" class="control-label"></label>
-        <input asp-for="Quantity" type="number" class="form-control" min="1" />
-        <span asp-validation-for="Quantity" class="text-danger"></span>
+        <label asp-for="Item.Quantity" class="control-label"></label>
+        <input asp-for="Item.Quantity" type="number" class="form-control" min="1" />
+        <span asp-validation-for="Item.Quantity" class="text-danger"></span>
     </div>
 
     <div class="form-group">
-        <label asp-for="StartingPrice" class="control-label"></label>
-        <input asp-for="StartingPrice" type="number" step="0.01" class="form-control" />
-        <span asp-validation-for="StartingPrice" class="text-danger"></span>
+        <label asp-for="Item.StartingPrice" class="control-label"></label>
+        <input asp-for="Item.StartingPrice" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="Item.StartingPrice" class="text-danger"></span>
     </div>
     <div class="form-group">
         <label class="control-label">Approval Status</label>
         <div>
-            <input type="radio" asp-for="Status" value="@AuctionStatus.Approved" id="approveRadio" />
+            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
             <label for="approveRadio">Approve</label>
 
-            <input type="radio" asp-for="Status" value="@AuctionStatus.NotApproved" id="declineRadio" />
+            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
             <label for="declineRadio">Decline</label>
         </div>
-        <span asp-validation-for="Status" class="text-danger"></span>
+        <span asp-validation-for="AuctionStatus" class="text-danger"></span>
     </div>
 
 
     <div class="form-group">
-        <label asp-for="CategoryId" class="control-label"></label>
-        <select asp-for="CategoryId" class="form-control" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+        <label asp-for="Item.CategoryId" class="control-label"></label>
+        <select asp-for="Item.CategoryId" class="form-control" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
             <option value="">-- Select Category --</option>
         </select>
-        <span asp-validation-for="CategoryId" class="text-danger"></span>
+        <span asp-validation-for="Item.CategoryId" class="text-danger"></span>
     </div>
 
 
 
     <div class="form-group">
-        <label asp-for="ImageUrl" class="control-label"></label>
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        <label asp-for="Item.ImageUrl" class="control-label"></label>
+        @if (!string.IsNullOrEmpty(Model.Item.ImageUrl))
         {
-            <img src="@Model.ImageUrl" width="150" height="150" class="mb-3" />
+            <img src="@Model.Item.ImageUrl" width="150" height="150" class="mb-3" />
         }
-        <input asp-for="ImageUrl" type="file" class="form-control" name="file" />
-        <span asp-validation-for="ImageUrl" class="text-danger"></span>
+        <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" />
+        <span asp-validation-for="Item.ImageUrl" class="text-danger"></span>
     </div>
 
-    <input type="hidden" asp-for="Id" />
-    <input type="hidden" asp-for="Status" />
+    <input type="hidden" asp-for="Item.Id" />
+    <input type="hidden" asp-for="AuctionStatus" />
 
     <button type="submit" class="btn btn-primary">
-        @(Model.Id == 0 ? "Create" : "Update")
+        @(Model.Item.Id == 0 ? "Create" : "Update")
     </button>
     <a asp-action="Index" class="btn btn-secondary">Cancel</a>
 </form>
@@ -96,7 +96,7 @@
     }
 }
 <script>
-    document.querySelectorAll('input[name="Status"]').forEach(radio => {
+    document.querySelectorAll('input[name="AuctionStatus"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (!confirm("Are you sure you want to change the approval status?")) {
                 this.checked = false;

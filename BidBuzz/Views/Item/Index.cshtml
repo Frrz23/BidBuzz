@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Models.Models.Item>
+﻿@model IEnumerable<Models.Models.ViewModels.ItemVM>
 
 
 @{
@@ -27,22 +27,23 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Name</td>
-                <td>@item.Description</td>
-                <td>@item.Condition</td>
-                <td>@item.Quantity</td>
-                <td>$@item.StartingPrice</td>
-                <td>@item.Category?.Name</td>
-                <td>@item.Status</td>
+                <td>@item.Item.Name</td>
+                <td>@item.Item.Description</td>
+                <td>@item.Item.Condition</td>
+                <td>@item.Item.Quantity</td>
+                <td>$@item.Item.StartingPrice</td>
+                <td>@item.CategoryName</td>
+                <td>@item.AuctionStatus</td>
+
                 <td>
-                    @if (!string.IsNullOrEmpty(item.ImageUrl))
+                    @if (!string.IsNullOrEmpty(item.Item.ImageUrl))
                     {
-                        <img src="@item.ImageUrl" width="100" height="100" />
+                        <img src="@item.Item.ImageUrl" width="100" height="100" />
                     }
                 </td>
                 <td>
-                    <a asp-action="Upsert" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    <a asp-action="Upsert" asp-route-id="@item.Item.Id" class="btn btn-primary btn-sm">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@item.Item.Id" class="btn btn-danger btn-sm">Delete</a>
                     
                 </td>
             </tr>

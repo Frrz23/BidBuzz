@@ -23,8 +23,13 @@ namespace DataAccess.Repository
         }
         public async Task<IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status)
         {
-            return await _context.Items.Where(i => i.Status == status).ToListAsync();
+            return await _context.Items
+                .Include(i => i.Auctions) // Ensure Auctions are loaded
+                .Where(i => i.Auctions.Any(a => a.Status == status)) // Check if any auction matches the status
+                .ToListAsync();
         }
+
+
         public async Task AddItemAsync(Item item)
         {
             _context.Items.Add(item);

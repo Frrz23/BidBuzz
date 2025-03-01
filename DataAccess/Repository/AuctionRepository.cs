@@ -2,6 +2,7 @@
 using DataAccess.Repository;
 using DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Models.Models;
 using Models.Models.ViewModels;
 using System;
@@ -17,11 +18,13 @@ namespace DataAccess.Repository
     {
         private readonly ApplicationDbContext _context;
         private readonly IBidRepository _bidRepository;
+        private readonly ILogger<AuctionRepository> _logger;
 
-        public AuctionRepository(ApplicationDbContext context, IBidRepository bidRepository) : base(context)
+        public AuctionRepository(ApplicationDbContext context, IBidRepository bidRepository, ILogger<AuctionRepository> logger) : base(context)
         {
             _context = context;
             _bidRepository = bidRepository;
+            _logger = logger;
         }
        public async Task<IEnumerable<Auction>> GetActiveAuctionsAsync()
         {
@@ -43,11 +46,19 @@ namespace DataAccess.Repository
         {
             var auctionsToStart = await _context.Auctions
                 .Where(a => a.Status == AuctionStatus.Approved && a.StartTime <= DateTime.UtcNow)
+                .Include(a => a.Item)
+                .AsNoTracking()
                 .ToListAsync();
 
             foreach (var auction in auctionsToStart)
             {
-                auction.Status = AuctionStatus.InAuction;
+                if (auction.Item != null && auction.Status != AuctionStatus.InAuction) // Prevent reprocessing
+                {
+                    auction.Status = AuctionStatus.InAuction;
+                    _logger.LogInformation($"Auction {auction.Id} started for Item {auction.Item.Id}");
+
+                }
+
             }
 
             await _context.SaveChangesAsync();
@@ -57,14 +68,24 @@ namespace DataAccess.Repository
         public async Task EndAuctionAsync()
         {
             var auctionsToEnd = await _context.Auctions
-                .Where(a => a.Status == AuctionStatus.InAuction && a.EndTime <= DateTime.UtcNow)
+                .Where(a => a.Status == AuctionStatus.InAuction && a.EndTime <= DateTime.UtcNow).Include(a => a.Item).AsNoTracking()
                 .ToListAsync();
 
             foreach (var auction in auctionsToEnd)
             {
                 var highestBid = await _bidRepository.GetHighestBidAsync(auction.Id);
-                auction.Status = (highestBid != null) ? AuctionStatus.Sold : AuctionStatus.Unsold;
+                if (highestBid != null)
+                {
+                    auction.Status = AuctionStatus.Sold;
+                    
+                }
+                else
+                {
+                    auction.Status = AuctionStatus.Unsold;
+                   
+                }
             }
+
 
             await _context.SaveChangesAsync();
         }
