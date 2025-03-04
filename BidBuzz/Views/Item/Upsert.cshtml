@@ -1,10 +1,13 @@
 ﻿@model Models.Models.ViewModels.ItemVM
 
+
+
 @{
-    ViewData["Title"] = Model.Item.Id == 0 ? "Create Item" : "Edit Item";
+    ViewData["Title"] = Model?.Item?.Id == 0 ? "Create Item" : "Edit Item";
 }
 
 <h2>@ViewData["Title"]</h2>
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -16,6 +19,7 @@
         </ul>
     </div>
 }
+
 
 
 <form asp-action="Upsert" method="post" enctype="multipart/form-data">
@@ -82,7 +86,7 @@
     </div>
 
     <input type="hidden" asp-for="Item.Id" />
-    <input type="hidden" asp-for="AuctionStatus" />
+
 
     <button type="submit" class="btn btn-primary">
         @(Model.Item.Id == 0 ? "Create" : "Update")

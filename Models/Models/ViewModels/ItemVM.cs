@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,6 @@ namespace Models.Models.ViewModels
     public class ItemVM
     {
         public Item Item { get; set; }  // Full Item model
-        public string CategoryName { get; set; }
         public AuctionStatus? AuctionStatus { get; set; }
     }
 }

@@ -30,7 +30,6 @@ namespace BidBuzz.Controllers
             var itemVMs = items.Select(i => new ItemVM
             {
                 Item = i,
-                CategoryName = i.Category.Name,
                 AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status
             }).ToList();
 
@@ -39,105 +38,7 @@ namespace BidBuzz.Controllers
 
 
 
-        //public IActionResult Create()
-        //{
-        //    return View();
-        //}
 
-        //// POST: Item/Create
-        ////[HttpPost]
-        ////[ValidateAntiForgeryToken]
-        ////public async Task<IActionResult> Create(Item item, IFormFile? file)
-        ////{
-        ////    if (ModelState.IsValid)
-        ////    {
-        ////        string wwwRootPath = _webHostEnvironment.WebRootPath;
-        ////        if (file != null)
-        ////        {
-        ////            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        ////            string productPath = Path.Combine(wwwRootPath, @"images");
-
-        ////            using (var fileStream = new FileStream(Path.Combine(productPath, fileName), FileMode.Create))
-        ////            {
-        ////                file.CopyToAsync(fileStream);
-        ////            }
-        ////            item.ImageUrl = @"\images\" + fileName;
-        ////        }
-        ////        else
-        ////        {
-        ////            item.ImageUrl = null; // ✅ Allow null images
-        ////        }
-        ////        item.Status = AuctionStatus.PendingApproval;
-        ////        await _unitOfWork.Items.AddAsync(item);
-        ////        await _unitOfWork.CompleteAsync();
-        ////        return RedirectToAction(nameof(Index));
-
-        ////    }
-        ////    return View(item);
-        ////}
-
-        ////// GET: Item/Edit/5
-        ////public async Task<IActionResult> Edit(int id)
-        ////{
-
-        ////    var item = await _unitOfWork.Items.GetByIdAsync(id);
-        ////    if (item == null)
-        ////    {
-        ////        return NotFound();
-        ////    }
-        ////    return View(item);
-        ////}
-
-        //// POST: Item/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, Item item, IFormFile? file)
-        //{
-        //    if (item.Status != AuctionStatus.PendingApproval)
-        //    {
-        //        return BadRequest("You can't edit items once they are approved or in auction.");
-        //    }
-
-        //    if (id != item.Id)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    if (ModelState.IsValid)
-        //    {
-        //        string wwwRootPath = _webHostEnvironment.WebRootPath;
-
-        //        if (file != null)
-        //        {
-        //            // Delete old image if exists
-        //            if (!string.IsNullOrEmpty(item.ImageUrl))
-        //            {
-        //                var oldImagePath = Path.Combine(wwwRootPath, item.ImageUrl.TrimStart('\\'));
-        //                if (System.IO.File.Exists(oldImagePath))
-        //                {
-        //                    System.IO.File.Delete(oldImagePath);
-        //                }
-        //            }
-
-        //            // Save new image
-        //            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-        //            string filePath = Path.Combine(wwwRootPath, @"images", fileName);
-
-        //            using (var fileStream = new FileStream(filePath, FileMode.Create))
-        //            {
-        //                await file.CopyToAsync(fileStream);
-        //            }
-
-        //            item.ImageUrl = @"\images\" + fileName; // Store relative path
-        //        }
-
-        //        _unitOfWork.Items.Update(item);
-        //        await _unitOfWork.CompleteAsync();
-        //        return RedirectToAction(nameof(Index));
-        //    }
-
-        //    return View(item);
-        //}
 
         public async Task<IActionResult> Upsert(int? id)
         {
@@ -145,31 +46,35 @@ namespace BidBuzz.Controllers
             if (categories == null || !categories.Any())
             {
                 ModelState.AddModelError("", "No categories available. Please add a category first.");
-                return View(new Item()); // Prevents submitting without valid categories
+                return View(new ItemVM { Item = new Item() }); // Ensure Item is not null
             }
             ViewBag.Categories = categories;
-            Item item = new Item();
 
-            if (id == null || id == 0)
+            ItemVM itemVM = new ItemVM { Item = new Item() };
+
+            if (id != null && id != 0)
             {
-                // Create mode
-                return View(item);
-            }
-            else
-            {
-                // Edit mode
-                item = await _unitOfWork.Items.GetByIdAsync(id.Value);
+                var item = await _unitOfWork.Items.GetByIdAsync(id.Value);
                 if (item == null)
                 {
                     return NotFound();
                 }
-                return View(item);
+
+                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
+
+                itemVM = new ItemVM
+                {
+                    Item = item,
+                    AuctionStatus = auction?.Status ?? AuctionStatus.PendingApproval
+                };
             }
+
+            return View(itemVM);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upsert(ItemVM item, IFormFile? file)
+        public async Task<IActionResult> Upsert(ItemVM itemVM, IFormFile? file)
         {
             if (ModelState.IsValid)
             {
@@ -177,7 +82,6 @@ namespace BidBuzz.Controllers
                 var endTime = AuctionScheduleHelper.GetNextAuctionEnd(_auctionSchedule.EndDay, _auctionSchedule.EndHour);
 
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
-               
 
                 if (file != null)
                 {
@@ -191,9 +95,9 @@ namespace BidBuzz.Controllers
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
                     // Delete old image if editing
-                    if (!string.IsNullOrEmpty(item.Item.ImageUrl) && item.Item.Id != 0)
+                    if (!string.IsNullOrEmpty(itemVM.Item.ImageUrl) && itemVM.Item.Id != 0)
                     {
-                        var oldImagePath = Path.Combine(wwwRootPath, item.Item.ImageUrl.TrimStart('\\'));
+                        var oldImagePath = Path.Combine(wwwRootPath, itemVM.Item.ImageUrl.TrimStart('\\'));
                         if (System.IO.File.Exists(oldImagePath))
                         {
                             System.IO.File.Delete(oldImagePath);
@@ -205,20 +109,19 @@ namespace BidBuzz.Controllers
                         await file.CopyToAsync(fileStream);
                     }
 
-                    item.Item.ImageUrl = @"\images\" + fileName;
+                    itemVM.Item.ImageUrl = @"\images\" + fileName;
                 }
 
-                if (item.Item.Id == 0)
+                if (itemVM.Item.Id == 0)
                 {
                     // Creating new item
-                    
-                    await _unitOfWork.Items.AddAsync(item.Item);
+                    await _unitOfWork.Items.AddAsync(itemVM.Item);
                     await _unitOfWork.CompleteAsync();
 
                     // Create auction for the item
                     var auction = new Auction
                     {
-                        ItemId = item.Item.Id,
+                        ItemId = itemVM.Item.Id,
                         StartTime = startTime,
                         EndTime = endTime,
                         Status = AuctionStatus.PendingApproval
@@ -228,13 +131,13 @@ namespace BidBuzz.Controllers
                 else
                 {
                     // Editing existing item
-                    var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Item.Id);
+                    var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemVM.Item.Id);
                     if (auction != null)
                     {
-                        
+                        auction.Status = AuctionStatus.Approved; // Update auction status
                         _unitOfWork.Auctions.Update(auction);
                     }
-                    _unitOfWork.Items.Update(item.Item);
+                    _unitOfWork.Items.Update(itemVM.Item);
                 }
 
                 await _unitOfWork.CompleteAsync();
@@ -243,8 +146,9 @@ namespace BidBuzz.Controllers
 
             var categories = await _unitOfWork.Categories.GetAllAsync();
             ViewBag.Categories = categories;
-            return View(item);
+            return View(itemVM); // Ensure correct type is returned
         }
+
 
         // GET: Item/Delete/5
         public async Task<IActionResult> Delete(int id)
