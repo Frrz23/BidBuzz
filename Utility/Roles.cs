@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace Utility
 {
-    public enum Roles
+    public class Roles
     {
-        Admin,
-        User,
-        Buyer,
-        Seller
+        public const string Admin = "Admin";
+        public const string User = "User";
+        public const string Buyer = "Buyer";
+        public const string Seller = "Seller";
     }
 
 }

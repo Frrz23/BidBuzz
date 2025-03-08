@@ -15,9 +15,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Models.Models;
 
 namespace BidBuzz.Areas.Identity.Pages.Account
 {
@@ -99,15 +102,33 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+
+
+            public string? Role { get; set; }
+            [ValidateNever]
+            public IEnumerable<SelectListItem> RolesList { get; set; }
         }
 
 
         public async Task OnGetAsync(string returnUrl = null)
         {
-            if (!_roleManager.GetRoleNameAsync)
+            string userroles = Utility.Roles.Admin.ToString();
+            if (!_roleManager.RoleExistsAsync(Utility.Roles.User).GetAwaiter().GetResult())
             {
+                _roleManager.CreateAsync(new IdentityRole(Utility.Roles.User)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(Utility.Roles.Admin)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(Utility.Roles.Buyer)).GetAwaiter().GetResult();
+                _roleManager.CreateAsync(new IdentityRole(Utility.Roles.Seller)).GetAwaiter().GetResult();
 
             }
+            Input = new() {
+                RolesList = _roleManager.Roles.Select(u => u.Name).Select(x => new SelectListItem
+                {
+                    Text = x,
+                    Value = x
+                })
+            };
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
@@ -127,8 +148,16 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+                    if(!String.IsNullOrEmpty(Input.Role))
+                    {
+                        await _userManager.AddToRoleAsync(user, Input.Role);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, Utility.Roles.User);
+                    }
 
-                    var userId = await _userManager.GetUserIdAsync(user);
+                        var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -160,11 +189,11 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             return Page();
         }
 
-        private IdentityUser CreateUser()
+        private ApplicationUser CreateUser()
         {
             try
             {
-                return Activator.CreateInstance<IdentityUser>();
+                return Activator.CreateInstance<ApplicationUser>();
             }
             catch
             {

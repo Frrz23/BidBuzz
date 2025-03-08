@@ -19,6 +19,7 @@ namespace DataAccess.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Auction> Auctions { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
