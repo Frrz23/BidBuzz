@@ -12,8 +12,22 @@ using Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders(); // Clear default providers
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information); // Or LogLevel.Debug for more details
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromSeconds(100);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbcs")));
 
@@ -53,7 +67,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
 app.UseRouting();
 app.UseHangfireDashboard();  // Enables the Hangfire dashboard
 
@@ -80,7 +94,9 @@ RecurringJob.AddOrUpdate("relist-unsold-items",
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapRazorPages();
+
 
 app.MapControllerRoute(
     name: "default",

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Session;
 
 namespace BidBuzz.Areas.Identity.Pages.Account
 {
@@ -103,18 +104,29 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(string userType,string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
+
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
+                
+
                 if (_signInManager == null)
                 {
                     throw new Exception("SignInManager is not initialized.");
                 }
+                userType ??= "Buyer"; // Default to Buyer if nothing is received
+
+                HttpContext.Session.SetString("_UserRole", userType);
+
+                var name = HttpContext.Session.GetString("_UserRole");
+
+                _logger.LogInformation("Session Name: {SessionName}", name);
+
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
