@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Session;
+using System.Security.Claims;
 
 namespace BidBuzz.Areas.Identity.Pages.Account
 {
@@ -120,8 +121,15 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                     throw new Exception("SignInManager is not initialized.");
                 }
                 userType ??= "Buyer"; // Default to Buyer if nothing is received
+                if (userType != "Buyer" && userType != "Seller")
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid user type selected.");
+                    return Page();
+                }
 
                 HttpContext.Session.SetString("_UserRole", userType);
+                var claimsIdentity = (ClaimsIdentity)User.Identity;
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, userType));
 
                 var name = HttpContext.Session.GetString("_UserRole");
 

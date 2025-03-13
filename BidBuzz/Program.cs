@@ -27,6 +27,11 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("BuyerOnly", policy => policy.RequireRole("Buyer"));
+    options.AddPolicy("SellerOnly", policy => policy.RequireRole("Seller"));
+});
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbcs")));
