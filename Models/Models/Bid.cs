@@ -14,7 +14,9 @@ namespace Models.Models
         public Auction Auction { get; set; }
         public decimal Amount { get; set; }
         public DateTime BidTime { get; set; } = DateTime.UtcNow;
-        public string UserId { get; set; } // To be linked with Identity later
+        public string? UserId { get; set; }   
+        public ApplicationUser? User { get; set; }  // Navigation property
+
     }
 
 

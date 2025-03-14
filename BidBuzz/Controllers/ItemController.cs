@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
 using Models.Models;
 using Models.Models.ViewModels;
+using System.Security.Claims;
 using Utility;
 
 namespace BidBuzz.Controllers
@@ -25,7 +26,10 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions");
+            var claimsIdentity = (ClaimsIdentity)User.Identity;
+            var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+            var items = await _unitOfWork.Items.GetAllAsync(u=>u.UserId==userId,includeProperties: "Category,Auctions");
 
             var itemVMs = items.Select(i => new ItemVM
             {
@@ -42,7 +46,7 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Upsert(int? id)
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllAsync(null);
             if (categories == null || !categories.Any())
             {
                 ModelState.AddModelError("", "No categories available. Please add a category first.");
@@ -144,7 +148,7 @@ namespace BidBuzz.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllAsync(null);
             ViewBag.Categories = categories;
             return View(itemVM); // Ensure correct type is returned
         }

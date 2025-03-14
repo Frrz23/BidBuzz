@@ -20,6 +20,10 @@ namespace Models.Models
         public ItemCondition Condition { get; set; } // Add this line
         public bool IsApprovedForAuction { get; set; } = false;  // Admin approval flag
         public ICollection<Auction> Auctions { get; set; }=new List<Auction>();
+        public string? UserId { get; set; }
+        public ApplicationUser? User { get; set; }  // Navigation property
+
+
     }
 
 

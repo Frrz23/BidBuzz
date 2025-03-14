@@ -21,9 +21,13 @@ namespace DataAccess.Repository
             _dbSet = context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter,string? includeProperties = null)
         {
             IQueryable<T> query = _dbSet;
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
 
             if (!string.IsNullOrWhiteSpace(includeProperties))
             {
@@ -35,9 +39,28 @@ namespace DataAccess.Repository
 
             return await query.ToListAsync();
         }
+        public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter, string includeProperties = null)
+        {
+            IQueryable<T> query = _dbSet;
+
+            if (filter != null)
+            {
+                query = query.Where(filter);
+            }
+
+            if (!string.IsNullOrEmpty(includeProperties))
+            {
+                foreach (var includeProp in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProp);
+                }
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
 
 
-       
+
 
         public async Task AddAsync(T entity)
         {
@@ -72,25 +95,7 @@ namespace DataAccess.Repository
 
             return await query.FirstOrDefaultAsync(e => EF.Property<int>(e, "Id") == id);
         }
-        public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter, string includeProperties = null)
-        {
-            IQueryable<T> query = _dbSet;
-
-            if (filter != null)
-            {
-                query = query.Where(filter);
-            }
-
-            if (!string.IsNullOrEmpty(includeProperties))
-            {
-                foreach (var includeProp in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
-                {
-                    query = query.Include(includeProp);
-                }
-            }
-
-            return await query.FirstOrDefaultAsync();
-        }
+     
 
     }
 }

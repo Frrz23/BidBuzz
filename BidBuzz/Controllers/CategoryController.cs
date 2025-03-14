@@ -15,7 +15,7 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var categories = await _unitOfWork.Categories.GetAllAsync();
+            var categories = await _unitOfWork.Categories.GetAllAsync(null);
             return View(categories);
         }
 
