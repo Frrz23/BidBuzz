@@ -1,4 +1,5 @@
 ﻿using DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
@@ -9,6 +10,7 @@ using Utility;
 
 namespace BidBuzz.Controllers
 {
+    [Authorize]
     public class ItemController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -33,6 +35,7 @@ namespace BidBuzz.Controllers
 
             var itemVMs = items.Select(i => new ItemVM
             {
+
                 Item = i,
                 AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status
             }).ToList();
@@ -68,6 +71,7 @@ namespace BidBuzz.Controllers
 
                 itemVM = new ItemVM
                 {
+                    
                     Item = item,
                     AuctionStatus = auction?.Status ?? AuctionStatus.PendingApproval
                 };
@@ -82,6 +86,8 @@ namespace BidBuzz.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                itemVM.Item.UserId = userId;
                 var startTime = AuctionScheduleHelper.GetNextAuctionStart(_auctionSchedule.StartDay, _auctionSchedule.StartHour);
                 var endTime = AuctionScheduleHelper.GetNextAuctionEnd(_auctionSchedule.EndDay, _auctionSchedule.EndHour);
 
@@ -118,6 +124,7 @@ namespace BidBuzz.Controllers
 
                 if (itemVM.Item.Id == 0)
                 {
+
                     // Creating new item
                     await _unitOfWork.Items.AddAsync(itemVM.Item);
                     await _unitOfWork.CompleteAsync();
@@ -147,7 +154,7 @@ namespace BidBuzz.Controllers
                 await _unitOfWork.CompleteAsync();
                 return RedirectToAction(nameof(Index));
             }
-
+          
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
             ViewBag.Categories = categories;
             return View(itemVM); // Ensure correct type is returned
