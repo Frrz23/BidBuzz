@@ -1,21 +1,27 @@
 using System.Diagnostics;
-using BidBuzz.Models;
+using Models;
+using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
+using Models;
 
 namespace BidBuzz.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,IUnitOfWork unitOfWork)
         {
             _logger = logger;
+            _unitOfWork = unitOfWork;
+        
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            IEnumerable<Item> itemList = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
+            return View(itemList);
         }
 
         public IActionResult Privacy()

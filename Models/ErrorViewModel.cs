@@ -1,4 +1,4 @@
-namespace BidBuzz.Models
+namespace Models
 {
     public class ErrorViewModel
     {

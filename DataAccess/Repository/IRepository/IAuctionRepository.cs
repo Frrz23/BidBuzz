@@ -1,5 +1,5 @@
-﻿using Models.Models;
-using Models.Models.ViewModels;
+﻿using Models;
+using Models.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;

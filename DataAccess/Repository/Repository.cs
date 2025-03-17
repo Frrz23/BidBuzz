@@ -21,14 +21,17 @@ namespace DataAccess.Repository
             _dbSet = context.Set<T>();
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter,string? includeProperties = null)
+        public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, string? includeProperties = null)
         {
             IQueryable<T> query = _dbSet;
+
+            // Apply filter only if provided
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
+            // Handle includes (comma-separated)
             if (!string.IsNullOrWhiteSpace(includeProperties))
             {
                 foreach (var includeProperty in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))
@@ -39,6 +42,7 @@ namespace DataAccess.Repository
 
             return await query.ToListAsync();
         }
+
         public async Task<T> GetFirstOrDefaultAsync(Expression<Func<T, bool>> filter, string includeProperties = null)
         {
             IQueryable<T> query = _dbSet;

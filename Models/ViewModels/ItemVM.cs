@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utility;
 
-namespace Models.Models.ViewModels
+namespace Models.ViewModels
 {
     public class ItemVM
     {

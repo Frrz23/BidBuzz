@@ -1,6 +1,6 @@
 ﻿using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
-using Models.Models;
+using Models;
 
 namespace BidBuzz.Controllers
 {

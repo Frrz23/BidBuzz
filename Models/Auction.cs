@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utility;
 
-namespace Models.Models
+namespace Models
 {
     public class Auction
     {

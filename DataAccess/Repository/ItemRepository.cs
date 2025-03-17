@@ -2,7 +2,7 @@
 using DataAccess.Repository;
 using DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
-using Models.Models;
+using Models;
 using Models.Models.ViewModels;
 using System;
 using System.Collections.Generic;
