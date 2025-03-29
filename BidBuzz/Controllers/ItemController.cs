@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Options;
-using Models.Models;
+using Models;
+
 using Models.ViewModels;
 using System.Security.Claims;
 using Utility;

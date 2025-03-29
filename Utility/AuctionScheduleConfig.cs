@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
 
-namespace Models.Models
+namespace Models
 {
     public class AuctionScheduleConfig
     {

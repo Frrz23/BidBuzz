@@ -20,9 +20,19 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            IEnumerable<Item> itemList = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
-            return View(itemList);
+            IEnumerable<Item> item = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
+            return View(item);
         }
+        public async Task<IActionResult> Details(int itemId)
+        {
+            var itemdetail = await _unitOfWork.Items.GetFirstOrDefaultAsync(i => i.Id == itemId, includeProperties: "Category");
+            if (itemdetail == null)
+            {
+                return NotFound();
+            }
+            return View(itemdetail);
+        }
+
 
         public IActionResult Privacy()
         {
