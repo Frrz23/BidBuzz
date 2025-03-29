@@ -122,6 +122,17 @@ namespace BidBuzz.Controllers
 
                     itemVM.Item.ImageUrl = @"\images\" + fileName;
                 }
+                else if (itemVM.Item.Id != 0) // Editing case, no new file uploaded
+                {
+                    var existingItem = await _unitOfWork.Items.GetByIdAsNoTrackingAsync(itemVM.Item.Id);
+
+                    if (existingItem != null)
+                    {
+                        itemVM.Item.ImageUrl = existingItem.ImageUrl; // Keep existing image
+                    }
+                }
+
+
 
                 if (itemVM.Item.Id == 0)
                 {
@@ -149,6 +160,7 @@ namespace BidBuzz.Controllers
                         auction.Status = AuctionStatus.Approved; // Update auction status
                         _unitOfWork.Auctions.Update(auction);
                     }
+
                     _unitOfWork.Items.Update(itemVM.Item);
                 }
 

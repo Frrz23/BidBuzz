@@ -13,6 +13,7 @@ namespace DataAccess.Repository
     {
         Task <IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status);
         Task AddItemAsync(Item item);
+        Task<Item> GetByIdAsNoTrackingAsync(int id);
 
     }
 

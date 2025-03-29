@@ -47,6 +47,11 @@ namespace DataAccess.Repository
             _context.Auctions.Add(auction);
             await _context.SaveChangesAsync();
         }
+        public async Task<Item> GetByIdAsNoTrackingAsync(int id)
+        {
+            return await _context.Items.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+        }
+
 
 
 

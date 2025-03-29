@@ -65,7 +65,8 @@ namespace DataAccess.Data
                   .HasOne(i => i.Category)
                   .WithMany()
                   .HasForeignKey(i => i.CategoryId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                  .OnDelete(DeleteBehavior.Restrict);
+
             // Bid Configuration
             modelBuilder.Entity<Bid>()
                 .HasKey(b => b.Id); // Primary key

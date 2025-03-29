@@ -53,18 +53,19 @@
         <input asp-for="Item.StartingPrice" type="number" step="0.01" class="form-control" />
         <span asp-validation-for="Item.StartingPrice" class="text-danger"></span>
     </div>
-    <div class="form-group">
-        <label class="control-label">Approval Status</label>
-        <div>
-            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
-            <label for="approveRadio">Approve</label>
+    @if (Model.Item.Id!=0) {
+        <div class="form-group">
+            <label class="control-label">Approval Status</label>
+            <div>
+                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
+                <label for="approveRadio">Approve</label>
 
-            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
-            <label for="declineRadio">Decline</label>
+                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
+                <label for="declineRadio">Decline</label>
+            </div>
+            <span asp-validation-for="AuctionStatus" class="text-danger"></span>
         </div>
-        <span asp-validation-for="AuctionStatus" class="text-danger"></span>
-    </div>
-
+    }
 
     <div class="form-group">
         <label asp-for="Item.CategoryId" class="control-label"></label>
@@ -82,9 +83,17 @@
         {
             <img src="@Model.Item.ImageUrl" width="150" height="150" class="mb-3" />
         }
-        <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" />
+        @if (Model.Item.Id == 0)
+        {
+            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" required />
+        }
+        else
+        {
+            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" />
+        }
         <span asp-validation-for="Item.ImageUrl" class="text-danger"></span>
     </div>
+
 
     <input type="hidden" asp-for="Item.Id" />
 
