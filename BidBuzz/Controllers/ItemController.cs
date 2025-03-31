@@ -157,7 +157,11 @@ namespace BidBuzz.Controllers
                     var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemVM.Item.Id);
                     if (auction != null)
                     {
-                        auction.Status = AuctionStatus.Approved; // Update auction status
+                        if (itemVM.AuctionStatus.HasValue)
+                        {
+                            auction.Status = itemVM.AuctionStatus.Value;
+                        }
+
                         _unitOfWork.Auctions.Update(auction);
                     }
 

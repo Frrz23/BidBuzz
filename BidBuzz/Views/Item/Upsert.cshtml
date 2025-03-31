@@ -53,19 +53,23 @@
         <input asp-for="Item.StartingPrice" type="number" step="0.01" class="form-control" />
         <span asp-validation-for="Item.StartingPrice" class="text-danger"></span>
     </div>
-    @if (Model.Item.Id!=0) {
-        <div class="form-group">
-            <label class="control-label">Approval Status</label>
-            <div>
-                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
-                <label for="approveRadio">Approve</label>
+@if (Model.Item.Id != 0){
+    <div class="form-group">
+        <label class="control-label">Approval Status</label>
+        <div>
+            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.PendingApproval" id="pendingRadio" />
+            <label for="pendingRadio">Pending Approval</label>
 
-                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
-                <label for="declineRadio">Decline</label>
-            </div>
-            <span asp-validation-for="AuctionStatus" class="text-danger"></span>
+            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
+            <label for="approveRadio">Approve</label>
+
+            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
+            <label for="declineRadio">Decline</label>
         </div>
-    }
+        <span asp-validation-for="AuctionStatus" class="text-danger"></span>
+    </div>
+}
+
 
     <div class="form-group">
         <label asp-for="Item.CategoryId" class="control-label"></label>

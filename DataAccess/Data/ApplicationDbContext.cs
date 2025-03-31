@@ -66,6 +66,16 @@ namespace DataAccess.Data
                   .WithMany()
                   .HasForeignKey(i => i.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Quantity)
+                .IsRequired(); // Quantity must not be null
+            modelBuilder.Entity<Item>()
+                .Property(i => i.Condition)
+                .IsRequired(); // Condition must not be null
+
+
+
+
 
             // Bid Configuration
             modelBuilder.Entity<Bid>()
