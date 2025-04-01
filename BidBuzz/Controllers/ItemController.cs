@@ -31,14 +31,25 @@ namespace BidBuzz.Controllers
         {
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            var isAdmin = User.IsInRole(Roles.Admin);
 
-            var items = await _unitOfWork.Items.GetAllAsync(u=>u.UserId==userId,includeProperties: "Category,Auctions");
-
+            IEnumerable<Item> items;
+            if (isAdmin)
+            {
+                // Admin sees all items
+                items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions,User");
+            }
+            else
+            {
+                // Regular users only see their own items
+                items = await _unitOfWork.Items.GetAllAsync(u => u.UserId == userId, includeProperties: "Category,Auctions,User");
+            }
             var itemVMs = items.Select(i => new ItemVM
             {
 
                 Item = i,
-                AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status
+                AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status,
+                UserName = i.User?.UserName
             }).ToList();
 
             return View(itemVMs);
@@ -88,7 +99,21 @@ namespace BidBuzz.Controllers
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                itemVM.Item.UserId = userId;
+                if (itemVM.Item.Id == 0)
+                {
+                    // Only set UserId when creating a new item
+                    itemVM.Item.UserId = userId;
+                }
+                else
+                {
+                    // Editing an existing item - preserve the original UserId
+                    var existingItem = await _unitOfWork.Items.GetByIdAsNoTrackingAsync(itemVM.Item.Id);
+                    if (existingItem != null)
+                    {
+                        itemVM.Item.UserId = existingItem.UserId; // Keep original UserId
+                    }
+                }
+
                 var startTime = AuctionScheduleHelper.GetNextAuctionStart(_auctionSchedule.StartDay, _auctionSchedule.StartHour);
                 var endTime = AuctionScheduleHelper.GetNextAuctionEnd(_auctionSchedule.EndDay, _auctionSchedule.EndHour);
 

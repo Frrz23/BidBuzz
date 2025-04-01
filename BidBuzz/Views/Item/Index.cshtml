@@ -13,7 +13,11 @@
 <table class="table table-bordered">
     <thead>
         <tr>
-            <th>Name</th>
+            @if (User.IsInRole(Roles.Admin))
+            {
+                <th>UserName</th>
+            }
+            <th>Item_Name</th>
             <th>Description</th>
             <th>Condition</th>
             <th>Quantity</th>
@@ -27,7 +31,12 @@
     <tbody>
         @foreach (var item in Model)
         {
+            
             <tr>
+                @if (User.IsInRole(Roles.Admin))
+                {
+                    <td>@item.UserName</td>
+                }
                 <td>@item.Item.Name</td>
                 <td>@item.Item.Description</td>
                 <td>@item.Item.Condition</td>

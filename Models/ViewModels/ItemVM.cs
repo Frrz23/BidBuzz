@@ -12,5 +12,6 @@ namespace Models.ViewModels
     {
         public Item Item { get; set; }  // Full Item model
         public AuctionStatus? AuctionStatus { get; set; }
+        public string? UserName { get; set; }
     }
 }
