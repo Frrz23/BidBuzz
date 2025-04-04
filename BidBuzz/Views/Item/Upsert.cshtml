@@ -1,8 +1,6 @@
 ﻿@using Models.ViewModels
 @model ItemVM
 
-
-
 @{
     ViewData["Title"] = Model?.Item?.Id == 0 ? "Create Item" : "Edit Item";
 }
@@ -21,9 +19,7 @@
     </div>
 }
 
-
-
-<form asp-action="Upsert" method="post" enctype="multipart/form-data">
+<form asp-action="Upsert" method="post" enctype="multipart/form-data" onsubmit="return ValidateForm()">
     <div class="form-group">
         <label asp-for="Item.Name" class="control-label"></label>
         <input asp-for="Item.Name" class="form-control" />
@@ -38,9 +34,12 @@
 
     <div class="form-group">
         <label asp-for="Item.Condition" class="control-label"></label>
-        <select asp-for="Item.Condition" class="form-control" asp-items="Html.GetEnumSelectList<ItemCondition>()"></select>
+        <select asp-for="Item.Condition" class="form-control" asp-items="Html.GetEnumSelectList<ItemCondition>()">
+            <option value="">-- Select Condition --</option>
+        </select>
         <span asp-validation-for="Item.Condition" class="text-danger"></span>
     </div>
+
 
     <div class="form-group">
         <label asp-for="Item.Quantity" class="control-label"></label>
@@ -53,23 +52,24 @@
         <input asp-for="Item.StartingPrice" type="number" step="0.01" class="form-control" />
         <span asp-validation-for="Item.StartingPrice" class="text-danger"></span>
     </div>
-@if(User.IsInRole(Roles.Admin)){
-    <div class="form-group">
-        <label class="control-label">Approval Status</label>
-        <div>
-            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.PendingApproval" id="pendingRadio" />
-            <label for="pendingRadio">Pending Approval</label>
 
-            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
-            <label for="approveRadio">Approve</label>
+    @if (User.IsInRole(Roles.Admin) && Model.Item.Id != 0)
+    {
+        <div class="form-group">
+            <label class="control-label">Approval Status</label>
+            <div>
+                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.PendingApproval" id="pendingRadio" />
+                <label for="pendingRadio">Pending Approval</label>
 
-            <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
-            <label for="declineRadio">Decline</label>
+                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
+                <label for="approveRadio">Approve</label>
+
+                <input type="radio" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
+                <label for="declineRadio">Decline</label>
+            </div>
+            <span asp-validation-for="AuctionStatus" class="text-danger"></span>
         </div>
-        <span asp-validation-for="AuctionStatus" class="text-danger"></span>
-    </div>
-}
-
+    }
 
     <div class="form-group">
         <label asp-for="Item.CategoryId" class="control-label"></label>
@@ -79,28 +79,29 @@
         <span asp-validation-for="Item.CategoryId" class="text-danger"></span>
     </div>
 
-
-
     <div class="form-group">
         <label asp-for="Item.ImageUrl" class="control-label"></label>
+        <input type="hidden" asp-for="@Model.Item.ImageUrl" id="ImageUrl" value="Error" />
         @if (!string.IsNullOrEmpty(Model.Item.ImageUrl))
         {
-            <img src="@Model.Item.ImageUrl" width="150" height="150" class="mb-3" />
-        }
-        @if (Model.Item.Id == 0)
-        {
-            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" required />
+            <img id="previewphoto" src="@Model.Item.ImageUrl" width="150" height="150" class="mb-3" />
         }
         else
         {
-            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" />
+            <img id="previewphoto" src="" width="150" height="150" class="mb-3" style="display:none;" />
         }
-        <span asp-validation-for="Item.ImageUrl" class="text-danger"></span>
+        @if (Model.Item.Id == 0)
+        {
+            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" required accept=".png,.jpg,.jpeg" id="imageInput" />
+        }
+        else
+        {
+            <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" accept=".png,.jpg,.jpeg" id="imageInput" />
+        }
+        <span id="imageError" asp-validation-for="Item.ImageUrl" class="text-danger"></span>
     </div>
 
-
     <input type="hidden" asp-for="Item.Id" />
-
 
     <button type="submit" class="btn btn-primary">
         @(Model.Item.Id == 0 ? "Create" : "Update")
@@ -114,6 +115,7 @@
     }
 }
 <script>
+    // Confirmation for approval status change for admin users
     document.querySelectorAll('input[name="AuctionStatus"]').forEach(radio => {
         radio.addEventListener('change', function() {
             if (!confirm("Are you sure you want to change the approval status?")) {
@@ -121,5 +123,63 @@
             }
         });
     });
-</script>
 
+    // Validate form to ensure image is uploaded
+    function ValidateForm() {
+        // Get the hidden Item.Id value
+        var itemId = parseInt(document.querySelector('input[name="Item.Id"]').value);
+        // Get the file input element
+        var fileInput = document.getElementById('imageInput');
+
+        // Only enforce image validation if a new item or a file is selected for an existing item
+        if (itemId === 0 || fileInput.value !== "") {
+            if (document.getElementById('ImageUrl').value === "Error") {
+                document.getElementById('imageError').innerText = 'Please upload a valid image.';
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Preview image and validate file size (<=100KB) and dimensions (800x800)
+    document.getElementById('imageInput').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        const imageError = document.getElementById('imageError');
+        const previewPhoto = document.getElementById('previewphoto');
+        imageError.innerText = ""; // Clear previous errors
+
+        if (file) {
+            // Check file size (100KB maximum)
+            if (file.size > 100 * 1024) {
+                imageError.innerText = "Image size must be less than 100KB.";
+                e.target.value = "";
+                previewPhoto.src = "";
+                previewPhoto.style.display = "none";
+                document.getElementById('ImageUrl').value = "Error";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const img = new Image();
+                img.onload = function () {
+                    // Check dimensions: must be exactly 800x800 pixels
+                    if (img.width !== 100 || img.height !== 100) {
+                        imageError.innerText = "Image dimensions must be exactly 800x800 pixels.";
+                        e.target.value = "";
+                        previewPhoto.src = "";
+                        previewPhoto.style.display = "none";
+                        document.getElementById('ImageUrl').value = "Error";
+                        return;
+                    }
+                    // If valid, set the preview and update hidden field to indicate a valid image
+                    previewPhoto.src = event.target.result;
+                    previewPhoto.style.display = "block";
+                    document.getElementById('ImageUrl').value = event.target.result;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+</script>

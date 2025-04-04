@@ -47,31 +47,31 @@ namespace DataAccess.Data
                 .Property(c => c.Description)
                 .HasMaxLength(500);
 
-            // Item Configuration
-            modelBuilder.Entity<Item>().HasKey(i => i.Id); // Primary key
-            modelBuilder.Entity<Item>()
-                .Property(i => i.Name)
-                .IsRequired() // Name must not be null
-                .HasMaxLength(200);
-            modelBuilder.Entity<Item>()
-                .Property(i => i.Description)
-                .IsRequired()
-                .HasMaxLength(1000);
-            modelBuilder.Entity<Item>()
-                .Property(i => i.StartingPrice)
-                .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
-            modelBuilder.Entity<Item>().Property(i => i.CategoryId).IsRequired();
-            modelBuilder.Entity<Item>()
-                  .HasOne(i => i.Category)
-                  .WithMany()
-                  .HasForeignKey(i => i.CategoryId)
-                  .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<Item>()
-                .Property(i => i.Quantity)
-                .IsRequired(); // Quantity must not be null
-            modelBuilder.Entity<Item>()
-                .Property(i => i.Condition)
-                .IsRequired(); // Condition must not be null
+            //// Item Configuration
+            //modelBuilder.Entity<Item>().HasKey(i => i.Id); // Primary key
+            //modelBuilder.Entity<Item>()
+            //    .Property(i => i.Name)
+            //    .IsRequired() // Name must not be null
+            //    .HasMaxLength(200);
+            //modelBuilder.Entity<Item>()
+            //    .Property(i => i.Description)
+            //    .IsRequired()
+            //    .HasMaxLength(1000);
+            //modelBuilder.Entity<Item>()
+            //    .Property(i => i.StartingPrice)
+            //    .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
+            //modelBuilder.Entity<Item>().Property(i => i.CategoryId).IsRequired();
+            //modelBuilder.Entity<Item>()
+            //      .HasOne(i => i.Category)
+            //      .WithMany()
+            //      .HasForeignKey(i => i.CategoryId)
+            //      .OnDelete(DeleteBehavior.Restrict);
+            //modelBuilder.Entity<Item>()
+            //    .Property(i => i.Quantity)
+            //    .IsRequired(); // Quantity must not be null
+            //modelBuilder.Entity<Item>()
+            //    .Property(i => i.Condition)
+            //    .IsRequired(); // Condition must not be null
 
 
 

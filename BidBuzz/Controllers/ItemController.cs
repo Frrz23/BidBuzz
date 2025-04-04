@@ -96,6 +96,8 @@ namespace BidBuzz.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upsert(ItemVM itemVM, IFormFile? file)
         {
+          
+
             if (ModelState.IsValid)
             {
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

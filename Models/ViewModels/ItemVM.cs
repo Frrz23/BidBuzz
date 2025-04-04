@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,5 +15,7 @@ namespace Models.ViewModels
         public Item Item { get; set; }  // Full Item model
         public AuctionStatus? AuctionStatus { get; set; }
         public string? UserName { get; set; }
+
+
     }
 }
