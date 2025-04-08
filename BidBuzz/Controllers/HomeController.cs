@@ -3,6 +3,7 @@ using Models;
 using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Models;
+using Models.ViewModels;
 
 namespace BidBuzz.Controllers
 {
@@ -15,7 +16,6 @@ namespace BidBuzz.Controllers
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-        
         }
 
         public async Task<IActionResult> Index()
@@ -25,13 +25,27 @@ namespace BidBuzz.Controllers
         }
         public async Task<IActionResult> Details(int itemId)
         {
-            var itemdetail = await _unitOfWork.Items.GetFirstOrDefaultAsync(i => i.Id == itemId, includeProperties: "Category");
-            if (itemdetail == null)
+            // Fetch the item
+            var item = await _unitOfWork.Items.GetFirstOrDefaultAsync(i => i.Id == itemId, includeProperties: "Category");
+            if (item == null)
             {
                 return NotFound();
             }
-            return View(itemdetail);
+
+            
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+
+            var viewModel = new ItemVM
+            {
+                Item = item,
+                LatestAuction = auction  
+            };
+
+
+
+            return View(viewModel);
         }
+
 
 
         public IActionResult Privacy()
