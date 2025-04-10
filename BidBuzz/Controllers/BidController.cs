@@ -1,83 +1,63 @@
-﻿//using DataAccess.Repositary;
-//using Microsoft.AspNetCore.Mvc;
-//using Models.Models;
+﻿using System.Security.Claims;
+using System.Threading.Tasks;
+using DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Utility;
 
-//namespace BidBuzz.Controllers
-//{
-//    public class CategoryController : Controller
-//    {
-//        private readonly IUnitOfWork _unitOfWork;
+namespace BidBuzz.Controllers
+{
+    [Authorize]
+    public class BidController : Controller
+    {
+        private readonly IUnitOfWork _unitOfWork;
 
-//        public CategoryController(IUnitOfWork unitOfWork)
-//        {
-//            _unitOfWork = unitOfWork;
-//        }
+        public BidController(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
 
-//        public async Task<IActionResult> Index()
-//        {
-//            var categories = await _unitOfWork.Categories.GetAllAsync();
-//            return View(categories);
-//        }
+        [HttpPost]
+        public async Task<IActionResult> PlaceBid(int itemId, decimal bidAmount)
+        {
+            // Get the item from the database
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId);
+            if (item == null)
+            {
+                return NotFound();
+            }
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // Get the associated auction
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+            if (auction == null || auction.Status != AuctionStatus.InAuction)
+            {
+                // If no active auction is found, we return an error
+                return BadRequest("The auction is not active.");
+            }
 
+            // Get the current highest bid
+            var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+            if (bidAmount <= highestBid?.Amount)
+            {
+                // Ensure the bid is higher than the current highest bid
+                return BadRequest("Your bid must be higher than the current highest bid.");
+            }
 
-//        public async Task<IActionResult> Upsert(int? id) {
-            
-//            if (id == null || id == 0)
-//            {
-//                return View(new Category());
-//            }
-//            else
-//            {
-//                var category = await _unitOfWork.Categories.GetByIdAsync(id);
-//                if (category == null)
-//                {
-//                    return NotFound();
-//                }
-//                return View(category);
-//            }
-//        }
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> Upsert(Category category)
-//        {
-//            if (ModelState.IsValid) {
-//                if (category.Id == 0)
-//                {
-//                    await _unitOfWork.Categories.AddAsync(category);
-//                }
-//                else
-//                {
-//                    _unitOfWork.Categories.Update(category);
+            // Create a new Bid
+            var bid = new Bid
+            {
+                Amount = bidAmount,
+                AuctionId = auction.Id,
+                UserId=userId,
+                BidTime = DateTime.Now
+            };
 
-//                }
-//                await _unitOfWork.CompleteAsync();
-//                return RedirectToAction(nameof(Index));
-            
+            // Add the bid to the auction and save changes to the database
+            await _unitOfWork.Bids.AddAsync(bid);
+            await _unitOfWork.CompleteAsync();
 
-//        }
-//            return View(category);
-//        }
-
- 
-//        public async Task<IActionResult> Delete(int id)
-//        {
-//            var category = await _unitOfWork.Categories.GetByIdAsync(id);
-//            if (category == null)
-//            {
-//                return NotFound();
-//            }
-//            return View(category);
-//        }
-
-//        [HttpPost, ActionName("Delete")]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> DeleteConfirmed(int id)
-//        {
-           
-//                _unitOfWork.Categories.Delete(id);
-//                await _unitOfWork.CompleteAsync();
-            
-//            return RedirectToAction(nameof(Index));
-//        }
-//    }
-//  }
+            return RedirectToAction("Details", "Home", new { itemId });
+        }
+    }
+}

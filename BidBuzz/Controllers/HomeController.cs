@@ -4,6 +4,7 @@ using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.ViewModels;
+using Utility;
 
 namespace BidBuzz.Controllers
 {
@@ -23,28 +24,32 @@ namespace BidBuzz.Controllers
             IEnumerable<Item> item = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
             return View(item);
         }
-        public async Task<IActionResult> Details(int itemId)
-        {
-            // Fetch the item
-            var item = await _unitOfWork.Items.GetFirstOrDefaultAsync(i => i.Id == itemId, includeProperties: "Category");
-            if (item == null)
+
+            public async Task<IActionResult> Details(int itemId)
             {
-                return NotFound();
+                var item = await _unitOfWork.Items.GetByIdAsync(itemId);
+                if (item == null)
+                {
+                    return NotFound();
+                }
+
+                // Get the auction status for this item
+                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+                var auctionStatus = auction?.Status;
+
+                // Create the ItemVM and return to the view
+                var itemVM = new ItemVM
+                {
+                    Item = item,
+                    AuctionStatus = auctionStatus
+                };
+
+                return View(itemVM);
             }
-
-            
-            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
-
-            var viewModel = new ItemVM
-            {
-                Item = item,
-                LatestAuction = auction  
-            };
+        
 
 
 
-            return View(viewModel);
-        }
 
 
 

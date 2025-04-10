@@ -64,7 +64,7 @@ namespace BidBuzz.Controllers
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
             if (categories == null || !categories.Any())
             {
-                ModelState.AddModelError("", "No categories available. Please add a category first.");
+                ModelState.AddModelError("", "No categories available. Please  a category first.");
                 return View(new ItemVM { Item = new Item() }); // Ensure Item is not null
             }
             ViewBag.Categories = categories;
