@@ -22,12 +22,13 @@ namespace DataAccess.Repository
         {
             return await _context.Bids.Where(i => i.AuctionId == auctionId).OrderByDescending(i=>i.Amount).ToListAsync();
         }
-        public async Task<Bid> GetHighestBidAsync(int auctionId)
+        public async Task<List<Bid>> GetBidsForAuctionAsync(int auctionId)
         {
             return await _context.Bids
-                .Where(b => b.AuctionId == auctionId)  
-                .OrderByDescending(b => b.Amount) 
-                .FirstOrDefaultAsync(); 
+                .Where(b => b.AuctionId == auctionId)
+                .Include(b => b.User) // Ensure the user is loaded
+                .OrderByDescending(b => b.Amount)
+                .ToListAsync();
         }
 
 

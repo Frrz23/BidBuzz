@@ -16,6 +16,14 @@
             <p><strong>Category:</strong> @Model.Item.Category?.Name</p>
             <p><strong>Condition:</strong> @Model.Item.Condition</p>
             <p><strong>Starting Price:</strong> @Model.Item.StartingPrice.ToString("C")</p>
+            @if (Model.BidAmount > 0)
+            {
+                <p><strong>Current Highest Bid:</strong> @Model.BidAmount.ToString("C")</p>
+            }
+            else
+            {
+                <p><strong>No bids placed yet.</strong></p>
+            }
             <p><strong>Auction Status:</strong> 
                 <span class="badge bg-info text-dark">@Model.AuctionStatus</span>
             </p>
@@ -26,10 +34,12 @@
                 <form method="post" action="@Url.Action("PlaceBid", "Bid")">
                     <div class="form-group">
                         <label for="bidAmount">Place Your Bid:</label>
-                        <input type="number" name="bidAmount" id="bidAmount" class="form-control" placeholder="Enter your bid" required min="@Model.Item.StartingPrice" />
+                        <input asp-for="BidAmount" class="form-control" placeholder="Enter your bid" min="@Model.Item.StartingPrice" />
+                        <span asp-validation-for="BidAmount" class="text-danger"></span>
+
+
                     </div>
                     <input type="hidden" name="ItemId" value="@Model.Item.Id" />
-                    <input type="hidden" name="AuctionId" value="@Model.AuctionStatus" /> <!-- Assuming Auction ID is part of the AuctionStatus model -->
                     <button type="submit" class="btn btn-primary">Place Bid</button>
                 </form>
             }
@@ -37,6 +47,35 @@
             {
                 <p><strong>The auction is not currently active. Please check back later!</strong></p>
             }
+            @if (Model.BidList?.Any() == true)
+            {
+                <h4>Ongoing Bids</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Bid Amount</th>
+                            <th>Bid Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var bid in Model.BidList)
+                        {
+                            <tr>
+                                <td>@bid.User?.UserName</td>  <!-- Display username -->
+                                <td>@bid.Amount.ToString("C")</td>
+
+                                <td>@bid.BidTime.ToString("g")</td> <!-- Display bid time -->
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No bids placed yet.</p>
+            }
+        
         </div>
     </div>
 </div>

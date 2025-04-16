@@ -72,7 +72,7 @@ namespace DataAccess.Repository
 
             foreach (var auction in auctionsToEnd)
             {
-                var highestBid = await _bidRepository.GetHighestBidAsync(auction.Id);
+                var highestBid = await _bidRepository.GetBidsForAuctionAsync(auction.Id);
                 if (highestBid != null)
                 {
                     auction.Status = AuctionStatus.Sold;
