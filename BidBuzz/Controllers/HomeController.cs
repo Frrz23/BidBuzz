@@ -29,7 +29,7 @@ namespace BidBuzz.Controllers
         [Authorize]
         public async Task<IActionResult> Details(int itemId)
             {
-                var item = await _unitOfWork.Items.GetByIdAsync(itemId);
+                var item = await _unitOfWork.Items.GetByIdAsync(itemId,includeProperties:"Category");
                 if (item == null)
                 {
                     return NotFound();
@@ -58,8 +58,49 @@ namespace BidBuzz.Controllers
 
                 return View(itemVM);
             }
-        
 
+
+        // GET: /Home/BidHistory
+        public async Task<IActionResult> BidHistory()
+        {
+            var itemsWithAuctions = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
+            var itemsInAuctions = new List<Item>();
+
+            foreach (var item in itemsWithAuctions)
+            {
+                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
+                if (auction != null)
+                {
+                    itemsInAuctions.Add(item);
+                }
+            }
+
+            return View(itemsInAuctions); // You will create this view
+        }
+
+        // GET: /Home/BidHistoryDetails?itemId=5
+        public async Task<IActionResult> BidHistoryDetails(int itemId)
+        {
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+            if (auction == null)
+            {
+                TempData["Error"] = "No auction found for the selected item.";
+                return RedirectToAction("BidHistory");
+            }
+
+            var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
+
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId, includeProperties: "Category");
+
+            var viewModel = new ItemVM
+            {
+                Item = item,
+                BidList = bids,
+                AuctionStatus = auction.Status
+            };
+
+            return View(viewModel); // You will create this view
+        }
 
 
 

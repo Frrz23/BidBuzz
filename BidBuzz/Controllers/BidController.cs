@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
 using System.Threading.Tasks;
+using BidBuzz.Hubs;
 using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Models;
 using Models.ViewModels;
 using NuGet.Packaging.Signing;
@@ -26,7 +28,7 @@ namespace BidBuzz.Controllers
             var itemId = model.ItemId;
             var bidAmount = model.BidAmount;
 
-            var item = await _unitOfWork.Items.GetByIdAsync(itemId);
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId,includeProperties:"Category");
             if (item == null)
             {
                 TempData["Error"] = "Item not found!";
@@ -73,11 +75,24 @@ namespace BidBuzz.Controllers
 
             await _unitOfWork.Bids.AddAsync(bid);
             await _unitOfWork.CompleteAsync();
+            var hubContext = HttpContext.RequestServices.GetRequiredService<IHubContext<BidHub>>();
+            await hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
+
             TempData["Success"] = "Your bid has been placed successfully!";
 
             return RedirectToAction("Details", "Home", new { itemId });
         }
 
+        public async Task<IActionResult> Top5(int itemId)
+        {
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+            if (auction == null)
+                return NotFound();
+
+            var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
+            var top5 = bids.Take(5).ToList();
+            return PartialView("_Top5Partial", top5);
+        }
 
 
     }

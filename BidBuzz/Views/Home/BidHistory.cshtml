@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Item>
+@{
+    ViewData["Title"] = "Bid History";
+}
+
+<h2>Bid History - All Auctioned Items</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Category</th>
+            <th>Condition</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Category?.Name</td>
+                <td>@item.Condition</td>
+                <td>
+                    <a href="@Url.Action("BidHistoryDetails", "Home", new { itemId = item.Id })" class="btn btn-sm btn-info">
+                        View Bid History
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

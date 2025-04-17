@@ -4,6 +4,7 @@
     ViewData["Title"] = "Item Details";
 }
 
+
 <div class="container">
     <h2>@Model.Item.Name</h2>
 
@@ -13,7 +14,7 @@
         </div>
         <div class="col-md-6">
             <h3>@Model.Item.Description</h3>
-            <p><strong>Category:</strong> @Model.Item.Category?.Name</p>
+            <p><strong>Category:</strong> @Model.Item.Category.Name</p>
             <p><strong>Condition:</strong> @Model.Item.Condition</p>
             <p><strong>Starting Price:</strong> @Model.Item.StartingPrice.ToString("C")</p>
             @if (Model.BidAmount > 0)
@@ -47,35 +48,72 @@
             {
                 <p><strong>The auction is not currently active. Please check back later!</strong></p>
             }
-            @if (Model.BidList?.Any() == true)
-            {
-                <h4>Ongoing Bids</h4>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Bid Amount</th>
-                            <th>Bid Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var bid in Model.BidList)
-                        {
-                            <tr>
-                                <td>@bid.User?.UserName</td>  <!-- Display username -->
-                                <td>@bid.Amount.ToString("C")</td>
+            <!-- Tab Buttons -->
+            <div class="btn-group mt-4" role="group">
+                <button type="button" class="btn btn-outline-primary" id="description-tab">Description</button>
+                <button type="button" class="btn btn-outline-primary" id="bids-tab">Top 5 Bids</button>
+            </div>
 
-                                <td>@bid.BidTime.ToString("g")</td> <!-- Display bid time -->
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p>No bids placed yet.</p>
-            }
+            <!-- Description Section -->
+            <div id="description-section" class="mt-3">
+                <p>@Model.Item.Description</p>
+            </div>
+
+            <!-- Top 5 Bids Section (initially hidden) -->
+            <div id="bids-section" class="mt-3" style="display: none;">
+                <div id="top5-bids-container">
+                    @await Html.PartialAsync("_Top5Partial", Model.BidList?.Take(5).ToList() ?? new List<Bid>())
+                </div>
+            </div>
+
         
         </div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+<script>
+    const itemId = @Model.Item.Id;
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/bidHub?itemId=" + itemId)
+        .build();
+
+    connection.start().then(() => {
+        console.log("SignalR connected");
+
+        // Initial load
+        loadTop5Bids();
+    });
+
+    connection.on("ReceiveBidUpdate", function (itemId) {
+        loadTop5Bids();
+    });
+
+    function loadTop5Bids() {
+        fetch(`/Bid/Top5?itemId=${itemId}`)
+            .then(res => res.text())
+            .then(html => {
+                document.getElementById("top5-bids-container").innerHTML = html;
+            });
+    }
+
+    // Optional: Refresh bids when tab is clicked
+    document.getElementById("bids-tab").addEventListener("click", () => {
+        loadTop5Bids();
+    });
+     // Toggle between Description and Bids
+    document.getElementById("description-tab").addEventListener("click", () => {
+        document.getElementById("description-section").style.display = "block";
+        document.getElementById("bids-section").style.display = "none";
+    });
+
+    document.getElementById("bids-tab").addEventListener("click", () => {
+        document.getElementById("description-section").style.display = "none";
+        document.getElementById("bids-section").style.display = "block";
+        loadTop5Bids(); // Refresh the bid list when the tab is clicked
+    });
+</script>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+

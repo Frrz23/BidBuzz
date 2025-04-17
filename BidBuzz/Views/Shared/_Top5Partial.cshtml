@@ -1,0 +1,21 @@
+﻿@model List<Bid>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Amount</th>
+            <th>Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var bid in Model)
+        {
+            <tr>
+                <td>@bid.User?.UserName</td>
+                <td>@bid.Amount.ToString("C")</td>
+                <td>@bid.BidTime.ToString("g")</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -8,6 +8,7 @@ using Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Utility;
+using BidBuzz.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,6 +57,7 @@ builder.Services.AddHangfireServer();
 
 builder.Services.Configure<AuctionScheduleConfig>(builder.Configuration.GetSection("AuctionSchedule"));
 
+builder.Services.AddSignalR();
 
 
 
@@ -101,6 +103,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapHub<BidHub>("/bidHub");
 
 
 app.MapControllerRoute(
