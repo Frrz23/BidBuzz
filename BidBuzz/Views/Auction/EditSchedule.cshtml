@@ -1,0 +1,100 @@
+﻿@model Models.AuctionSchedule
+@using System
+@{
+    ViewData["Title"] = "Edit Auction Schedule";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="EditSchedule" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="StartDay" class="control-label"></label>
+        <select asp-for="StartDay" class="form-control">
+            <option value="">-- Select Start Day --</option>
+            @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+            {
+                var dayString = day.ToString();
+                if (Model.StartDay == dayString)
+                {
+                    <option value="@dayString" selected>@dayString</option>
+                }
+                else
+                {
+                    <option value="@dayString">@dayString</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="StartDay" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StartHour" class="control-label"></label>
+        <select asp-for="StartHour" class="form-control">
+            <option value="">-- Select Start Hour --</option>
+            @for (int hour = 0; hour < 24; hour++)
+            {
+                if (Model.StartHour == hour)
+                {
+                    <option value="@hour" selected>@hour:00</option>
+                }
+                else
+                {
+                    <option value="@hour">@hour:00</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="StartHour" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EndDay" class="control-label"></label>
+        <select asp-for="EndDay" class="form-control">
+            <option value="">-- Select End Day --</option>
+            @foreach (DayOfWeek day in Enum.GetValues(typeof(DayOfWeek)))
+            {
+                var dayString = day.ToString();
+                if (Model.EndDay == dayString)
+                {
+                    <option value="@dayString" selected>@dayString</option>
+                }
+                else
+                {
+                    <option value="@dayString">@dayString</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="EndDay" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="EndHour" class="control-label"></label>
+        <select asp-for="EndHour" class="form-control">
+            <option value="">-- Select End Hour --</option>
+            @for (int hour = 0; hour < 24; hour++)
+            {
+                if (Model.EndHour == hour)
+                {
+                    <option value="@hour" selected>@hour:00</option>
+                }
+                else
+                {
+                    <option value="@hour">@hour:00</option>
+                }
+            }
+        </select>
+        <span asp-validation-for="EndHour" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="Week" />
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary ml-2">Cancel</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -53,7 +53,7 @@ namespace BidBuzz.Controllers
 
                     AuctionStatus = auctionStatus,
                     BidList = bids,  // All bids sorted by amount
-                    BidAmount = highestBid?.Amount ?? 0  // Highest bid amount
+                    HighestAmount = highestBid?.Amount ?? 0  // Highest bid amount
             };
 
                 return View(itemVM);

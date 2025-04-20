@@ -4,6 +4,7 @@ using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250420034755_addedauctionschedule")]
+    partial class addedauctionschedule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -254,6 +257,16 @@ namespace DataAccess.Migrations
                     b.HasIndex("ItemId");
 
                     b.ToTable("Auctions");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            EndTime = new DateTime(2025, 2, 25, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            ItemId = 1,
+                            StartTime = new DateTime(2025, 2, 24, 12, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("Models.AuctionSchedule", b =>
@@ -295,15 +308,6 @@ namespace DataAccess.Migrations
                             StartDay = "Saturday",
                             StartHour = 12,
                             Week = "Current"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            EndDay = "Sunday",
-                            EndHour = 1,
-                            StartDay = "Saturday",
-                            StartHour = 12,
-                            Week = "Next"
                         });
                 });
 

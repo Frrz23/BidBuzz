@@ -1,0 +1,86 @@
+﻿@model List<Models.Auction>
+@using Utility
+@{
+    ViewData["Title"] = "Auction Management";
+    var selectedStatus = ViewBag.SelectedStatus as string ?? "All";
+    var currentSchedule = ViewBag.CurrentSchedule as Models.AuctionSchedule;
+    var nextSchedule = ViewBag.NextSchedule as Models.AuctionSchedule;
+}
+
+<h1>@ViewData["Title"]</h1>
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="d-flex justify-content-between align-items-center">
+    <div>
+        <h4>Next Week Auction Schedule</h4>
+        <p>
+            Start: @nextSchedule?.StartDay @nextSchedule?.StartHour:00<br />
+            End:   @nextSchedule?.EndDay   @nextSchedule?.EndHour:00
+        </p>
+    </div>
+    <div>
+        <a class="nav-link text-danger"
+           asp-controller="Auction" asp-action="EditSchedule">Edit Schedule</a>
+    </div>
+</div>
+
+<!-- Nav-style filter -->
+<ul class="nav nav-pills my-4">
+    <li class="nav-item">
+        <a class="nav-link @(selectedStatus == "All" ? "active" : "")"
+           asp-controller="Auction" asp-action="Index" asp-route-status="All">All</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(selectedStatus == "InAuction" ? "active" : "")"
+           asp-controller="Auction" asp-action="Index" asp-route-status="InAuction">In Auction</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(selectedStatus == "Sold" ? "active" : "")"
+           asp-controller="Auction" asp-action="Index" asp-route-status="Sold">Sold</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(selectedStatus == "Cancelled" ? "active" : "")"
+           asp-controller="Auction" asp-action="Index" asp-route-status="Cancelled">Cancelled</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link @(selectedStatus == "Approved" ? "active" : "")"
+           asp-controller="Auction" asp-action="Index" asp-route-status="Approved">Approved</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-danger"
+           asp-controller="Auction" asp-action="Cancelled">View Cancelled Items</a>
+    </li>
+</ul>
+
+<!-- Auction table -->
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Highest Bid</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var auction in Model)
+        {
+            <tr>
+                <td>@auction.Item.Name</td>
+                <td>@(auction.Bids.Any() ? auction.Bids.Max(b => b.Amount).ToString("C") : "No Bids")</td>
+                <td>@auction.Status</td>
+                <td>
+                    @if (auction.Status == AuctionStatus.InAuction)
+                    {
+                        <form asp-action="StopAuction" method="post" asp-route-id="@auction.Id">
+                            <button class="btn btn-sm btn-danger">Stop Auction</button>
+                        </form>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

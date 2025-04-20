@@ -26,7 +26,8 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> PlaceBid(ItemVM model)
         {
             var itemId = model.ItemId;
-            var bidAmount = model.BidAmount;
+            var bidAmount = model.BidModel.BidAmount;
+
 
             var item = await _unitOfWork.Items.GetByIdAsync(itemId,includeProperties:"Category");
             if (item == null)
@@ -56,7 +57,7 @@ namespace BidBuzz.Controllers
             if (bidAmount <= highestBidAmount)
             {
                 TempData["Error"] = "Your bid must be higher than the current highest bid.";
-                ModelState.AddModelError("BidAmount", "Your bid must be higher than the current highest bid.");
+                ModelState.AddModelError("BidModel.BidAmount", "Your bid must be higher than the current highest bid.");
 
                 model.Item = item;
                 model.AuctionStatus = auction.Status;

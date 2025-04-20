@@ -12,6 +12,7 @@ public class UnitOfWork : IUnitOfWork
     public IItemRepository Items { get; private set; }
     public IBidRepository Bids { get; private set; }
     public IAuctionRepository Auctions { get; private set; }
+    public IAuctionScheduleRepository AuctionSchedules { get; private set; }
 
     public UnitOfWork(ApplicationDbContext context, ILogger<AuctionRepository> logger)
     {
@@ -21,7 +22,8 @@ public class UnitOfWork : IUnitOfWork
         Categories = new CategoryRepository(_context);
         Items = new ItemRepository(_context);
         Bids = new BidRepository(_context);
-        Auctions = new AuctionRepository(_context, Bids, _logger); // Pass logger
+        Auctions = new AuctionRepository(_context); // Pass logger
+        AuctionSchedules=new AuctionScheduleRepository(_context);
     }
 
     public async Task<int> CompleteAsync()

@@ -11,14 +11,15 @@ namespace DataAccess.Repository.IRepository
 {
     public interface IAuctionRepository : IRepository<Auction>
     {
-        Task<IEnumerable<Auction>> GetAuctionsByStatusAsync(AuctionStatus status);
-        Task<IEnumerable<Auction>> GetUpcomingAuctionsAsync();
-        Task<IEnumerable<Auction>> GetActiveAuctionsAsync();
+
+        Task<List<Auction>> GetAuctionsByStatusAsync(AuctionStatus status);
+        Task<Auction?> GetAuctionWithHighestBidAsync(int itemId);
+        Task CancelAuctionAsync(int auctionId);
+        Task<Auction?> GetAuctionByItemIdAsync(int itemId);
+        Task<List<Auction>> GetCancelledAuctionsAsync();
         Task StartAuctionAsync();
         Task EndAuctionAsync();
         Task RelistUnsoldItemsAsync();
-        Task<IEnumerable<AuctionVM>> GetAllForAuctionManagementAsync();
-
 
 
     }

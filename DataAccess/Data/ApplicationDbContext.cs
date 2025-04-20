@@ -21,19 +21,33 @@ namespace DataAccess.Data
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
 
+        public DbSet<AuctionSchedule>AuctionSchedules { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);             // ensures Identity’s database schema (tables, relationships, indexes) is properly configured.
-            modelBuilder.Entity<Auction>().HasData(
-         new Auction
-         {
-             Id = 1,
-             ItemId = 1,  // Make sure an item exists with this ID
-             Status = AuctionStatus.Approved,
-             StartTime = new DateTime(2025, 2, 24, 12, 0, 0),  // Static DateTime value for StartTime
-             EndTime = new DateTime(2025, 2, 25, 12, 0, 0)    // Static DateTime value for EndTime
-         }
-     );
+            modelBuilder.Entity<AuctionSchedule>().HasData(
+             new AuctionSchedule
+             {
+               Id = 1,
+               Week = "Current",
+               StartDay = "Saturday",
+               StartHour = 12,
+               EndDay = "Sunday",
+               EndHour = 1
+    },
+             new AuctionSchedule
+             {
+                 Id = 2,
+                 Week = "Next",
+                 StartDay = "Saturday",
+                 StartHour = 12,
+                 EndDay = "Sunday",
+                 EndHour = 1
+             }
+);
+
+
 
 
 
@@ -47,31 +61,12 @@ namespace DataAccess.Data
                 .Property(c => c.Description)
                 .HasMaxLength(500);
 
-            //// Item Configuration
-            //modelBuilder.Entity<Item>().HasKey(i => i.Id); // Primary key
-            //modelBuilder.Entity<Item>()
-            //    .Property(i => i.Name)
-            //    .IsRequired() // Name must not be null
-            //    .HasMaxLength(200);
-            //modelBuilder.Entity<Item>()
-            //    .Property(i => i.Description)
-            //    .IsRequired()
-            //    .HasMaxLength(1000);
-            //modelBuilder.Entity<Item>()
-            //    .Property(i => i.StartingPrice)
-            //    .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
-            //modelBuilder.Entity<Item>().Property(i => i.CategoryId).IsRequired();
-            //modelBuilder.Entity<Item>()
-            //      .HasOne(i => i.Category)
-            //      .WithMany()
-            //      .HasForeignKey(i => i.CategoryId)
-            //      .OnDelete(DeleteBehavior.Restrict);
-            //modelBuilder.Entity<Item>()
-            //    .Property(i => i.Quantity)
-            //    .IsRequired(); // Quantity must not be null
-            //modelBuilder.Entity<Item>()
-            //    .Property(i => i.Condition)
-            //    .IsRequired(); // Condition must not be null
+            // Item Configuration
+           
+            modelBuilder.Entity<Item>()
+                .Property(i => i.StartingPrice)
+                .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
+           
 
 
 

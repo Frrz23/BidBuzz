@@ -1,0 +1,41 @@
+﻿@model List<Models.Auction>
+@using Utility
+@{
+    ViewData["Title"] = "Cancelled Auctions";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped mt-3">
+    <thead>
+        <tr>
+            <th>Item Name</th>
+            <th>Highest Bid</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var auction in Model)
+        {
+            <tr>
+                <td>@auction.Item.Name</td>
+                <td>
+                    @{
+                        var highest = auction.Bids?.Any() == true
+                        ? auction.Bids.Max(b => b.Amount).ToString("C")
+                        : "-";
+                    }
+                    @highest
+                </td>
+                <td>
+                    <a asp-controller="Item" asp-action="Upsert" asp-route-id="@auction.ItemId" class="btn btn-sm btn-warning">
+                        Edit Item
+                    </a>
+                    <a asp-controller="Item" asp-action="Delete" asp-route-id="@auction.ItemId" class="btn btn-sm btn-danger">
+                        Delete Item
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

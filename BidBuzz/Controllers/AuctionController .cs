@@ -1,115 +1,141 @@
-﻿//using Microsoft.AspNetCore.Mvc;
-//using Models.Models;
-//using Models.Models.ViewModels;
-//using System.Threading.Tasks;
-//using DataAccess.Repository.IRepository;
-//using Utility;
+﻿using DataAccess.Repository.IRepository;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Models;
+using Utility;
 
-//namespace BidBuzz.Controllers
-//{
-//    public class AuctionController : Controller
-//    {
-//        private readonly IUnitOfWork _unitOfWork;
+namespace BidBuzz.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AuctionController : Controller
+    {
+        private readonly IAuctionRepository _auctionRepo;
+        private readonly IAuctionScheduleRepository _scheduleRepo;
 
-//        public AuctionController(IUnitOfWork unitOfWork)
-//        {
-//            _unitOfWork = unitOfWork;
-//        }
+        public AuctionController(IAuctionRepository auctionRepo, IAuctionScheduleRepository scheduleRepo)
+        {
+            _auctionRepo = auctionRepo;
+            _scheduleRepo = scheduleRepo;
+        }
 
-//        public async Task<IActionResult> Index()
-//        {
-//            var auctionVMs = await _unitOfWork.Auctions.GetAllForAuctionManagementAsync();
-//            return View(auctionVMs);
-//        }
+        // GET: Admin Auction Management Page (Index)
+        public async Task<IActionResult> Index(string status = "All")
+        {
+            ViewBag.SelectedStatus = status;
 
-//        public async Task<IActionResult> Update(int? id, int? itemId)
-//        {
-//            AuctionVM auctionVM = new AuctionVM();
+            var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
+            var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
 
-//            if (id != null && id > 0)
-//            {
-//                // Load existing auction using GetByIdAsync
-//                var auction = await _unitOfWork.Auctions.GetByIdAsync(id.Value, "Item");
-//                if (auction == null)
-//                {
-//                    return NotFound();
-//                }
-//                auctionVM.Auction = auction;
-//                auctionVM.Item = auction.Item;
-//            }
-//            else if (itemId != null && itemId > 0)
-//            {
-//                // Load item using GetByIdAsync
-//                var item = await _unitOfWork.Items.GetByIdAsync(itemId.Value);
-//                if (item == null)
-//                {
-//                    return NotFound();
-//                }
+            ViewBag.CurrentSchedule = currentSchedule;
+            ViewBag.NextSchedule = nextSchedule;
 
-//                auctionVM.Item = item;
-//                auctionVM.Auction = new Auction()
-//                {
-//                    ItemId = item.Id,
-//                    Status = AuctionStatus.PendingApproval, // Default status
-//                    StartTime = null,
-//                    EndTime = null
-//                };
-//            }
-//            else
-//            {
-//                return NotFound();
-//            }
+            List<Auction> auctions = status switch
+            {
+                "InAuction" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.InAuction),
+                "Completed" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Sold),
+                "Cancelled" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Cancelled),
+                "Approved" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Approved),
+                _ => (await _auctionRepo.GetAllAsync(includeProperties: "Item,Bids")).ToList()
+            };
 
-//            return View(auctionVM);
-//        }
+            return View(auctions);
+        }
+
+        // POST: Stop auction (Change status to Cancelled)
+        [HttpPost]
+        public async Task<IActionResult> StopAuction(int id)
+        {
+            await _auctionRepo.CancelAuctionAsync(id);
+            return RedirectToAction(nameof(Index)); // Redirect to the Index action after stopping the auction
+        }
+
+        // GET: View Cancelled Auctions
+        public async Task<IActionResult> Cancelled()
+        {
+            var cancelledAuctions = await _auctionRepo.GetCancelledAuctionsAsync();
+            return View(cancelledAuctions); // This view is for showing cancelled auctions
+        }
+
+        
+        public async Task<IActionResult> EditSchedule()
+        {
+            Console.WriteLine("🔥 EditSchedule GET triggered");
+
+            var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
+            if (nextSchedule == null)
+            {
+                TempData["Error"] = "No schedule found for next week.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(nextSchedule);
+        }
 
 
-//        // 3. Handle form submission to update or create a new auction
-//        [HttpPost]
-//        public async Task<IActionResult> Update(AuctionVM auctionVM)
-//        {
-//            if (ModelState.IsValid)
-//            {
-//                // Check if auction exists or if it's new
-//                if (auctionVM.Auction.Id == 0)
-//                {
-//                    // New auction, setting status to 'Approved' by default
-//                    auctionVM.Auction.Status = AuctionStatus.Approved;
-//                    await _unitOfWork.Auctions.AddAsync(auctionVM.Auction);
-//                }
-//                else
-//                {
-//                    // Existing auction, update the details
-//                    var existingAuction = await _unitOfWork.Auctions.GetByIdAsync(auctionVM.Auction.Id);
-//                    if (existingAuction != null)
-//                    {
-//                        existingAuction.StartTime = auctionVM.Auction.StartTime;
-//                        existingAuction.EndTime = auctionVM.Auction.EndTime;
-//                        existingAuction.Status = auctionVM.Auction.Status;
 
-//                        _unitOfWork.Auctions.Update(existingAuction);
-//                    }
-//                }
+        //POST: Update Next Week's Schedule
+        [HttpPost]
+        public async Task<IActionResult> EditSchedule(AuctionSchedule updatedSchedule)
+        {
+            if (ModelState.IsValid)
+            {
+                updatedSchedule.Week = "Next";
+                await _scheduleRepo.UpdateScheduleAsync(updatedSchedule);
+                TempData["Success"] = "Next week's auction schedule updated successfully.";
+                return RedirectToAction(nameof(Index)); // Redirect to the main page after updating
+            }
+            return View(updatedSchedule); // If model state is invalid, return the view with errors
+        }
 
-//                await _unitOfWork.CompleteAsync();
-//                return RedirectToAction(nameof(Index));
-//            }
-//            return View(auctionVM);
-//        }
+        //GET: Current Auction Schedule View
+        public async Task<IActionResult> CurrentSchedule()
+        {
+            var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
+            return View(currentSchedule); // View for showing the current auction schedule
+        }
 
-//        // 4. Stop an ongoing auction
-//        [HttpPost]
-//        public async Task<IActionResult> Stop(int id)
-//        {
-//            var auction = await _unitOfWork.Auctions.GetByIdAsync(id);
-//            if (auction != null && auction.Status == AuctionStatus.InAuction)
-//            {
-//                auction.Status = AuctionStatus.Sold;
-//                _unitOfWork.Auctions.Update(auction);
-//                await _unitOfWork.CompleteAsync();
-//            }
+        // GET: Update the Auction Schedule for Next Week (form view)
+        public async Task<IActionResult> UpdateScheduleForm()
+        {
+            // Fetch the current and next week's schedule from the repository
+            var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
+            var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
 
-//            return RedirectToAction(nameof(Index));
-//        }
-//    }
-//}
+            if (nextSchedule == null)
+            {
+                // If there is no next week's schedule, you may want to create one or redirect elsewhere
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Pass both schedules to the view to be displayed in the form
+            ViewBag.CurrentSchedule = currentSchedule;
+            ViewBag.NextSchedule = nextSchedule;
+
+            return View(nextSchedule); // Display the form to edit next week's schedule
+        }
+
+        // POST: Submit Updated Schedule for Next Week
+        [HttpPost]
+        public async Task<IActionResult> UpdateSchedule(AuctionSchedule updatedSchedule)
+        {
+            if (ModelState.IsValid)
+            {
+                // Ensure the update is only for the next week's schedule
+                updatedSchedule.Week = "Next";
+
+                // Update the schedule in the repository
+                await _scheduleRepo.UpdateScheduleAsync(updatedSchedule);
+
+                // Notify the user of success
+                TempData["Success"] = "Next week's auction schedule updated successfully.";
+
+                // Redirect to the main auction management page after updating
+                return RedirectToAction(nameof(Index));
+            }
+
+            // If the model state is invalid, re-display the form with errors
+            return View(updatedSchedule);
+        }
+
+    }
+}

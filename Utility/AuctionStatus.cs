@@ -7,7 +7,8 @@
         InAuction,//2
         Sold,//3
         NotApproved,//4
-        Unsold//5
+        Unsold,//5
+        Cancelled,
     }
 
 }

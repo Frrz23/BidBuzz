@@ -1,0 +1,23 @@
+﻿@model Models.AuctionSchedule
+@{
+    ViewData["Title"] = "Current Auction Schedule";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model != null)
+{
+    <dl class="row">
+        <dt class="col-sm-2">Start</dt>
+        <dd class="col-sm-10">@Model.StartDay at @Model.StartHour:00</dd>
+
+        <dt class="col-sm-2">End</dt>
+        <dd class="col-sm-10">@Model.EndDay at @Model.EndHour:00</dd>
+    </dl>
+}
+else
+{
+    <div class="alert alert-info">
+        No schedule has been set for the current week.
+    </div>
+}
