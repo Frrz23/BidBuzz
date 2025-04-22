@@ -17,6 +17,7 @@
 }
 
 
+
 @if (!ViewData.ModelState.IsValid)
 {
     <div class="alert alert-danger">
@@ -160,33 +161,36 @@
 
         if (file) {
             // Check file size (100KB maximum)
-            if (file.size > 100 * 1024) {
-                imageError.innerText = "Image size must be less than 100KB.";
-                e.target.value = "";
-                previewPhoto.src = "";
-                previewPhoto.style.display = "none";
-                document.getElementById('ImageUrl').value = "Error";
-                return;
-            }
+               // Check file size (1MB maximum)
+    if (file.size > 1 * 1024 * 1024) {  // 1MB = 1 * 1024 * 1024 bytes
+        imageError.innerText = "Image size must be less than 1MB.";
+        e.target.value = "";
+        previewPhoto.src = "";
+        previewPhoto.style.display = "none";
+        document.getElementById('ImageUrl').value = "Error";
+        return;
+    }
+
 
             const reader = new FileReader();
             reader.onload = function (event) {
                 const img = new Image();
-                img.onload = function () {
-                    // Check dimensions: must be exactly 800x800 pixels
-                    if (img.width !== 100 || img.height !== 100) {
-                        imageError.innerText = "Image dimensions must be exactly 800x800 pixels.";
-                        e.target.value = "";
-                        previewPhoto.src = "";
-                        previewPhoto.style.display = "none";
-                        document.getElementById('ImageUrl').value = "Error";
-                        return;
-                    }
-                    // If valid, set the preview and update hidden field to indicate a valid image
-                    previewPhoto.src = event.target.result;
-                    previewPhoto.style.display = "block";
-                    document.getElementById('ImageUrl').value = event.target.result;
-                };
+                   img.onload = function () {
+        // Check if dimensions are between 400x400 and 1200x1200
+        if (img.width < 400 || img.height < 400 || img.width > 1200 || img.height > 1200) {
+            imageError.innerText = "Image dimensions must be between 400x400 and 1200x1200 pixels.";
+            e.target.value = "";
+            previewPhoto.src = "";
+            previewPhoto.style.display = "none";
+            document.getElementById('ImageUrl').value = "Error";
+            return;
+        }
+        // If valid, set the preview and update hidden field to indicate a valid image
+        previewPhoto.src = event.target.result;
+        previewPhoto.style.display = "block";
+        document.getElementById('ImageUrl').value = event.target.result;
+    };
+
                 img.src = event.target.result;
             };
             reader.readAsDataURL(file);

@@ -1,4 +1,5 @@
-﻿using DataAccess.Repository.IRepository;
+﻿using BidBuzz.Services;
+using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -66,14 +67,7 @@ namespace BidBuzz.Controllers
                 "InAuction" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.InAuction),
                 "Sold" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Sold),
                 "NotApproved" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Cancelled),
-                "Unsold" => itemVMs.Where(vm => {
-                    var last = vm.Item.Auctions
-                                  .OrderByDescending(a => a.StartTime)
-                                  .FirstOrDefault();
-                    return last != null
-                        && last.Status == AuctionStatus.Sold
-                        && !last.Bids.Any();
-                }),
+                "Unsold" => itemVMs.Where(vm =>vm.AuctionStatus == AuctionStatus.Unsold),
                 _ => itemVMs  // "All"
             };
 
@@ -102,9 +96,9 @@ namespace BidBuzz.Controllers
                     .GetAllAsync(a => a.ItemId == item.Id
                                      && a.Status == AuctionStatus.Unsold);
 
-                int maxAttempts = 3;
-                int usedAttempts = unsoldAuctions.Count();
-                int remaining = Math.Max(0, maxAttempts - usedAttempts);
+                int usedAttempts = (await _unitOfWork.Auctions
+    .GetAllAsync(a => a.ItemId == item.Id && a.Status == AuctionStatus.Unsold))
+    .Count();
 
                 itemVM = new ItemVM
                 {
@@ -113,8 +107,9 @@ namespace BidBuzz.Controllers
                                         .GetFirstOrDefaultAsync(a => a.ItemId == item.Id))
                                         ?.Status
                                   ?? AuctionStatus.PendingApproval,
-                    RemainingRelistAttempts = remaining
+                    RemainingRelistAttempts = usedAttempts // ← just store attempts
                 };
+
             }
             else
             {
@@ -156,8 +151,19 @@ namespace BidBuzz.Controllers
                 var startDayOfWeek = (int)Enum.Parse<DayOfWeek>(schedule.StartDay);
                 var endDayOfWeek = (int)Enum.Parse<DayOfWeek>(schedule.EndDay);
 
-                var startTime = AuctionScheduleHelper.GetNextAuctionStart(startDayOfWeek, schedule.StartHour);
-                var endTime = AuctionScheduleHelper.GetNextAuctionEnd(endDayOfWeek, schedule.EndHour);
+                var startTime = new AuctionSchedulerService(null).GetNextUtcForLocal(
+     (DayOfWeek)startDayOfWeek,
+     schedule.StartHour,
+     DateTime.UtcNow,
+     forceNextWeek: true // 👈 This is the fix
+ );
+
+                var endTime = new AuctionSchedulerService(null).GetNextUtcForLocal(
+                    (DayOfWeek)endDayOfWeek,
+                    schedule.EndHour,
+                    DateTime.UtcNow,
+                    forceNextWeek: true
+                );
 
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
 

@@ -20,7 +20,7 @@ namespace BidBuzz.Services
         /// <summary>
         /// Calculates the next UTC DateTime corresponding to the given target day and local hour.
         /// </summary>
-        private DateTime GetNextUtcForLocal(
+        public DateTime GetNextUtcForLocal(
             DayOfWeek targetDay,
             int localHour,
             DateTime utcNow,
@@ -58,15 +58,17 @@ namespace BidBuzz.Services
             using var scope = _services.CreateScope();
             var schedRepo = scope.ServiceProvider.GetRequiredService<IAuctionScheduleRepository>();
             var sched = await schedRepo.GetScheduleAsync("Current");
+            if (sched == null) return;
+
             var nowUtc = DateTime.UtcNow;
 
+            // Compute the two target UTC times
             var startUtc = GetNextUtcForLocal(
                 Enum.Parse<DayOfWeek>(sched.StartDay),
                 sched.StartHour,
                 nowUtc,
                 forceNextWeek
             );
-
             var endUtc = GetNextUtcForLocal(
                 Enum.Parse<DayOfWeek>(sched.EndDay),
                 sched.EndHour,
@@ -74,30 +76,29 @@ namespace BidBuzz.Services
                 forceNextWeek
             );
 
+            // If we’re bootstrapping (forceNextWeek==false) but we’re already past this week’s end, bail out
+            if (!forceNextWeek && nowUtc > endUtc)
+                return;
+
             var monitor = JobStorage.Current.GetMonitoringApi();
             var scheduledJobs = monitor.ScheduledJobs(0, int.MaxValue);
 
-            // Look for jobs in a ±1 hour window instead of exact match
+            // === NEW: only check for any pending StartAuctionJob, ignore exact time ===
             bool startExists = scheduledJobs.Any(j =>
                 j.Value.Job.Method.Name == nameof(StartAuctionJob) &&
-                Math.Abs((j.Value.EnqueueAt.ToUniversalTime() - startUtc).TotalMinutes) < 60);
+                j.Value.EnqueueAt > nowUtc);
 
             if (!startExists)
-            {
                 BackgroundJob.Schedule(() => StartAuctionJob(), startUtc);
-            }
 
+            // === NEW: only check for any pending EndAuctionJob ===
             bool endExists = scheduledJobs.Any(j =>
                 j.Value.Job.Method.Name == nameof(EndAuctionJob) &&
-                Math.Abs((j.Value.EnqueueAt.ToUniversalTime() - endUtc).TotalMinutes) < 60);
+                j.Value.EnqueueAt > nowUtc);
 
             if (!endExists)
-            {
                 BackgroundJob.Schedule(() => EndAuctionJob(), endUtc);
-            }
         }
-
-
 
         /// <summary>
         /// Fires at the scheduled start time to transition approved auctions to InAuction.
@@ -133,3 +134,4 @@ namespace BidBuzz.Services
 
     }
 }
+ 

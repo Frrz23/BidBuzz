@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using Models;
+using Utility;
 
 namespace BidBuzz.Areas.Identity.Pages.Account
 {
@@ -108,6 +109,17 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             public string? Role { get; set; }
             [ValidateNever]
             public IEnumerable<SelectListItem> RolesList { get; set; }
+            [Required(ErrorMessage = "Name is required.")]
+            public string Full_Name { get; set; }
+            [Required(ErrorMessage ="Age is Required")]
+            [Range(0, 120, ErrorMessage = "Age must be between 0 and 120.")]
+            public int Age { get; set; }
+            [Required(ErrorMessage = "Phone Number is required.")]
+            [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be exactly 10 digits.")]
+            public string? PhoneNumber { get; set; }
+            [Required(ErrorMessage = "Address is required.")]
+            [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters.")]
+            public string Address { get; set; }
         }
 
 
@@ -143,6 +155,10 @@ namespace BidBuzz.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+                user.Full_Name= Input.Full_Name;
+                user.Age = Input.Age;
+                user.PhoneNumber= Input.PhoneNumber;
+                user.Address = Input.Address;
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
@@ -175,7 +191,15 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                     }
                     else
                     {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        if (User.IsInRole(Roles.Admin))
+                        {
+                            TempData["success"] = "New User Created Successfully";
+                        }
+                        else
+                        {
+                            await _signInManager.SignInAsync(user, isPersistent: false);
+                            
+                        }
                         return LocalRedirect(returnUrl);
                     }
                 }

@@ -26,17 +26,17 @@ namespace DataAccess.Repository
         }
 
         // Already existing methods...
-        private DateTime GetDateTimeForDayAndHour(string dayOfWeek, int hour, DateTime reference)
-        {
-            // Get the DayOfWeek enum from string
-            var targetDay = Enum.Parse<DayOfWeek>(dayOfWeek);
+        //private DateTime GetDateTimeForDayAndHour(string dayOfWeek, int hour, DateTime reference)
+        //{
+        //    // Get the DayOfWeek enum from string
+        //    var targetDay = Enum.Parse<DayOfWeek>(dayOfWeek);
 
-            // Start from the beginning of this week (Sunday) and add days
-            int daysUntilTarget = ((int)targetDay - (int)reference.DayOfWeek + 7) % 7;
-            var targetDate = reference.Date.AddDays(daysUntilTarget).AddHours(hour);
+        //    // Start from the beginning of this week (Sunday) and add days
+        //    int daysUntilTarget = ((int)targetDay - (int)reference.DayOfWeek + 7) % 7;
+        //    var targetDate = reference.Date.AddDays(daysUntilTarget).AddHours(hour);
 
-            return targetDate;
-        }
+        //    return targetDate;
+        //}
 
 
         public async Task<List<Auction>> GetAuctionsByStatusAsync(AuctionStatus status)

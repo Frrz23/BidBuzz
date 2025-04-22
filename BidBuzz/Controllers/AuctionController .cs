@@ -32,7 +32,7 @@ namespace BidBuzz.Controllers
             List<Auction> auctions = status switch
             {
                 "InAuction" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.InAuction),
-                "Completed" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Sold),
+                "Sold" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Sold),
                 "Cancelled" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Cancelled),
                 "Approved" => await _auctionRepo.GetAuctionsByStatusAsync(AuctionStatus.Approved),
                 _ => (await _auctionRepo.GetAllAsync(includeProperties: "Item,Bids")).ToList()
@@ -94,25 +94,25 @@ namespace BidBuzz.Controllers
             return View(currentSchedule); // View for showing the current auction schedule
         }
 
-        // GET: Update the Auction Schedule for Next Week (form view)
-        public async Task<IActionResult> UpdateScheduleForm()
-        {
+        //// GET: Update the Auction Schedule for Next Week (form view)
+        //public async Task<IActionResult> UpdateScheduleForm()
+        //{
             
-            var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
-            var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
+        //    var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
+        //    var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
 
-            if (nextSchedule == null)
-            {
+        //    if (nextSchedule == null)
+        //    {
                 
-                return RedirectToAction(nameof(Index));
-            }
+        //        return RedirectToAction(nameof(Index));
+        //    }
 
-            // Pass both schedules to the view to be displayed in the form
-            ViewBag.CurrentSchedule = currentSchedule;
-            ViewBag.NextSchedule = nextSchedule;
+        //    // Pass both schedules to the view to be displayed in the form
+        //    ViewBag.CurrentSchedule = currentSchedule;
+        //    ViewBag.NextSchedule = nextSchedule;
 
-            return View(nextSchedule); // Display the form to edit next week's schedule
-        }
+        //    return View(nextSchedule); // Display the form to edit next week's schedule
+        //}
 
         // POST: Submit Updated Schedule for Next Week
         [HttpPost]

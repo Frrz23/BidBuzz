@@ -17,6 +17,7 @@ namespace Models
 
         [Required]
         [MaxLength(200)] // Name must not exceed 200 characters
+        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Name can only contain letters and spaces.")]
         public string Name { get; set; } = string.Empty;
 
         [Required]

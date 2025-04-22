@@ -80,13 +80,45 @@ app.UseHangfireDashboard();  // Enables the Hangfire dashboard
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
-    var auctionScheduleRepo = services.GetRequiredService<IAuctionScheduleRepository>();
-    await auctionScheduleRepo.SeedInitialScheduleAsync();
-
+    var schedRepo = services.GetRequiredService<IAuctionScheduleRepository>();
     var auctionScheduler = services.GetRequiredService<AuctionSchedulerService>();
-    await auctionScheduler.ScheduleNextCycleAsync();
+
+    await schedRepo.SeedInitialScheduleAsync();
+
+    // load the “Current” schedule
+    var sched = await schedRepo.GetScheduleAsync("Current");
+    if (sched != null)
+    {
+        var nowUtc = DateTime.UtcNow;
+        // compute this week’s end
+        var endUtc = auctionScheduler
+            .GetNextUtcForLocal(
+               Enum.Parse<DayOfWeek>(sched.EndDay),
+               sched.EndHour,
+               nowUtc,
+               forceNextWeek: false
+            );
+
+        if (nowUtc <= endUtc)
+        {
+            var monitor = JobStorage.Current.GetMonitoringApi();
+            var scheduledJobs = monitor.ScheduledJobs(0, 100);
+
+            bool alreadyScheduled = scheduledJobs.Any(j =>
+                j.Value.Job.Type == typeof(AuctionSchedulerService) &&
+                (j.Value.Job.Method.Name == nameof(AuctionSchedulerService.StartAuctionJob) ||
+                 j.Value.Job.Method.Name == nameof(AuctionSchedulerService.EndAuctionJob)));
+
+            if (!alreadyScheduled)
+            {
+                await auctionScheduler.ScheduleNextCycleAsync(forceNextWeek: false);
+            }
+        }
+
+        // otherwise, let the EndAuctionJob path (below) rotate+schedule the next week
+    }
 }
+
 
 app.UseAuthentication();
 app.UseAuthorization();
