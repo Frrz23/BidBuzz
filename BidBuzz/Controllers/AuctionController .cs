@@ -97,13 +97,13 @@ namespace BidBuzz.Controllers
         // GET: Update the Auction Schedule for Next Week (form view)
         public async Task<IActionResult> UpdateScheduleForm()
         {
-            // Fetch the current and next week's schedule from the repository
+            
             var currentSchedule = await _scheduleRepo.GetScheduleAsync("Current");
             var nextSchedule = await _scheduleRepo.GetScheduleAsync("Next");
 
             if (nextSchedule == null)
             {
-                // If there is no next week's schedule, you may want to create one or redirect elsewhere
+                
                 return RedirectToAction(nameof(Index));
             }
 

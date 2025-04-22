@@ -18,6 +18,8 @@ namespace Models
         public AuctionStatus Status { get; set; }
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
+        public int? RelistCount { get; set; } // Defaults to 0
+
 
     }
 

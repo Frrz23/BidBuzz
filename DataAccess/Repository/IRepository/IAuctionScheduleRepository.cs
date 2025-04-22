@@ -16,6 +16,7 @@ namespace DataAccess.Repository.IRepository
         Task AddScheduleAsync(AuctionSchedule schedule);
         Task UpdateScheduleAsync(AuctionSchedule schedule);
         Task SeedInitialScheduleAsync();
+        Task RotateAndPrepareNextScheduleAsync();
     }
 
 

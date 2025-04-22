@@ -61,6 +61,34 @@ namespace DataAccess.Repository
                 await _context.SaveChangesAsync();
             }
         }
+        public async Task RotateAndPrepareNextScheduleAsync()
+        {
+            var current = await _context.AuctionSchedules.FirstOrDefaultAsync(s => s.Week == "Current");
+            var next = await _context.AuctionSchedules.FirstOrDefaultAsync(s => s.Week == "Next");
+
+            if (current != null)
+                _context.AuctionSchedules.Remove(current); // Optional: Or mark as "Old"
+
+            if (next != null)
+            {
+                next.Week = "Current";
+
+                // Create a clone of this as the new "Next"
+                var clonedNext = new AuctionSchedule
+                {
+                    Week = "Next",
+                    StartDay = next.StartDay,
+                    StartHour = next.StartHour,
+                    EndDay = next.EndDay,
+                    EndHour = next.EndHour
+                };
+
+                await _context.AuctionSchedules.AddAsync(clonedNext);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
     }
 
 }

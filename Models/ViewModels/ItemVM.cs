@@ -25,6 +25,7 @@ namespace Models.ViewModels
 
         [ValidateNever]
         public BidVM? BidModel { get; set; } = new();
+        public int RemainingRelistAttempts { get; set; }
 
 
 

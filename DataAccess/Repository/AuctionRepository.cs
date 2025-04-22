@@ -17,13 +17,27 @@ namespace DataAccess.Repository
     public class AuctionRepository : Repository<Auction>, IAuctionRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly IAuctionScheduleRepository _scheduleRepo;
 
         public AuctionRepository(ApplicationDbContext context) : base(context)
         {
             _context = context;
+            _scheduleRepo = new AuctionScheduleRepository(context);
         }
 
         // Already existing methods...
+        private DateTime GetDateTimeForDayAndHour(string dayOfWeek, int hour, DateTime reference)
+        {
+            // Get the DayOfWeek enum from string
+            var targetDay = Enum.Parse<DayOfWeek>(dayOfWeek);
+
+            // Start from the beginning of this week (Sunday) and add days
+            int daysUntilTarget = ((int)targetDay - (int)reference.DayOfWeek + 7) % 7;
+            var targetDate = reference.Date.AddDays(daysUntilTarget).AddHours(hour);
+
+            return targetDate;
+        }
+
 
         public async Task<List<Auction>> GetAuctionsByStatusAsync(AuctionStatus status)
         {
@@ -71,57 +85,82 @@ namespace DataAccess.Repository
 
         public async Task StartAuctionAsync()
         {
-            var now = DateTime.UtcNow;
-            var auctionsToStart = await _context.Auctions
-                .Where(a => a.Status == AuctionStatus.Approved && a.StartTime <= now)
+            // grab all auctions that an Admin previously Approved
+            var toStart = await _context.Auctions
+                .Where(a => a.Status == AuctionStatus.Approved)
                 .ToListAsync();
 
-            foreach (var auction in auctionsToStart)
+            if (!toStart.Any()) return;
+
+            var nowUtc = DateTime.UtcNow;
+            foreach (var auction in toStart)
             {
+                auction.StartTime = nowUtc;
                 auction.Status = AuctionStatus.InAuction;
             }
 
             await _context.SaveChangesAsync();
         }
 
+
+
+
         public async Task EndAuctionAsync()
         {
-            var now = DateTime.UtcNow;
             var auctionsToEnd = await _context.Auctions
-                .Where(a => a.Status == AuctionStatus.InAuction && a.EndTime <= now)
+                .Include(a => a.Bids)
+                .Where(a => a.Status == AuctionStatus.InAuction)
                 .ToListAsync();
+
+            var now = DateTime.UtcNow;
 
             foreach (var auction in auctionsToEnd)
             {
-                auction.Status = AuctionStatus.Sold;
+                auction.EndTime = now;
+                auction.Status = auction.Bids.Any()
+                    ? AuctionStatus.Sold
+                    : AuctionStatus.Unsold;
             }
 
             await _context.SaveChangesAsync();
         }
+
 
         public async Task RelistUnsoldItemsAsync()
         {
-            var now = DateTime.UtcNow;
+            // 1) Pull down *all* auctions that ended unsold
             var unsoldAuctions = await _context.Auctions
-                .Include(a => a.Bids)
-                .Where(a => a.Status == AuctionStatus.Sold && !a.Bids.Any())
+                .Where(a => a.Status == AuctionStatus.Unsold)
                 .ToListAsync();
 
-            foreach (var auction in unsoldAuctions)
-            {
-                var newAuction = new Auction
-                {
-                    ItemId = auction.ItemId,
-                    Status = AuctionStatus.Approved,
-                    StartTime = now.AddDays(5), // Optional: use schedule here
-                    EndTime = now.AddDays(6)
-                };
+            // 2) Group them by ItemId so we can count per item in one pass
+            var groups = unsoldAuctions
+                .GroupBy(a => a.ItemId);
 
-                await _context.Auctions.AddAsync(newAuction);
+            foreach (var group in groups)
+            {
+                var itemId = group.Key;
+                var unsoldCount = group.Count();
+
+                if (unsoldCount >= 3)
+                {
+                    // 3a) Too many unsold attempts: delete *all* these auctions
+                    _context.Auctions.RemoveRange(group);
+                }
+                else
+                {
+                    // 3b) Otherwise, increment relist count and reset status for future relisting
+                    foreach (var auction in group)
+                    {
+                        auction.RelistCount = (auction.RelistCount ?? 0) + 1;
+                        auction.Status = AuctionStatus.Unsold;
+                    }
+                }
             }
 
             await _context.SaveChangesAsync();
         }
+
     }
 
 }

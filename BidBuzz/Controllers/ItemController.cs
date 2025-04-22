@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Models;
 
 using Models.ViewModels;
+using System.Linq;
 using System.Security.Claims;
 using Utility;
 
@@ -16,43 +17,68 @@ namespace BidBuzz.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly AuctionScheduleConfig _auctionSchedule;
+        private readonly IAuctionScheduleRepository _scheduleRepo;   // ← new
+        private readonly IAuctionRepository _auctionRepo;
 
 
-        public ItemController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IOptions<AuctionScheduleConfig> auctionScheduleConfig)//ioptions is used to get data from appsetiings without it we cant get it 
+
+        public ItemController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, IAuctionScheduleRepository schedlueRepo, IAuctionRepository auctionRepo)//ioptions is used to get data from appsetiings without it we cant get it 
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
-            _auctionSchedule = auctionScheduleConfig.Value; // Extract value from IOptions
+            _scheduleRepo = schedlueRepo; // Extract value from IOptions
+            _auctionRepo = auctionRepo;
         }
 
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status = "All")
         {
+            ViewBag.SelectedStatus = status;
+
             var claimsIdentity = (ClaimsIdentity)User.Identity;
             var userId = claimsIdentity.FindFirst(ClaimTypes.NameIdentifier).Value;
             var isAdmin = User.IsInRole(Roles.Admin);
 
-            IEnumerable<Item> items;
-            if (isAdmin)
-            {
-                // Admin sees all items
-                items = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions,User");
-            }
-            else
-            {
-                // Regular users only see their own items
-                items = await _unitOfWork.Items.GetAllAsync(u => u.UserId == userId, includeProperties: "Category,Auctions,User");
-            }
-            var itemVMs = items.Select(i => new ItemVM
-            {
+            var items = isAdmin
+         ? await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,User,Auctions.Bids")
+         : await _unitOfWork.Items.GetAllAsync(i => i.UserId == userId,
+                                               includeProperties: "Category,User,Auctions.Bids");
 
-                Item = i,
-                AuctionStatus = i.Auctions.OrderByDescending(a => a.StartTime).FirstOrDefault()?.Status,
-                UserName = i.User?.UserName
-            }).ToList();
+            // 2) Project into your VM
+            var itemVMs = items.Select(i => {
+                var latestAuct = i.Auctions
+                                   .OrderByDescending(a => a.StartTime)
+                                   .FirstOrDefault();
+                return new ItemVM
+                {
+                    Item = i,
+                    AuctionStatus = latestAuct?.Status ?? AuctionStatus.PendingApproval,
+                    UserName = i.User?.UserName
+                };
+            })
+            .ToList();
 
-            return View(itemVMs);
+            // 3) Filter
+            IEnumerable<ItemVM> filtered = status switch
+            {
+                "PendingApproval" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.PendingApproval),
+                "Approved" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Approved),
+                "InAuction" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.InAuction),
+                "Sold" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Sold),
+                "NotApproved" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Cancelled),
+                "Unsold" => itemVMs.Where(vm => {
+                    var last = vm.Item.Auctions
+                                  .OrderByDescending(a => a.StartTime)
+                                  .FirstOrDefault();
+                    return last != null
+                        && last.Status == AuctionStatus.Sold
+                        && !last.Bids.Any();
+                }),
+                _ => itemVMs  // "All"
+            };
+
+
+            return View(filtered);
         }
 
 
@@ -62,35 +88,44 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> Upsert(int? id)
         {
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
-            if (categories == null || !categories.Any())
-            {
-                ModelState.AddModelError("", "No categories available. Please  a category first.");
-                return View(new ItemVM { Item = new Item() }); // Ensure Item is not null
-            }
-            ViewBag.Categories = categories;
+            // … your existing category-check logic …
 
-            ItemVM itemVM = new ItemVM { Item = new Item() };
+            var itemVM = new ItemVM { Item = new Item() };
 
             if (id != null && id != 0)
             {
                 var item = await _unitOfWork.Items.GetByIdAsync(id.Value);
-                if (item == null)
-                {
-                    return NotFound();
-                }
+                if (item == null) return NotFound();
 
-                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
+                // Get how many times this item ended unsold
+                var unsoldAuctions = await _unitOfWork.Auctions
+                    .GetAllAsync(a => a.ItemId == item.Id
+                                     && a.Status == AuctionStatus.Unsold);
+
+                int maxAttempts = 3;
+                int usedAttempts = unsoldAuctions.Count();
+                int remaining = Math.Max(0, maxAttempts - usedAttempts);
 
                 itemVM = new ItemVM
                 {
-                    
                     Item = item,
-                    AuctionStatus = auction?.Status ?? AuctionStatus.PendingApproval
+                    AuctionStatus = (await _unitOfWork.Auctions
+                                        .GetFirstOrDefaultAsync(a => a.ItemId == item.Id))
+                                        ?.Status
+                                  ?? AuctionStatus.PendingApproval,
+                    RemainingRelistAttempts = remaining
                 };
             }
+            else
+            {
+                // New item: all 3 attempts still available
+                itemVM.RemainingRelistAttempts = 3;
+            }
 
+            ViewBag.Categories = categories;
             return View(itemVM);
         }
+
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -115,9 +150,14 @@ namespace BidBuzz.Controllers
                         itemVM.Item.UserId = existingItem.UserId; // Keep original UserId
                     }
                 }
+                var schedule = await _scheduleRepo.GetScheduleAsync("Current")
+                                                 ?? throw new InvalidOperationException("No current auction schedule found");
 
-                var startTime = AuctionScheduleHelper.GetNextAuctionStart(_auctionSchedule.StartDay, _auctionSchedule.StartHour);
-                var endTime = AuctionScheduleHelper.GetNextAuctionEnd(_auctionSchedule.EndDay, _auctionSchedule.EndHour);
+                var startDayOfWeek = (int)Enum.Parse<DayOfWeek>(schedule.StartDay);
+                var endDayOfWeek = (int)Enum.Parse<DayOfWeek>(schedule.EndDay);
+
+                var startTime = AuctionScheduleHelper.GetNextAuctionStart(startDayOfWeek, schedule.StartHour);
+                var endTime = AuctionScheduleHelper.GetNextAuctionEnd(endDayOfWeek, schedule.EndHour);
 
                 string wwwRootPath = _webHostEnvironment.WebRootPath;
 

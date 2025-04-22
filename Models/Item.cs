@@ -50,6 +50,8 @@ namespace Models
         public ApplicationUser? User { get; set; } // Navigation property
 
 
+
+
     }
 
 

@@ -6,6 +6,16 @@
 }
 
 <h2>@ViewData["Title"]</h2>
+@if (Model.Item.Id != 0)
+{
+    <div class="form-group">
+        <label>Remaining relist attempts:</label>
+        <span class="font-weight-bold">
+            @Model.RemainingRelistAttempts
+        </span>
+    </div>
+}
+
 
 @if (!ViewData.ModelState.IsValid)
 {
