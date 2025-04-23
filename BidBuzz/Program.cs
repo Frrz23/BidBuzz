@@ -14,6 +14,7 @@ using System.IO;
 using System.Text;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddAuthorization(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("dbcs")));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
 
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -122,6 +124,7 @@ using (var scope = app.Services.CreateScope())
 
 app.UseAuthentication();
 app.UseAuthorization();
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 // Use UTC for time-based operations (this isn't strictly necessary unless needed elsewhere)
 app.Use(async (context, next) =>

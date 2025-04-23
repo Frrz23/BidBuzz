@@ -1,0 +1,37 @@
+﻿@model IEnumerable<Auction>
+@using System.Security.Claims
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Item</th>
+            <th>Highest Bid</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var auction in Model)
+        {
+            var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isWinner = highestBid?.UserId == currentUserId;
+
+            <tr>
+                <td>@auction.Item.Name</td>
+                <td>@highestBid?.Amount.ToString("C")</td>
+                <td>@auction.PaymentStatus</td>
+                <td>
+                    @if (isWinner && auction.PaymentStatus == PaymentStatus.Unpaid)
+                    {
+                        <a href="@Url.Action("Pay", "Payment", new { auctionId = auction.Id })" class="btn btn-sm btn-success">Pay</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">View Only</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,58 @@
+﻿@model UserProfileVm
+
+<div class="container mt-4">
+    <h2>My Profile</h2>
+    <form asp-action="MyProfile" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-floating mb-3">
+            <input asp-for="Full_Name" class="form-control" />
+            <label asp-for="Full_Name"></label>
+            <span asp-validation-for="Full_Name" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Age" class="form-control" />
+            <label asp-for="Age"></label>
+            <span asp-validation-for="Age" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="PhoneNumber" class="form-control" maxlength="10" pattern="\d{10}" title="Enter 10 digit phone number" />
+            <label asp-for="PhoneNumber" class="ms-2 text-muted">Phone Number</label>
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Address" class="form-control" />
+            <label asp-for="Address"></label>
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+
+
+        <h4>Change Password (optional)</h4>
+        <div class="form-floating mb-3">
+            <input asp-for="CurrentPassword" class="form-control" />
+            <label asp-for="CurrentPassword"></label>
+            <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="NewPassword" class="form-control" />
+            <label asp-for="NewPassword"></label>
+            <span asp-validation-for="NewPassword" class="text-danger"></span>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="ConfirmPassword" class="form-control" />
+            <label asp-for="ConfirmPassword"></label>
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

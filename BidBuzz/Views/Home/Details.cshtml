@@ -30,23 +30,30 @@
             </p>
 
             <!-- Bid Form -->
-            @if (Model.AuctionStatus == AuctionStatus.InAuction)  
+            @if (UserAccessHelper.IsBuyer(Context, User) || UserAccessHelper.IsAdmin(User))
             {
-                <form method="post" action="@Url.Action("PlaceBid", "Bid")">
-                    <div class="form-group">
-                        <label for="bidAmount">Place Your Bid:</label>
-                        <input asp-for="BidModel.BidAmount" class="form-control" placeholder="Enter your bid" min="@Model.Item.StartingPrice" />
-                        <span asp-validation-for="BidModel.BidAmount" class="text-danger"></span>
+                @if (Model.AuctionStatus == AuctionStatus.InAuction)  
+                {
+                    <form method="post" action="@Url.Action("PlaceBid", "Bid")">
+                        <div class="form-group">
+                            <label for="bidAmount">Place Your Bid:</label>
+                            <input asp-for="BidModel.BidAmount" class="form-control" placeholder="Enter your bid" min="@Model.Item.StartingPrice" />
+                            <span asp-validation-for="BidModel.BidAmount" class="text-danger"></span>
 
 
-                    </div>
-                    <input type="hidden" name="ItemId" value="@Model.Item.Id" />
-                    <button type="submit" class="btn btn-primary">Place Bid</button>
-                </form>
+                        </div>
+                        <input type="hidden" name="ItemId" value="@Model.Item.Id" />
+                        <button type="submit" class="btn btn-primary">Place Bid</button>
+                    </form>
+                }
+                else
+                {
+                    <p><strong>The auction is not currently active. Please check back later!</strong></p>
+                }
             }
             else
             {
-                <p><strong>The auction is not currently active. Please check back later!</strong></p>
+                <p><strong>Only Buyer Can Bid here</strong></p>
             }
             <!-- Tab Buttons -->
             <div class="btn-group mt-4" role="group">

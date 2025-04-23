@@ -6,9 +6,13 @@ using Models;
 using Models.ViewModels;
 using Utility;
 using Microsoft.AspNetCore.Authorization;
+using Stripe.Checkout;
+using Microsoft.Extensions.Options;
+using Azure;
 
 namespace BidBuzz.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -118,3 +122,35 @@ namespace BidBuzz.Controllers
         }
     }
 }
+
+//var domain = Request.Scheme + "://" + Request.Host.Value + "/";
+//var options = new SessionCreateOptions
+//{
+//    SuccessUrl = domain + $"home/OrderConfirmation",
+//    CancelUrl = domain + "home/index",
+//    LineItems = new List<SessionLineItemOptions>(),
+//    Mode = "payment",
+//};
+//foreach (var item in ShoppingCartVM.ShoppingCartList)
+//{
+//    var sessionLineItem = new SessionLineItemOptions
+//    {
+//        PriceData = new SessionLineItemPriceDataOptions
+//        {
+//            UnitAmount = (long)(item.Price * 100), // $20.50 => 2050
+//            Currency = "usd",
+//            ProductData = new SessionLineItemPriceDataProductDataOptions
+//            {
+//                Name = item.Product.Title
+//            }
+//        },
+//        Quantity = item.Count
+//    };
+//    options.LineItems.Add(sessionLineItem);
+//}
+//var service = new SessionService();
+//Session session = service.Create(options);
+//_unitOfWork.OrderHeader.UpdateStripePaymentID(ShoppingCartVM.OrderHeader.Id, session.Id, session.PaymentIntentId);
+//_unitOfWork.Save();
+//Response.Headers.Add("Location", session.Url);
+//return new StatusCodeResult(303);

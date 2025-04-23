@@ -27,21 +27,23 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
+
+                       
+                        @if (UserAccessHelper.IsSeller(Context, User) || UserAccessHelper.IsAdmin(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
+                            </li>
+                        }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Category" asp-action="Index">Category</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Payment" asp-action="Index">Payment</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
-                        </li>
+
+                        
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="BidHistory">Bid History</a>
                         </li>
-                        @if (User.IsInRole(Roles.Admin))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Auction" asp-action="Index">Auctions</a>
-                            </li>
-                        }
+                       
                         @if (User.IsInRole(Roles.Admin))
                         {
                             <li class="nav-item dropdown">
@@ -49,6 +51,9 @@
                                     Content Managment
                                 </a>
                                 <ul class="dropdown-menu">
+                                    <li class="nav-item">
+                                        <a class="dropdown-item" asp-area="" asp-controller="Category" asp-action="Index">Category</a>
+                                    </li>
                                     <li class="nav-item">
                                         <a class="dropdown-item" asp-area="" asp-controller="Auction" asp-action="Index">Auctions</a>
                                     </li>
@@ -71,6 +76,13 @@
                 </div>
             </div>
         </nav>
+        @if (TempData["success"] != null)
+        {
+            <script>
+                toastr.success('@TempData["success"]');
+            </script>
+        }
+
     </header>
     <div class="container">
         <main role="main" class="pb-3">

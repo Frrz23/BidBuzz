@@ -12,7 +12,7 @@ using Utility;
 namespace Quillia.Areas.Admin.Controllers
 {
 
-    [Authorize(Roles = Roles.Admin)]
+    
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -28,6 +28,77 @@ namespace Quillia.Areas.Admin.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public async Task<IActionResult> MyProfile()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null) return NotFound();
+
+            var vm = new UserProfileVm
+            {
+                Id = user.Id,
+                Full_Name = user.Full_Name,
+                Age = user.Age,
+                PhoneNumber = user.PhoneNumber,
+                Address = user.Address
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MyProfile(UserProfileVm vm)
+        {
+            if (!ModelState.IsValid)
+                return View(vm);
+
+            // Check for duplicate Full_Name
+            var duplicateName = await _db.ApplicationUsers
+                .AnyAsync(u => u.Full_Name == vm.Full_Name && u.Id != vm.Id);
+
+            if (duplicateName)
+            {
+                ModelState.AddModelError("Full_Name", "This name is already taken by another user.");
+                return View(vm);
+            }
+
+            var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == vm.Id);
+            if (user == null) return NotFound();
+
+            user.Full_Name = vm.Full_Name;
+            user.Age = vm.Age;
+            user.PhoneNumber = vm.PhoneNumber;
+            user.Address = vm.Address;
+
+            await _db.SaveChangesAsync();
+
+            if (!string.IsNullOrWhiteSpace(vm.CurrentPassword))
+            {
+                // note: IdentityUser here is the same record but must be fetched via UserManager
+                var identityUser = await _userManager.FindByIdAsync(vm.Id);
+                var pwdResult = await _userManager.ChangePasswordAsync(
+                    identityUser,
+                    vm.CurrentPassword,
+                    vm.NewPassword
+                );
+
+                if (!pwdResult.Succeeded)
+                {
+                    // add password errors to ModelState and show the form again
+                    foreach (var err in pwdResult.Errors)
+                        ModelState.AddModelError(string.Empty, err.Description);
+                    return View(vm);
+                }
+            }
+
+            TempData["success"] = "Profile updated successfully!";
+            return RedirectToAction("Index", "Home");
+        }
+
+
 
         public IActionResult RoleManagment(string userId)
         {
