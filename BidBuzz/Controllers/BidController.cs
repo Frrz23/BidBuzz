@@ -29,7 +29,7 @@ namespace BidBuzz.Controllers
             var bidAmount = model.BidModel.BidAmount;
 
 
-            var item = await _unitOfWork.Items.GetByIdAsync(itemId,includeProperties:"Category");
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId, includeProperties: "Category");
             if (item == null)
             {
                 TempData["Error"] = "Item not found!";
@@ -94,6 +94,7 @@ namespace BidBuzz.Controllers
             var top5 = bids.Take(5).ToList();
             return PartialView("_Top5Partial", top5);
         }
+
 
 
     }

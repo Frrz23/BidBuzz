@@ -15,6 +15,7 @@ using System.Text;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
 using Stripe;
+using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -60,7 +61,6 @@ builder.Services.AddScoped<IBidRepository, BidRepository>(); // Add this line
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("dbcs")));
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<AuctionSchedulerService>();
-
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IAuctionScheduleRepository, AuctionScheduleRepository>();
 

@@ -20,8 +20,9 @@ namespace DataAccess.Data
         public DbSet<Bid> Bids { get; set; }
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
-
         public DbSet<AuctionSchedule>AuctionSchedules { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

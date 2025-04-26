@@ -14,6 +14,7 @@ public class UnitOfWork : IUnitOfWork
     public IAuctionRepository Auctions { get; private set; }
     public IAuctionScheduleRepository AuctionSchedules { get; private set; }
 
+
     public UnitOfWork(ApplicationDbContext context, ILogger<AuctionRepository> logger)
     {
         _context = context;
@@ -24,6 +25,8 @@ public class UnitOfWork : IUnitOfWork
         Bids = new BidRepository(_context);
         Auctions = new AuctionRepository(_context); // Pass logger
         AuctionSchedules=new AuctionScheduleRepository(_context);
+
+
     }
 
     public async Task<int> CompleteAsync()
