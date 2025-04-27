@@ -21,6 +21,8 @@ namespace DataAccess.Data
         public DbSet<Auction> Auctions { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<AuctionSchedule>AuctionSchedules { get; set; }
+        public DbSet<AutoBid> AutoBids { get; set; }
+
 
 
 
@@ -48,7 +50,17 @@ namespace DataAccess.Data
              }
 );
 
+            modelBuilder.Entity<AutoBid>()
+    .HasOne(a => a.Auction)
+    .WithMany()
+    .HasForeignKey(a => a.AuctionId)
+    .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<AutoBid>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
 
 

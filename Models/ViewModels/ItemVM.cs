@@ -1,35 +1,23 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Models.ViewModels;
+using Models;
 using Utility;
 
-namespace Models.ViewModels
+public class ItemVM
 {
-    public class ItemVM
-    {
-        public Item Item { get; set; }  // Full Item model
-        public int ItemId { get; set; } // <-- Add this
+    // Existing properties
+    public Item Item { get; set; }
+    public int ItemId { get; set; }
+    public AuctionStatus? AuctionStatus { get; set; }
+    public string? UserName { get; set; }
+    public List<Bid> BidList { get; set; } = new();
+    public decimal HighestAmount { get; set; }
 
-        public AuctionStatus? AuctionStatus { get; set; }
-        public string? UserName { get; set; }
+    [ValidateNever]
+    public BidVM? BidModel { get; set; } = new();
+    public int RemainingRelistAttempts { get; set; }
 
-        public List<Bid> BidList { get; set; } = new(); // Include user navigation
-
-        public decimal HighestAmount { get; set; }  // used only for input binding and validation
-
-        [ValidateNever]
-        public BidVM? BidModel { get; set; } = new();
-        public int RemainingRelistAttempts { get; set; }
-
-
-
-
-
-    }
+    // Add auto bid properties
+    public bool HasActiveAutoBid { get; set; }
+    public decimal? MaxAutoBidAmount { get; set; }
 }

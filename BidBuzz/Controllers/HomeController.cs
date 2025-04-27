@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Stripe.Checkout;
 using Microsoft.Extensions.Options;
 using Azure;
+using System.Security.Claims;
 
 namespace BidBuzz.Controllers
 {
@@ -32,37 +33,53 @@ namespace BidBuzz.Controllers
 
         [Authorize]
         public async Task<IActionResult> Details(int itemId)
+        {
+            var item = await _unitOfWork.Items.GetByIdAsync(itemId, includeProperties: "Category");
+            if (item == null)
             {
-                var item = await _unitOfWork.Items.GetByIdAsync(itemId,includeProperties:"Category");
-                if (item == null)
-                {
-                    return NotFound();
-                }
+                return NotFound();
+            }
 
-                // Get the auction status for this item
-                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
-                var auctionStatus = auction?.Status;
+            // Get the auction status for this item
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+            var auctionStatus = auction?.Status;
 
-
-            var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
+            var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction?.Id ?? 0);
 
             // Get the highest bid (first in the list)
             var highestBid = bids.FirstOrDefault();
 
+            // Get the current user's auto bid if any
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            AutoBid userAutoBid = null;
+
+            if (auction != null && userId != null)
+            {
+                userAutoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
+            }
+
             // Create the ItemVM and return to the view
             var itemVM = new ItemVM
-                {
-                    Item = item,
-                    ItemId = item.Id, // <-- Add this line
-
-                    AuctionStatus = auctionStatus,
-                    BidList = bids,  // All bids sorted by amount
-                    HighestAmount = highestBid?.Amount ?? 0  // Highest bid amount
+            {
+                Item = item,
+                ItemId = item.Id,
+                AuctionStatus = auctionStatus,
+                BidList = bids,  // All bids sorted by amount
+                HighestAmount = highestBid?.Amount ?? 0,  // Highest bid amount
+                HasActiveAutoBid = userAutoBid != null,
+                MaxAutoBidAmount = userAutoBid?.MaxAmount
             };
 
+            // Include auto bid info in the BidModel
+            itemVM.BidModel = new BidVM
+            {
+                ItemId = item.Id,
+                Item = item,
+                CurrentAutoBid = userAutoBid
+            };
 
-                return View(itemVM);
-            }
+            return View(itemVM);
+        }
 
 
         // GET: /Home/BidHistory

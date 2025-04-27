@@ -2,6 +2,7 @@
 using DataAccess.Repository.IRepository;
 using DataAccess.Repository;
 using Microsoft.Extensions.Logging;
+using Models;
 
 public class UnitOfWork : IUnitOfWork
 {
@@ -13,6 +14,8 @@ public class UnitOfWork : IUnitOfWork
     public IBidRepository Bids { get; private set; }
     public IAuctionRepository Auctions { get; private set; }
     public IAuctionScheduleRepository AuctionSchedules { get; private set; }
+    public IAutoBidRepository AutoBids { get; private set; }
+
 
 
     public UnitOfWork(ApplicationDbContext context, ILogger<AuctionRepository> logger)
@@ -25,6 +28,7 @@ public class UnitOfWork : IUnitOfWork
         Bids = new BidRepository(_context);
         Auctions = new AuctionRepository(_context); // Pass logger
         AuctionSchedules=new AuctionScheduleRepository(_context);
+        AutoBids = new AutoBidRepository(_context, Bids); // <--- Fix this line
 
 
     }

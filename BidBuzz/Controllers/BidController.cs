@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BidBuzz.Hubs;
 using DataAccess.Repository.IRepository;
@@ -7,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Models;
 using Models.ViewModels;
-using NuGet.Packaging.Signing;
 using Utility;
 
 namespace BidBuzz.Controllers
@@ -16,10 +16,12 @@ namespace BidBuzz.Controllers
     public class BidController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IHubContext<BidHub> _hubContext;
 
-        public BidController(IUnitOfWork unitOfWork)
+        public BidController(IUnitOfWork unitOfWork, IHubContext<BidHub> hubContext)
         {
             _unitOfWork = unitOfWork;
+            _hubContext = hubContext;
         }
 
         [HttpPost]
@@ -27,7 +29,8 @@ namespace BidBuzz.Controllers
         {
             var itemId = model.ItemId;
             var bidAmount = model.BidModel.BidAmount;
-
+            var enableAutoBid = model.BidModel.EnableAutoBid;
+            var maxBidAmount = model.BidModel.MaxBidAmount;
 
             var item = await _unitOfWork.Items.GetByIdAsync(itemId, includeProperties: "Category");
             if (item == null)
@@ -37,36 +40,68 @@ namespace BidBuzz.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
             var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+
             if (auction == null || auction.Status != AuctionStatus.InAuction)
             {
                 TempData["Error"] = "The auction is not active.";
                 ModelState.AddModelError(string.Empty, "The auction is not active.");
-
-                var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction?.Id ?? 0); // safe fallback
+                var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction?.Id ?? 0);
                 model.Item = item;
                 model.AuctionStatus = auction?.Status ?? AuctionStatus.PendingApproval;
-                model.BidList = bids; // ✅ ADD THIS
-
+                model.BidList = bids;
                 return View("~/Views/Home/Details.cshtml", model);
             }
 
             var bidsActive = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
-            var highestBidAmount = bidsActive.FirstOrDefault()?.Amount ?? item.StartingPrice;
+            var highestBid = bidsActive.FirstOrDefault();
+            var highestBidAmount = highestBid?.Amount ?? item.StartingPrice;
+
             if (bidAmount <= highestBidAmount)
             {
                 TempData["Error"] = "Your bid must be higher than the current highest bid.";
                 ModelState.AddModelError("BidModel.BidAmount", "Your bid must be higher than the current highest bid.");
-
                 model.Item = item;
                 model.AuctionStatus = auction.Status;
-                model.BidList = bidsActive; // ✅ ADD THIS
-
+                model.BidList = bidsActive;
                 return View("~/Views/Home/Details.cshtml", model);
             }
 
-            var bid = new Bid
+            // Check for auto bidding
+            if (enableAutoBid && maxBidAmount > 0)
+            {
+                if (maxBidAmount < bidAmount)
+                {
+                    TempData["Error"] = "Your maximum bid amount must be at least equal to your initial bid.";
+                    ModelState.AddModelError("BidModel.MaxBidAmount", "Max bid must be at least equal to your initial bid.");
+                    model.Item = item;
+                    model.AuctionStatus = auction.Status;
+                    model.BidList = bidsActive;
+                    return View("~/Views/Home/Details.cshtml", model);
+                }
+
+                // Create or update auto bid
+                var existingAutoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
+
+                if (existingAutoBid != null)
+                {
+                    existingAutoBid.MaxAmount = maxBidAmount;
+                }
+                else
+                {
+                    var autoBid = new AutoBid
+                    {
+                        AuctionId = auction.Id,
+                        UserId = userId,
+                        MaxAmount = maxBidAmount,
+                        IsActive = true
+                    };
+                    await _unitOfWork.AutoBids.AddAsync(autoBid);
+                }
+            }
+
+            // Create the bid
+            var newBid = new Bid
             {
                 Amount = bidAmount,
                 AuctionId = auction.Id,
@@ -74,13 +109,20 @@ namespace BidBuzz.Controllers
                 BidTime = DateTime.Now
             };
 
-            await _unitOfWork.Bids.AddAsync(bid);
+            await _unitOfWork.Bids.AddAsync(newBid);
             await _unitOfWork.CompleteAsync();
-            var hubContext = HttpContext.RequestServices.GetRequiredService<IHubContext<BidHub>>();
-            await hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
+
+            // Process auto bids if there are any
+            if (highestBid != null && highestBid.UserId != userId)
+            {
+                await _unitOfWork.AutoBids.ProcessAutoBidsAsync(auction.Id, bidAmount, userId);
+                await _unitOfWork.CompleteAsync();
+            }
+
+            // Notify clients
+            await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
 
             TempData["Success"] = "Your bid has been placed successfully!";
-
             return RedirectToAction("Details", "Home", new { itemId });
         }
 
@@ -92,10 +134,8 @@ namespace BidBuzz.Controllers
 
             var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
             var top5 = bids.Take(5).ToList();
+
             return PartialView("_Top5Partial", top5);
         }
-
-
-
     }
 }

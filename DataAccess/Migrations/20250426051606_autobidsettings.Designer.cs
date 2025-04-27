@@ -4,6 +4,7 @@ using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250426051606_autobidsettings")]
+    partial class autobidsettings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -313,7 +316,7 @@ namespace DataAccess.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Models.AutoBid", b =>
+            modelBuilder.Entity("Models.AutoBidSetting", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -330,20 +333,18 @@ namespace DataAccess.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("MaxAmount")
+                    b.Property<decimal>("MaxBid")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AuctionId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("AutoBids");
+                    b.ToTable("AutoBidSettings");
                 });
 
             modelBuilder.Entity("Models.Bid", b =>
@@ -523,7 +524,7 @@ namespace DataAccess.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("Models.AutoBid", b =>
+            modelBuilder.Entity("Models.AutoBidSetting", b =>
                 {
                     b.HasOne("Models.Auction", "Auction")
                         .WithMany()
@@ -531,15 +532,7 @@ namespace DataAccess.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Auction");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Models.Bid", b =>
