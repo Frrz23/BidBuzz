@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using DataAccess.Data;
 using DataAccess.Repository.IRepository;
 using Microsoft.EntityFrameworkCore;
 using Models;
+using Utility;
 
 namespace DataAccess.Repository
 {
@@ -39,66 +41,78 @@ namespace DataAccess.Repository
 
         public async Task ProcessAutoBidsAsync(int auctionId, decimal currentHighestBid, string currentHighestBidUserId)
         {
-            // Get all active auto bids for this auction except the one from the current highest bidder
+            var increment = BiddingDefaults.Increment;
+
+            // 1) find challengers who can actually outbid
             var autoBids = await _context.AutoBids
-                .Where(ab => ab.AuctionId == auctionId &&
-                           ab.IsActive &&
-                           ab.UserId != currentHighestBidUserId &&
-                           ab.MaxAmount > currentHighestBid)
+                .Where(ab => ab.AuctionId == auctionId
+                          && ab.IsActive
+                          && ab.UserId != currentHighestBidUserId
+                          && ab.MaxAmount >= currentHighestBid + increment)
                 .OrderByDescending(ab => ab.MaxAmount)
                 .ThenBy(ab => ab.CreatedAt)
                 .ToListAsync();
 
-            if (!autoBids.Any())
-                return;
-
-            // Get the auto bid with the highest max amount
-            var highestAutoBid = autoBids.First();
-
-            // If the current highest bidder also has an auto bid, we need to handle the outbidding logic
-            var currentBidderAutoBid = await GetActiveAutoBidForUserAsync(auctionId, currentHighestBidUserId);
-
-            decimal bidAmount;
-
-            if (currentBidderAutoBid != null)
+            if (autoBids.Any())
             {
-                // If current highest bidder has auto bid, we need to see who has the higher max amount
-                if (highestAutoBid.MaxAmount > currentBidderAutoBid.MaxAmount)
-                {
-                    // The challenger will bid just above the current bidder's max
-                    bidAmount = Math.Min(highestAutoBid.MaxAmount, currentBidderAutoBid.MaxAmount + 1);
+                var highestAutoBid = autoBids.First();
+                var currentBidderAutoBid = await GetActiveAutoBidForUserAsync(auctionId, currentHighestBidUserId);
 
-                    // Deactivate the current bidder's auto bid as it's been outbid
-                    await DeactivateAsync(currentBidderAutoBid.Id);
+                decimal bidAmount;
+                if (currentBidderAutoBid != null)
+                {
+                    if (highestAutoBid.MaxAmount > currentBidderAutoBid.MaxAmount)
+                    {
+                        // bid one increment above *their* cap, capped at your own cap
+                        bidAmount = Math.Min(
+                            highestAutoBid.MaxAmount,
+                            currentBidderAutoBid.MaxAmount + increment
+                        );
+
+                        await DeactivateAsync(currentBidderAutoBid.Id);
+                    }
+                    else
+                    {
+                        // current stays highest—nothing to do
+                        bidAmount = 0;
+                    }
                 }
                 else
                 {
-                    // Current bidder has higher max, so we'll just bump up to outbid the challenger
-                    return; // No need to do anything as current bidder remains highest
+                    // outbid the top, capped at your max
+                    bidAmount = Math.Min(
+                        highestAutoBid.MaxAmount,
+                        currentHighestBid + increment
+                    );
+                }
+
+                if (bidAmount > 0)
+                {
+                    await _bidRepository.AddAsync(new Bid
+                    {
+                        AuctionId = auctionId,
+                        UserId = highestAutoBid.UserId,
+                        Amount = bidAmount,
+                        BidTime = DateTime.UtcNow
+                    });
+
+                    if (bidAmount >= highestAutoBid.MaxAmount)
+                        await DeactivateAsync(highestAutoBid.Id);
                 }
             }
-            else
-            {
-                // Normal case: just outbid the current highest by the minimum increment
-                bidAmount = currentHighestBid + 1; // Minimum increment of $1
-            }
 
-            // Create and place the new bid
-            var bid = new Bid
-            {
-                AuctionId = auctionId,
-                UserId = highestAutoBid.UserId,
-                Amount = bidAmount,
-                BidTime = DateTime.UtcNow
-            };
+            // 2) deactivate *all* exhausted auto bids so none linger forever
+            var exhausted = await _context.AutoBids
+                .Where(ab => ab.AuctionId == auctionId
+                          && ab.IsActive
+                          && ab.MaxAmount <= currentHighestBid)
+                .ToListAsync();
+            foreach (var ab in exhausted)
+                ab.IsActive = false;
 
-            await _bidRepository.AddAsync(bid);
-
-            // If the bid amount reaches max amount, deactivate the auto bid
-            if (bidAmount >= highestAutoBid.MaxAmount)
-            {
-                await DeactivateAsync(highestAutoBid.Id);
-            }
+            if (exhausted.Any())
+                await _context.SaveChangesAsync();
         }
+
     }
 }

@@ -30,6 +30,7 @@ namespace BidBuzz.Controllers
         {
             var itemId = model.ItemId;
             var maxBidAmount = model.MaxBidAmount;
+            var increment = BiddingDefaults.Increment;
 
             if (maxBidAmount <= 0)
             {
@@ -85,8 +86,7 @@ namespace BidBuzz.Controllers
             if (highestBid == null || highestBid.UserId != userId)
             {
                 // Place initial bid with minimum increment
-                var initialBidAmount = currentHighestAmount + 1; // Minimum increment of $1
-
+                var initialBidAmount = Math.Min(maxBidAmount, currentHighestAmount + increment);
                 var newBid = new Bid
                 {
                     Amount = initialBidAmount,

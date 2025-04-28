@@ -19,7 +19,7 @@
             @if (Model.HighestAmount > 0)
             {
                 <p><strong>Current Highest Bid:</strong> @Model.HighestAmount.ToString("C")</p>
-                <p><strong>Minimum Next Bid:</strong> @((Model.HighestAmount + 1).ToString("C"))</p>
+                <p><strong>Minimum Next Bid:</strong> @((Model.HighestAmount + BiddingDefaults.Increment).ToString("C"))</p>
             }
             else
             {
@@ -68,7 +68,7 @@
                                     <label for="maxBidAmount"><strong>Maximum Bid Amount:</strong></label>
                                     <input type="number" name="MaxBidAmount" id="maxBidAmount" class="form-control"
                                            placeholder="Enter your maximum bid amount"
-                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + 1 : Model.Item.StartingPrice)"
+                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
                                            step="0.01"
                                            value="@(Model.MaxAutoBidAmount ?? 0)"
                                            required />
@@ -88,7 +88,7 @@
                                     <label for="bidAmount"><strong>Place Your Bid:</strong></label>
                                     <input asp-for="BidModel.BidAmount" class="form-control"
                                            placeholder="Enter your bid"
-                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + 1 : Model.Item.StartingPrice)"
+                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
                                            step="0.01" />
                                     <span asp-validation-for="BidModel.BidAmount" class="text-danger"></span>
                                     <small class="form-text text-muted">
