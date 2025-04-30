@@ -30,6 +30,7 @@ namespace BidBuzz.Controllers
             IEnumerable<Item> item = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
             return View(item);
         }
+        
 
         [Authorize]
         public async Task<IActionResult> Details(int itemId)
@@ -132,6 +133,11 @@ namespace BidBuzz.Controllers
         {
             return View();
         }
+        public IActionResult AboutUs()
+        {
+            return View();
+        }
+
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -128,36 +128,37 @@ namespace DataAccess.Repository
 
         public async Task RelistUnsoldItemsAsync()
         {
-            // 1) Pull down *all* auctions that ended unsold
+            // 1) Pull down *all* auctions that ended unsold - include the Item relationship
             var unsoldAuctions = await _context.Auctions
+                .Include(a => a.Item)
                 .Where(a => a.Status == AuctionStatus.Unsold)
                 .ToListAsync();
 
-            // 2) Group them by ItemId so we can count per item in one pass
-            var groups = unsoldAuctions
-                .GroupBy(a => a.ItemId);
-
-            foreach (var group in groups)
+            foreach (var auction in unsoldAuctions)
             {
-                var itemId = group.Key;
-                var unsoldCount = group.Count();
+                // Increment the relist count for tracking purposes
+                auction.RelistCount = (auction.RelistCount ?? 0) + 1;
 
-                if (unsoldCount >= 3)
+                // Check if this auction has been relisted too many times
+                if (auction.RelistCount >= 3)
                 {
-                    // 3a) Too many unsold attempts: delete *all* these auctions
-                    _context.Auctions.RemoveRange(group);
+                    // Remove the associated item first (if it exists)
+                    if (auction.Item != null)
+                    {
+                        _context.Items.Remove(auction.Item);
+                    }
+
+                    // Remove the auction that has been relisted 3 or more times
+                    _context.Auctions.Remove(auction);
                 }
                 else
                 {
-                    // 3b) Otherwise, increment relist count and reset status for future relisting
-                    foreach (var auction in group)
-                    {
-                        auction.RelistCount = (auction.RelistCount ?? 0) + 1;
-                        auction.Status = AuctionStatus.Unsold;
-                    }
+                    // Reset to Unsold so it can be processed again in the next cycle
+                    auction.Status = AuctionStatus.Unsold;
                 }
             }
 
+            // Save changes to the database
             await _context.SaveChangesAsync();
         }
 

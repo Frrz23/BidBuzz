@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - BidBuzz</title>
+    <title>@ViewData["Title"] - BidBuzz | Premium Auction Platform</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BidBuzz.styles.css" asp-append-version="true" />
@@ -11,90 +11,141 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="//cdn.datatables.net/1.13.3/css/jquery.dataTables.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light border-bottom box-shadow mb-4">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">BidBuzz</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <i class="fas fa-gavel me-2"></i>BidBuzz
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                aria-expanded="false" aria-label="Toggle navigation">
+                        aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="bi bi-house-door me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="AboutUs">
+                                <i class="fa fa-users me-1" ></i>About Us
+                            </a>
                         </li>
 
-                       
+
                         @if (UserAccessHelper.IsSeller(Context, User) || UserAccessHelper.IsAdmin(User))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Item" asp-action="Index">Item</a>
+                                <a class="nav-link" asp-area="" asp-controller="Item" asp-action="Index">
+                                    <i class="bi bi-box me-1"></i>My Items
+                                </a>
                             </li>
                         }
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Payment" asp-action="Index">Payment</a>
+                            <a class="nav-link" asp-area="" asp-controller="Payment" asp-action="Index">
+                                <i class="bi bi-credit-card me-1"></i>Payments
+                            </a>
                         </li>
 
-                        
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="BidHistory">Bid History</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="BidHistory">
+                                <i class="bi bi-clock-history me-1"></i>Bid History
+                            </a>
                         </li>
-                       
+
                         @if (User.IsInRole(Roles.Admin))
                         {
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Content Managment
+                                    <i class="bi bi-gear me-1"></i>Administration
                                 </a>
                                 <ul class="dropdown-menu">
                                     <li class="nav-item">
-                                        <a class="dropdown-item" asp-area="" asp-controller="Category" asp-action="Index">Category</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Category" asp-action="Index">
+                                            <i class="bi bi-tags me-2"></i>Categories
+                                        </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="dropdown-item" asp-area="" asp-controller="Auction" asp-action="Index">Auctions</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Auction" asp-action="Index">
+                                            <i class="bi bi-megaphone me-2"></i>Auctions
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li class="nav-item">
+                                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">
+                                            <i class="bi bi-person-plus me-2"></i>Create User
+                                        </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register">Create User</a>
+                                        <a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Index">
+                                            <i class="bi bi-people me-2"></i>Manage Users
+                                        </a>
                                     </li>
-                                    <li class="nav-item">
-                                        <a class="dropdown-item" asp-area="" asp-controller="User" asp-action="Index">Manage User</a>
-                                    </li>
-
-                                   
-
                                 </ul>
-
                             </li>
                         }
-
-                    </ul> 
+                    </ul>
                     <partial name="_LoginPartial" />
                 </div>
             </div>
         </nav>
-        @if (TempData["success"] != null)
-        {
-            <script>
-                toastr.success('@TempData["success"]');
-            </script>
-        }
-
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - BidBuzz - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        <!-- Footer -->
+    <footer class="modern-footer">
+        <div class="footer-container">
+            <div class="footer-section brand">
+                <h2><i class="fas fa-gavel"></i> BidBuzz</h2>
+                <p>Your trusted platform for premium online auctions. <br>Bid smart, win big!</p>
+            </div>
+            <div class="footer-section links">
+                <h4>Explore</h4>
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a asp-controller="Item" asp-action="Index"><i class="fas fa-tags"></i> Products</a></li>
+                    <li><a asp-controller="Home" asp-action="AboutUs"><i class="fa fa-users"></i> About US</a></li>
+                </ul>
+            </div>
+            <div class="footer-section support">
+                <h4>Support</h4>
+                <ul>
+                    <li><a asp-controller="Home" asp-action="Privacy"><i class="fas fa-question-circle"></i> Poicies</a></li>
+                    <li><a href="#"><i class="fas fa-envelope"></i> Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section social">
+                <h4>Follow Us</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 <strong>BidBuzz</strong>. All rights reserved.
         </div>
     </footer>
+
+
+        <!-- Footer -->
+ 
+    <!-- End of .container -->
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
@@ -106,11 +157,15 @@
     <script src="//cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 
-    @section Scripts {
-        <partial name="_ValidationScriptsPartial" />
-    }
-
     <script>
+        // Initialize toastr notifications
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+
         $(function () {
         @if (TempData["Success"] != null)
         {
@@ -125,9 +180,16 @@
                         toastr.error('@TempData["Error"]');
             </text>
         }
+
+            // Initialize any datatables
+            $('.table').DataTable();
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').fadeOut('slow');
+            }, 5000);
         });
     </script>
-
 
 </body>
 </html>
