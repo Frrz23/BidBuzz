@@ -27,10 +27,18 @@ namespace BidBuzz.Controllers
 
         public async Task<IActionResult> Index()
         {
-            IEnumerable<Item> item = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
-            return View(item);
+            // 1) Pull only those Items where any of its Auctions is Approved or InAuction
+            var items = await _unitOfWork.Items.GetAllAsync(
+                filter: item => item.Auctions.Any(a =>
+                    a.Status == AuctionStatus.Approved
+                 || a.Status == AuctionStatus.InAuction),
+                includeProperties: "Category,Auctions"
+            );
+
+
+            return View(items);
         }
-        
+
 
         [Authorize]
         public async Task<IActionResult> Details(int itemId)
@@ -137,7 +145,10 @@ namespace BidBuzz.Controllers
         {
             return View();
         }
-
+        public IActionResult Contact()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

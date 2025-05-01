@@ -1,42 +1,152 @@
 ﻿@model IEnumerable<Item>
+@{
+    var liveAuctions = Model.Where(item => item.Auctions.Any(a => a.Status == AuctionStatus.InAuction));
+    var upcomingAuctions = Model.Where(item => item.Auctions.Any(a => a.Status == AuctionStatus.Approved));
+}
 
-<div class="pt-3">
-    <h3>
-        <i class="bi bi-star"></i> Items
-    </h3>
-    <div class="row pb-3">
-        @foreach (var item in Model)
+<div class="container py-5">
+    <!-- Live Auctions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold display-6 text-primary">
+                <i class="bi bi-broadcast me-2"></i>Live Auctions
+            </h2>
+            <hr class="text-primary opacity-75">
+        </div>
+    </div>
+    <div class="row g-4 mb-5">
+        @if (liveAuctions.Any())
         {
-            <div class="col-lg-4 col-sm-6">
-                <div class="row p-2">
-                    <div class="col-12 p-1">
-                        <div class="card border-0 p-3 shadow border-top border-5 rounded">
-                            <img src="@item.ImageUrl" class="card-img-top item-image" />
-                            <div class="card-body pb-0 ">
-                                <div class="pl-1">
-                                    <p class="card-title h3 text-dark opacity-75 text-uppercase text-center">@item.Name</p>
-                                    <p class="card-title text-warning h4 text-center">by <b>@item.Condition</b></p>
-                                </div>
-                                <div class="pl-1 h5">
-                                    <p class="text-dark text-opacity-75 text-center mb-0">
-                                        Bidding Price:
-                                        <span class="text-decoration-line-through">
-                                            @* रु *@ $ @item.StartingPrice.ToString("N")
-                                        </span>
-                                    </p>
-                                </div>
+            @foreach (var item in liveAuctions)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="card h-100 shadow-sm hover-scale border-primary">
+                        <div class="position-relative">
+                            <img src="@item.ImageUrl" class="card-img-top rounded-top" alt="@item.Name">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-warning text-dark">@item.Condition</span>
                             </div>
-                            <div>
-                                <a asp-action="Details"
-                                   asp-route-itemId="@item.Id"
-                                   class="btn btn-info bg-gradient border-0 form-control ">
-                                    Details
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-circle-fill text-danger me-1 animate-pulse"></i>Live Now
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-dark fw-bold text-center mb-1">@item.Name</h5>
+                            <div class="mt-auto pt-3">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <p class="text-muted small mb-0 me-2">Current Bid:</p>
+                                    <p class="text-primary fw-bold mb-0">$@item.StartingPrice.ToString("N")</p>
+                                </div>
+                                <a asp-action="Details" asp-route-itemId="@item.Id"
+                                   class="btn btn-primary w-100 stretched-link">
+                                    <i class="bi bi-gavel me-1"></i> Bid Now
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle-fill me-2"></i> No live auctions at the moment. Check back soon!
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Upcoming Auctions Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold display-6 text-primary">
+                <i class="bi bi-calendar-event me-2"></i>Upcoming Auctions
+            </h2>
+            <hr class="text-primary opacity-75">
+        </div>
+    </div>
+    <div class="row g-4">
+        @if (upcomingAuctions.Any())
+        {
+            @foreach (var item in upcomingAuctions)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6">
+                    <div class="card h-100 shadow-sm hover-scale">
+                        <div class="position-relative">
+                            <img src="@item.ImageUrl" class="card-img-top rounded-top" alt="@item.Name">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-warning text-dark">@item.Condition</span>
+                            </div>
+                            <div class="position-absolute top-0 start-0 m-2">
+                                <span class="badge bg-success">
+                                    <i class="bi bi-calendar-check me-1"></i>Coming Soon
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-dark fw-bold text-center mb-1">@item.Name</h5>
+                            <div class="mt-auto pt-3">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <p class="text-muted small mb-0 me-2">Starting Bid:</p>
+                                    <p class="text-primary fw-bold mb-0">$@item.StartingPrice.ToString("N")</p>
+                                </div>
+                                <a asp-action="Details" asp-route-itemId="@item.Id"
+                                   class="btn btn-outline-primary w-100 stretched-link">
+                                    <i class="bi bi-eye me-1"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle-fill me-2"></i> No upcoming auctions scheduled at this time.
+                </div>
             </div>
         }
     </div>
 </div>
+
+<style>
+    .hover-scale {
+        transition: transform 0.3s ease;
+    }
+
+        .hover-scale:hover {
+            transform: translateY(-5px);
+        }
+
+    .card-img-top {
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .animate-pulse {
+        animation: pulse 1.5s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.3;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    .border-primary {
+        border-width: 2px;
+    }
+</style>

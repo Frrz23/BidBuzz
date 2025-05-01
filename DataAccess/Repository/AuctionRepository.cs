@@ -120,6 +120,8 @@ namespace DataAccess.Repository
                 auction.Status = auction.Bids.Any()
                     ? AuctionStatus.Sold
                     : AuctionStatus.Unsold;
+                Console.WriteLine($"Auction {auction.Id} ended as {auction.Status}");
+
             }
 
             await _context.SaveChangesAsync();
@@ -142,6 +144,8 @@ namespace DataAccess.Repository
                 // Check if this auction has been relisted too many times
                 if (auction.RelistCount >= 3)
                 {
+                    Console.WriteLine($"Removing Auction {auction.Id} and Item {auction.Item?.Id} at RelistCount {auction.RelistCount}");
+
                     // Remove the associated item first (if it exists)
                     if (auction.Item != null)
                     {
