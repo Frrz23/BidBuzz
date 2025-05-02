@@ -54,7 +54,7 @@ namespace BidBuzz.Controllers
                 {
                     Item = i,
                     AuctionStatus = latestAuct?.Status ?? AuctionStatus.PendingApproval,
-                    UserName = i.User?.UserName
+                    UserName = i.User?.Full_Name
                 };
             })
             .ToList();
@@ -126,11 +126,26 @@ namespace BidBuzz.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upsert(ItemVM itemVM, IFormFile? file)
         {
-          
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 1) Check for duplicate name for this user
+            var duplicate = await _unitOfWork.Items
+                .GetFirstOrDefaultAsync(i =>
+                    i.UserId == userId
+                    && i.Name.Trim().ToLower() == itemVM.Item.Name.Trim().ToLower()
+                    && i.Id != itemVM.Item.Id      // allow updating the same record
+                );
+
+            if (duplicate != null)
+            {
+                ModelState.AddModelError(nameof(itemVM.Item.Name),
+                    "You already have an item with this name. Please choose a different name.");
+            }
+
 
             if (ModelState.IsValid)
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+
                 if (itemVM.Item.Id == 0)
                 {
                     // Only set UserId when creating a new item

@@ -1,61 +1,66 @@
 ﻿@page
 @model LoginModel
-
 @{
     ViewData["Title"] = "Log in";
 }
 
-<h1>@ViewData["Title"]</h1>
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form id="account" method="post">
-                <h2>Use a local account to log in.</h2>
-                <label class="switch">
-                    <input type="checkbox" id="toggleSwitch">
-                    <span class="slider round"></span>
-                </label>
-                <span id="toggleLabel">Buyer</span>
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h2 class="fs-3 fw-bold mb-0">Welcome Back</h2>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-light">
+                    <form id="account" method="post">
+                        <div class="text-center mb-4">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <span id="toggleLabel" class="me-3 fw-bold fs-5">Buyer</span>
+                                <label class="switch mx-2" style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                                    <input type="checkbox" id="toggleSwitch" style="opacity: 0; width: 0; height: 0;">
+                                    <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;"></span>
+                                </label>
+                                <span class="ms-2 fw-bold fs-5">Seller</span>
+                                <!-- Hidden input to store the user role -->
+                                <input type="hidden" id="userType" name="userType" value="Buyer">
+                            </div>
+                        </div>
 
-                <!-- Hidden input to store the user role -->
-                <input type="hidden" id="userType" name="userType" value="Buyer">
+                        <div asp-validation-summary="ModelOnly" class="text-danger alert alert-danger p-2" role="alert"></div>
 
-                <hr />
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Input.Email" class="form-label">Email</label>
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Email" class="form-control border-secondary" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                            <label asp-for="Input.Email">Email</label>
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.Password" class="form-control border-secondary" autocomplete="current-password" aria-required="true" placeholder="password" />
+                            <label asp-for="Input.Password">Password</label>
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" asp-for="Input.RememberMe" id="rememberMe" />
+                            <label class="form-check-label" for="rememberMe">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <div class="d-grid gap-2 mb-4">
+                            <button id="login-submit" type="submit" class="btn btn-success btn-lg py-3">Sign In</button>
+                        </div>
+
+                        <div class="text-center">
+                            <p class="mb-0">
+                                Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="text-success fw-bold">Register now</a>
+                            </p>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Input.Password" class="form-label">Password</label>
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="Input.RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="Input.RememberMe" />
-                        @Html.DisplayNameFor(m => m.Input.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </form>
-        </section>
+            </div>
+        </div>
     </div>
-
 </div>
 
 @section Scripts {
@@ -67,5 +72,26 @@
             document.getElementById("userType").value = role; // Set hidden input value
         });
     </script>
+    <style>
+        /* Custom toggle switch styling */
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
 
+        input:checked + .slider {
+            background-color: #28a745;
+        }
+
+            input:checked + .slider:before {
+                transform: translateX(26px);
+            }
+    </style>
 }

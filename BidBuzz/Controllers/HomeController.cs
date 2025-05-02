@@ -60,6 +60,8 @@ namespace BidBuzz.Controllers
 
             // Get the current user's auto bid if any
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            bool isOwner = (userId != null && item.UserId == userId);
+
             AutoBid userAutoBid = null;
 
             if (auction != null && userId != null)
@@ -76,7 +78,8 @@ namespace BidBuzz.Controllers
                 BidList = bids,  // All bids sorted by amount
                 HighestAmount = highestBid?.Amount ?? 0,  // Highest bid amount
                 HasActiveAutoBid = userAutoBid != null,
-                MaxAutoBidAmount = userAutoBid?.MaxAmount
+                MaxAutoBidAmount = userAutoBid?.MaxAmount,
+                IsOwner = isOwner
             };
 
             // Include auto bid info in the BidModel

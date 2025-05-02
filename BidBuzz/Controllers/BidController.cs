@@ -40,6 +40,12 @@ namespace BidBuzz.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (item.UserId == userId)
+            {
+                TempData["Error"] = "You cannot bid on your own item.";
+                return RedirectToAction("Details", new { itemId = model.ItemId });
+            }
+
             var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
 
             if (auction == null || auction.Status != AuctionStatus.InAuction)
@@ -137,5 +143,36 @@ namespace BidBuzz.Controllers
 
             return PartialView("_Top5Partial", top5);
         }
+        // inside BidController, alongside your other actions:
+
+        [HttpGet]
+        public async Task<IActionResult> GetHighest(int itemId)
+        {
+            // 1) Find the auction for this item
+            var auction = await _unitOfWork.Auctions
+                .GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+
+            if (auction == null)
+                return NotFound();
+
+            // 2) Pull all bids for that auction, ordered descending so the first is highest
+            var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
+            var highest = bids.FirstOrDefault()?.Amount
+                          ?? (await _unitOfWork.Items.GetByIdAsync(itemId)).StartingPrice;
+
+            // 3) Compute the next minimum
+            var nextMin = highest + BiddingDefaults.Increment;
+
+            // 4) Return both as formatted strings
+            return Json(new
+            {
+                highestFormatted = highest > 0
+                    ? highest.ToString("C")
+                    : "No bids yet",
+                nextMinFormatted = nextMin.ToString("C")
+            });
+        }
+
+
     }
 }

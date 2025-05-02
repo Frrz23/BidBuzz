@@ -19,9 +19,9 @@ using Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Logging.ClearProviders(); // Clear default providers
+builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Information); // Or LogLevel.Debug for more details
+builder.Logging.SetMinimumLevel(LogLevel.Information); 
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

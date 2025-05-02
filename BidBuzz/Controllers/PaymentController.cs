@@ -22,14 +22,16 @@ namespace BidBuzz.Controllers
         // GET: Payment
         public async Task<IActionResult> Index()
         {
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole(Roles.Admin); // Replace with your admin role key
 
             var auctions = await _unitOfWork.Auctions.GetAllAsync(includeProperties: "Item,Bids");
 
             // Filter auctions visible to this user
-            var visibleAuctions = auctions.Where(a =>
+            var visibleAuctions = auctions.Where(a => 
             {
+                if (a.Status != AuctionStatus.Sold) return false;
                 var highestBid = a.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
                 return highestBid?.UserId == userId // won the auction
                        || a.Item.UserId == userId  // seller

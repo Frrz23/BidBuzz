@@ -3,70 +3,125 @@
     ViewData["Title"] = "Bid History Details";
 }
 
-<h2>Bid History - @Model.Item.Name</h2>
+<div class="card shadow-sm border-0 rounded-lg mb-4">
+    <div class="card-header bg-primary text-white">
+        <h2 class="h4 mb-0">Bid History - @Model.Item.Name</h2>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h5 class="text-muted mb-3">Item Details</h5>
+                <dl class="row">
+                    <dt class="col-sm-3">Description:</dt>
+                    <dd class="col-sm-9">@Model.Item.Description</dd>
 
-<p><strong>Description:</strong> @Model.Item.Description</p>
-<p><strong>Category:</strong> @Model.Item.Category?.Name</p>
-<p><strong>Condition:</strong> @Model.Item.Condition</p>
-<p><strong>Status:</strong> @Model.AuctionStatus</p>
+                    <dt class="col-sm-3">Category:</dt>
+                    <dd class="col-sm-9">@Model.Item.Category?.Name</dd>
 
-@if (Model.AuctionStatus == AuctionStatus.InAuction)
-{
-    <h4>Live Top 5 Bids (Real-time)</h4>
-    <div id="top5-bids-container"></div>
+                    <dt class="col-sm-3">Condition:</dt>
+                    <dd class="col-sm-9">@Model.Item.Condition</dd>
+                </dl>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 bg-light rounded text-center">
+                    <span class="d-block mb-2">Status</span>
+                    @if (Model.AuctionStatus == AuctionStatus.InAuction)
+                    {
+                        <span class="badge bg-success fs-6 p-2">Active Auction</span>
+                    }
+                    else if (Model.AuctionStatus == AuctionStatus.Sold)
+                    {
+                        <span class="badge bg-secondary fs-6 p-2">Auction Ended</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning fs-6 p-2">@Model.AuctionStatus</span>
+                    }
+                </div>
+            </div>
+        </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
-    <script>
-        const itemId = @Model.Item.Id;
+        @if (Model.AuctionStatus == AuctionStatus.InAuction)
+        {
+            <div class="card border-success mb-3">
+                <div class="card-header bg-success text-white">
+                    <h4 class="h5 mb-0">Live Top 5 Bids (Real-time)</h4>
+                </div>
+                <div class="card-body" id="top5-bids-container">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading current bids...</p>
+                    </div>
+                </div>
+            </div>
 
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/bidHub?itemId=" + itemId)
-            .build();
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+            <script>
+                const itemId = @Model.Item.Id;
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/bidHub?itemId=" + itemId)
+                    .build();
 
-        connection.start().then(() => {
-            console.log("SignalR connected for history live top 5");
-            loadTop5Bids();
-        });
-
-        connection.on("ReceiveBidUpdate", function (itemId) {
-            loadTop5Bids();
-        });
-
-        function loadTop5Bids() {
-            fetch(`/Bid/Top5?itemId=${itemId}`)
-                .then(res => res.text())
-                .then(html => {
-                    document.getElementById("top5-bids-container").innerHTML = html;
+                connection.start().then(() => {
+                    console.log("SignalR connected for history live top 5");
+                    loadTop5Bids();
+                }).catch(err => {
+                    console.error("SignalR connection error:", err);
+                    document.getElementById("top5-bids-container").innerHTML =
+                        '<div class="alert alert-danger">Error connecting to real-time updates. Please refresh.</div>';
                 });
-        }
-    </script>
-}
-else
-{
-    @if (Model.BidList?.Any() == true)
-    {
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Username</th>
-                    <th>Bid Amount</th>
-                    <th>Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var bid in Model.BidList.OrderByDescending(b => b.BidTime))
-                {
-                    <tr>
-                        <td>@bid.User?.UserName</td>
-                        <td>@bid.Amount.ToString("C")</td>
-                        <td>@bid.BidTime.ToString("g")</td>
-                    </tr>
+
+                connection.on("ReceiveBidUpdate", function (itemId) {
+                    loadTop5Bids();
+                });
+
+                function loadTop5Bids() {
+                    fetch(`/Bid/Top5?itemId=${itemId}`)
+                        .then(res => res.text())
+                        .then(html => {
+                            document.getElementById("top5-bids-container").innerHTML = html;
+                        })
+                        .catch(err => {
+                            console.error("Error loading top bids:", err);
+                        });
                 }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <p>No bids were placed for this item.</p>
-    }
-}
+            </script>
+        }
+        else
+        {
+            <h5 class="text-muted mb-3">Bid History</h5>
+            @if (Model.BidList?.Any() == true)
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Username</th>
+                                <th>Bid Amount</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var bid in Model.BidList.OrderByDescending(b => b.BidTime))
+                            {
+                                <tr>
+                                    <td>@bid.User?.UserName</td>
+                                    <td class="fw-bold text-primary">@bid.Amount.ToString("C")</td>
+                                    <td>@bid.BidTime.ToString("g")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i> No bids were placed for this item.
+                </div>
+            }
+        }
+    </div>
+</div>

@@ -47,13 +47,12 @@ namespace Quillia.Areas.Admin.Controllers
 
             return View(vm);
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MyProfile(UserProfileVm vm)
         {
-            if (!ModelState.IsValid)
-                return View(vm);
+            // We'll handle basic profile validation normally
+            bool profileValid = true;
 
             // Check for duplicate Full_Name
             var duplicateName = await _db.ApplicationUsers
@@ -62,12 +61,29 @@ namespace Quillia.Areas.Admin.Controllers
             if (duplicateName)
             {
                 ModelState.AddModelError("Full_Name", "This name is already taken by another user.");
+                profileValid = false;
+            }
+
+            // Validate all non-password fields
+            if (string.IsNullOrWhiteSpace(vm.Full_Name) ||
+                vm.Age < 0 || vm.Age > 120 ||
+                string.IsNullOrWhiteSpace(vm.PhoneNumber) ||
+                !System.Text.RegularExpressions.Regex.IsMatch(vm.PhoneNumber, @"^\d{10}$") ||
+                string.IsNullOrWhiteSpace(vm.Address))
+            {
+                profileValid = false;
+            }
+
+            if (!profileValid)
+            {
                 return View(vm);
             }
 
+            // At this point, profile data is valid
             var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == vm.Id);
             if (user == null) return NotFound();
 
+            // Update basic profile fields
             user.Full_Name = vm.Full_Name;
             user.Age = vm.Age;
             user.PhoneNumber = vm.PhoneNumber;
@@ -75,9 +91,32 @@ namespace Quillia.Areas.Admin.Controllers
 
             await _db.SaveChangesAsync();
 
-            if (!string.IsNullOrWhiteSpace(vm.CurrentPassword))
+            // Handle password separately - all fields must be filled or all must be empty
+            bool passwordChangeRequested = !string.IsNullOrWhiteSpace(vm.CurrentPassword) ||
+                                         !string.IsNullOrWhiteSpace(vm.NewPassword) ||
+                                         !string.IsNullOrWhiteSpace(vm.ConfirmPassword);
+
+            // If password change was requested and client-side validation passed, process it
+            if (passwordChangeRequested)
             {
-                // note: IdentityUser here is the same record but must be fetched via UserManager
+                // Double-check that all required fields are provided
+                if (string.IsNullOrWhiteSpace(vm.CurrentPassword) ||
+                    string.IsNullOrWhiteSpace(vm.NewPassword) ||
+                    string.IsNullOrWhiteSpace(vm.ConfirmPassword))
+                {
+                    // Client-side validation should prevent this, but just in case
+                    TempData["error"] = "All password fields are required to change password.";
+                    return View(vm);
+                }
+
+                // Check that passwords match (again, client-side validation should catch this)
+                if (vm.NewPassword != vm.ConfirmPassword)
+                {
+                    TempData["error"] = "New password and confirmation do not match.";
+                    return View(vm);
+                }
+
+                // Attempt to change password
                 var identityUser = await _userManager.FindByIdAsync(vm.Id);
                 var pwdResult = await _userManager.ChangePasswordAsync(
                     identityUser,
@@ -87,14 +126,19 @@ namespace Quillia.Areas.Admin.Controllers
 
                 if (!pwdResult.Succeeded)
                 {
-                    // add password errors to ModelState and show the form again
-                    foreach (var err in pwdResult.Errors)
-                        ModelState.AddModelError(string.Empty, err.Description);
+                    // Show specific error message from Identity
+                    TempData["error"] = "Password change failed: " +
+                        string.Join(", ", pwdResult.Errors.Select(e => e.Description));
                     return View(vm);
                 }
+
+                TempData["success"] = "Profile and password updated successfully!";
+            }
+            else
+            {
+                TempData["success"] = "Profile updated successfully!";
             }
 
-            TempData["success"] = "Profile updated successfully!";
             return RedirectToAction("Index", "Home");
         }
 

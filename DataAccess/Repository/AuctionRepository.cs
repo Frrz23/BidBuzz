@@ -81,11 +81,9 @@ namespace DataAccess.Repository
                 .ToListAsync();
         }
 
-        // ✅ New methods used in Program.cs
 
         public async Task StartAuctionAsync()
         {
-            // grab all auctions that an Admin previously Approved
             var toStart = await _context.Auctions
                 .Where(a => a.Status == AuctionStatus.Approved)
                 .ToListAsync();
@@ -130,7 +128,7 @@ namespace DataAccess.Repository
 
         public async Task RelistUnsoldItemsAsync()
         {
-            // 1) Pull down *all* auctions that ended unsold - include the Item relationship
+            //unsold catch
             var unsoldAuctions = await _context.Auctions
                 .Include(a => a.Item)
                 .Where(a => a.Status == AuctionStatus.Unsold)
@@ -138,31 +136,31 @@ namespace DataAccess.Repository
 
             foreach (var auction in unsoldAuctions)
             {
-                // Increment the relist count for tracking purposes
+
                 auction.RelistCount = (auction.RelistCount ?? 0) + 1;
 
-                // Check if this auction has been relisted too many times
+                //remove if more than 3 
                 if (auction.RelistCount >= 3)
                 {
                     Console.WriteLine($"Removing Auction {auction.Id} and Item {auction.Item?.Id} at RelistCount {auction.RelistCount}");
 
-                    // Remove the associated item first (if it exists)
+
                     if (auction.Item != null)
                     {
                         _context.Items.Remove(auction.Item);
                     }
 
-                    // Remove the auction that has been relisted 3 or more times
+
                     _context.Auctions.Remove(auction);
                 }
                 else
                 {
-                    // Reset to Unsold so it can be processed again in the next cycle
+
                     auction.Status = AuctionStatus.Unsold;
                 }
             }
 
-            // Save changes to the database
+
             await _context.SaveChangesAsync();
         }
 

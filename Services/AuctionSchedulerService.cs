@@ -17,9 +17,6 @@ namespace BidBuzz.Services
         public AuctionSchedulerService(IServiceProvider services)
             => _services = services;
 
-        /// <summary>
-        /// Calculates the next UTC DateTime corresponding to the given target day and local hour.
-        /// </summary>
         public DateTime GetNextUtcForLocal(
             DayOfWeek targetDay,
             int localHour,
@@ -34,8 +31,8 @@ namespace BidBuzz.Services
             // days until the _first_ occurrence
             int daysUntil = ((int)targetDay - (int)localNow.DayOfWeek + 7) % 7;
 
-            // if we’re scheduling for “Next” after rotation,
-            // push it a full extra week out
+            // if we’re scheduling for “Next” after rotation add 7 days
+
             if (forceNextWeek)
                 daysUntil += 7;
 
@@ -43,16 +40,13 @@ namespace BidBuzz.Services
                 .AddDays(daysUntil)
                 .AddHours(localHour);
 
-            // preserve your old "if it’s already passed" check
+
             if (!forceNextWeek && nextLocal <= localNow)
                 nextLocal = nextLocal.AddDays(7);
 
             return nextLocal.ToUniversalTime();
         }
 
-        /// <summary>
-        /// Schedules start and end jobs for the current auction schedule only if not already scheduled.
-        /// </summary>
         public async Task ScheduleNextCycleAsync(bool forceNextWeek = false)
         {
             using var scope = _services.CreateScope();
@@ -62,7 +56,7 @@ namespace BidBuzz.Services
 
             var nowUtc = DateTime.UtcNow;
 
-            // Compute the two target UTC times
+
             var startUtc = GetNextUtcForLocal(
                 Enum.Parse<DayOfWeek>(sched.StartDay),
                 sched.StartHour,
@@ -100,9 +94,6 @@ namespace BidBuzz.Services
                 BackgroundJob.Schedule(() => EndAuctionJob(), endUtc);
         }
 
-        /// <summary>
-        /// Fires at the scheduled start time to transition approved auctions to InAuction.
-        /// </summary>
         public async Task StartAuctionJob()
         {
             using var scope = _services.CreateScope();
@@ -110,9 +101,6 @@ namespace BidBuzz.Services
             await auctionRepo.StartAuctionAsync();
         }
 
-        /// <summary>
-        /// Fires at the scheduled end time to end auctions, relist unsold items, rotate schedule, and schedule the next cycle.
-        /// </summary>
         public void EndAuctionJob()
         {
             using var scope = _services.CreateScope();
@@ -124,10 +112,10 @@ namespace BidBuzz.Services
                 await auctionRepo.EndAuctionAsync();
                 await auctionRepo.RelistUnsoldItemsAsync();
 
-                // ✅ rotate only AFTER auctions are ended
+
                 await schedRepo.RotateAndPrepareNextScheduleAsync();
 
-                // ✅ schedule next jobs for NEXT week
+
                 await ScheduleNextCycleAsync(forceNextWeek: true);
             }).Wait();
         }

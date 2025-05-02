@@ -64,16 +64,7 @@ namespace DataAccess.Data
 
 
 
-            // Category Configuration
-            modelBuilder.Entity<Category>().HasKey(c => c.Id); // Primary key
-            modelBuilder.Entity<Category>()
-                .Property(c => c.Name)
-                .IsRequired() // Name must not be null
-                .HasMaxLength(100);
-            modelBuilder.Entity<Category>()
-                .Property(c => c.Description)
-                .HasMaxLength(500);
-
+            
             // Item Configuration
            
             modelBuilder.Entity<Item>()

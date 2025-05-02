@@ -105,17 +105,15 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string userType,string returnUrl = null)
+        // Change in the OnPostAsync method in LoginModel.cs
+        public async Task<IActionResult> OnPostAsync(string userType, string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             if (ModelState.IsValid)
             {
-                
-
                 if (_signInManager == null)
                 {
                     throw new Exception("SignInManager is not initialized.");
@@ -135,6 +133,13 @@ namespace BidBuzz.Areas.Identity.Pages.Account
 
                 _logger.LogInformation("Session Name: {SessionName}", name);
 
+                // First check if the user exists
+                var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Email address not found. Please check your email or register for an account.");
+                    return Page();
+                }
 
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
@@ -155,7 +160,8 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    // Password doesn't match
+                    ModelState.AddModelError(string.Empty, "Incorrect password. Please try again.");
                     return Page();
                 }
             }

@@ -1,58 +1,179 @@
 ﻿@model UserProfileVm
 
-<div class="container mt-4">
-    <h2>My Profile</h2>
-    <form asp-action="MyProfile" method="post">
-        <input type="hidden" asp-for="Id" />
+<div class="container-fluid py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h2 class="fs-3 fw-bold mb-0">My Profile</h2>
+                </div>
+                <div class="card-body p-4 p-md-5 bg-light">
+                    <form asp-action="MyProfile" method="post" id="profileForm">
+                        <input type="hidden" asp-for="Id" />
 
-        <div class="form-floating mb-3">
-            <input asp-for="Full_Name" class="form-control" />
-            <label asp-for="Full_Name"></label>
-            <span asp-validation-for="Full_Name" class="text-danger"></span>
+                        <div asp-validation-summary="ModelOnly" class="text-danger alert alert-danger p-2" role="alert"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input asp-for="Full_Name" class="form-control border-secondary" />
+                                    <label asp-for="Full_Name">Full Name</label>
+                                    <span asp-validation-for="Full_Name" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input asp-for="Age" class="form-control border-secondary" type="number" min="0" max="120" />
+                                    <label asp-for="Age">Age</label>
+                                    <span asp-validation-for="Age" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input asp-for="PhoneNumber" class="form-control border-secondary" maxlength="10" pattern="\d{10}" title="Enter 10 digit phone number" />
+                                    <label asp-for="PhoneNumber">Phone Number</label>
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-4">
+                                <div class="form-floating">
+                                    <input asp-for="Address" class="form-control border-secondary" />
+                                    <label asp-for="Address">Address</label>
+                                    <span asp-validation-for="Address" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 mb-3">
+                            <div class="card border-secondary">
+                                <div class="card-header bg-light text-dark">
+                                    <h4 class="m-0">Change Password (Optional)</h4>
+                                    <small class="text-muted">Leave all fields blank to keep your current password</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12 mb-3">
+                                            <div class="form-floating">
+                                                <input asp-for="CurrentPassword" class="form-control border-secondary pwd-field" autocomplete="new-password" />
+                                                <label asp-for="CurrentPassword">Current Password</label>
+                                                <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+                                                <div class="pwd-error text-danger d-none" data-for="CurrentPassword">Current password is required to change password</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-floating">
+                                                <input asp-for="NewPassword" class="form-control border-secondary pwd-field" autocomplete="new-password" />
+                                                <label asp-for="NewPassword">New Password</label>
+                                                <span asp-validation-for="NewPassword" class="text-danger"></span>
+                                                <div class="pwd-error text-danger d-none" data-for="NewPassword">New password is required and must be at least 6 characters</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6 mb-3">
+                                            <div class="form-floating">
+                                                <input asp-for="ConfirmPassword" class="form-control border-secondary pwd-field" autocomplete="new-password" />
+                                                <label asp-for="ConfirmPassword">Confirm New Password</label>
+                                                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                                                <div class="pwd-error text-danger d-none" data-for="ConfirmPassword">Passwords must match</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg py-3">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="Age" class="form-control" />
-            <label asp-for="Age"></label>
-            <span asp-validation-for="Age" class="text-danger"></span>
-        </div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="PhoneNumber" class="form-control" maxlength="10" pattern="\d{10}" title="Enter 10 digit phone number" />
-            <label asp-for="PhoneNumber" class="ms-2 text-muted">Phone Number</label>
-            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-        </div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="Address" class="form-control" />
-            <label asp-for="Address"></label>
-            <span asp-validation-for="Address" class="text-danger"></span>
-        </div>
-
-
-        <h4>Change Password (optional)</h4>
-        <div class="form-floating mb-3">
-            <input asp-for="CurrentPassword" class="form-control" />
-            <label asp-for="CurrentPassword"></label>
-            <span asp-validation-for="CurrentPassword" class="text-danger"></span>
-        </div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="NewPassword" class="form-control" />
-            <label asp-for="NewPassword"></label>
-            <span asp-validation-for="NewPassword" class="text-danger"></span>
-        </div>
-
-        <div class="form-floating mb-3">
-            <input asp-for="ConfirmPassword" class="form-control" />
-            <label asp-for="ConfirmPassword"></label>
-            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+    </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Fix browser autofill issues by adding autocomplete="new-password"
+            // This has already been added to the HTML inputs above
+
+            // Handle form submission with client-side validation
+            $("#profileForm").on("submit", function(e) {
+                // First validate the regular form fields using default validation
+                if (!$(this).valid()) {
+                    return false;
+                }
+
+                // Now handle password validation
+                var currentPassword = $("#CurrentPassword").val();
+                var newPassword = $("#NewPassword").val();
+                var confirmPassword = $("#ConfirmPassword").val();
+
+                // Clear previous error messages
+                $(".pwd-error").addClass("d-none");
+
+                // If all password fields are empty, allow the form to submit
+                if (!currentPassword && !newPassword && !confirmPassword) {
+                    return true;
+                }
+
+                // If any password field has data, validate all fields
+                var isValid = true;
+
+                // Check current password
+                if (!currentPassword) {
+                    $(".pwd-error[data-for='CurrentPassword']").removeClass("d-none");
+                    isValid = false;
+                }
+
+                // Check new password
+                if (!newPassword || newPassword.length < 6) {
+                    $(".pwd-error[data-for='NewPassword']").removeClass("d-none");
+                    isValid = false;
+                }
+
+                // Check confirm password
+                if (newPassword !== confirmPassword) {
+                    $(".pwd-error[data-for='ConfirmPassword']").removeClass("d-none");
+                    isValid = false;
+                }
+
+                // Only submit if all validations pass
+                if (!isValid) {
+                    e.preventDefault();
+                    return false;
+                }
+
+                return true;
+            });
+
+            // Clear password validation errors when user modifies any password field
+            $(".pwd-field").on("input", function() {
+                // Get all password field values
+                var currentPassword = $("#CurrentPassword").val();
+                var newPassword = $("#NewPassword").val();
+                var confirmPassword = $("#ConfirmPassword").val();
+
+                // If all fields are empty, hide all password validation errors
+                if (!currentPassword && !newPassword && !confirmPassword) {
+                    $(".pwd-error").addClass("d-none");
+                }
+            });
+
+            // When the page loads, clear all password fields to prevent autofill issues
+            // This runs after the browser's autofill happens
+            setTimeout(function() {
+                // Only clear if all fields have values (likely from autofill)
+                if ($("#CurrentPassword").val() && $("#NewPassword").val() && $("#ConfirmPassword").val()) {
+                    $(".pwd-field").val("").trigger("change");
+                }
+            }, 500);
+        });
+    </script>
 }

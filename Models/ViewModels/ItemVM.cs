@@ -20,4 +20,5 @@ public class ItemVM
     // Add auto bid properties
     public bool HasActiveAutoBid { get; set; }
     public decimal? MaxAutoBidAmount { get; set; }
+    public bool IsOwner { get; set; }
 }

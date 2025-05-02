@@ -14,11 +14,11 @@ namespace Models
     {
         [Key] // Primary key
         public int Id { get; set; }
-
         [Required]
         [MaxLength(200)] // Name must not exceed 200 characters
-        [RegularExpression(@"^[A-Za-z\s]+$", ErrorMessage = "Name can only contain letters and spaces.")]
+        [RegularExpression(@"^[A-Za-z0-9\s]+$", ErrorMessage = "Name can only contain letters, numbers, and spaces.")]
         public string Name { get; set; } = string.Empty;
+
 
         [Required]
         [MaxLength(1000)] // Description must not exceed 1000 characters

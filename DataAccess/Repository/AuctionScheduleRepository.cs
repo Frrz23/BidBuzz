@@ -48,16 +48,25 @@ namespace DataAccess.Repository
         {
             if (!_context.AuctionSchedules.Any())
             {
-                var initialSchedule = new AuctionSchedule
+                var current = new AuctionSchedule
                 {
                     Week = "Current",
                     StartDay = "Saturday",
                     StartHour = 12,
                     EndDay = "Sunday",
-                    EndHour = 1
+                    EndHour = 0
                 };
 
-                await _context.AuctionSchedules.AddAsync(initialSchedule);
+                var next = new AuctionSchedule
+                {
+                    Week = "Next",
+                    StartDay = "Saturday",
+                    StartHour = 12,
+                    EndDay = "Sunday",
+                    EndHour = 0
+                };
+
+                await _context.AuctionSchedules.AddRangeAsync(current, next);
                 await _context.SaveChangesAsync();
             }
         }
@@ -67,7 +76,7 @@ namespace DataAccess.Repository
             var next = await _context.AuctionSchedules.FirstOrDefaultAsync(s => s.Week == "Next");
 
             if (current != null)
-                _context.AuctionSchedules.Remove(current); // Optional: Or mark as "Old"
+                _context.AuctionSchedules.Remove(current); 
 
             if (next != null)
             {
