@@ -13,6 +13,8 @@ namespace DataAccess.Repository.IRepository
         Task<AutoBid> GetActiveAutoBidForUserAsync(int auctionId, string userId);
         Task DeactivateAsync(int autoBidId);
         Task ProcessAutoBidsAsync(int auctionId, decimal currentHighestBid, string currentHighestBidUserId);
+        Task<bool> ExistsActiveAutoBidWithMaxAsync(int auctionId, decimal maxAmount, string excludeUserId);
+
 
     }
 

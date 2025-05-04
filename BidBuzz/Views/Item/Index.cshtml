@@ -12,7 +12,7 @@
 <ul class="nav nav-pills my-3">
     @foreach (var s in new[] {
     "All", "PendingApproval", "Approved",
-    "InAuction", "Sold", "NotApproved", "Unsold"
+    "InAuction", "Sold", "NotApproved", "Unsold","Cancelled"
     })
     {
         <li class="nav-item">
@@ -67,11 +67,21 @@
                     }
                 </td>
                 <td>
-                    <a asp-action="Upsert" asp-route-id="@item.Item.Id"
-                       class="btn btn-primary btn-sm">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.Item.Id"
-                       class="btn btn-danger btn-sm">Delete</a>
+                    @* For Admins always show buttons, for non-admins only if not Cancelled *@
+                    @if (User.IsInRole(Roles.Admin)
+                   || item.AuctionStatus == AuctionStatus.PendingApproval || item.AuctionStatus==AuctionStatus.Unsold)
+                    {
+                        <a asp-action="Upsert" asp-route-id="@item.Item.Id"
+                           class="btn btn-primary btn-sm">Edit</a>
+                        <a asp-action="Delete" asp-route-id="@item.Item.Id"
+                           class="btn btn-danger btn-sm">Delete</a>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Only administrators can edit or delete this item.</span>
+                    }
                 </td>
+
             </tr>
         }
     </tbody>

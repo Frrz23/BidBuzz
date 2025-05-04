@@ -203,17 +203,16 @@
                                         </div>
                                         <form method="post" action="@Url.Action("SetAutoBid", "AutoBid")">
                                             <div class="form-group mb-3">
-                                                <label asp-for="MaxAutoBidAmount" class="form-label fw-bold">Maximum Bid Amount:</label>
+                                                <label for="MaxBidAmount" class="form-label fw-bold">Maximum Bid Amount:</label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">$</span>
-                                                    <input asp-for="MaxAutoBidAmount"
+                                                    <input name="MaxBidAmount" id="MaxBidAmount"
                                                            class="form-control form-control-lg"
                                                            placeholder="Enter your maximum bid amount"
                                                            min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
                                                            step="0.01"
                                                            required />
                                                 </div>
-                                                <span asp-validation-for="MaxAutoBidAmount" class="text-danger"></span>
                                                 <small class="form-text text-muted">
                                                     This is the maximum amount you're willing to pay for this item.
                                                 </small>
@@ -225,6 +224,7 @@
                                             </button>
                                         </form>
                                     </div>
+                                   
                                 </div>
                             </div>
                         }

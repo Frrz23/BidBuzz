@@ -26,12 +26,13 @@ namespace BidBuzz.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetAutoBid(BidVM model)
+        public async Task<IActionResult> SetAutoBid(int ItemId, decimal MaxBidAmount)
         {
-            var itemId = model.ItemId;
-            var maxBidAmount = model.MaxBidAmount;
+            var itemId = ItemId;
+            var maxBidAmount = MaxBidAmount;
             var increment = BiddingDefaults.Increment;
 
+            // Debug logging (optional)
             if (maxBidAmount <= 0)
             {
                 TempData["Error"] = "Maximum bid amount must be greater than zero.";
@@ -52,6 +53,7 @@ namespace BidBuzz.Controllers
             var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
             var highestBid = bids.FirstOrDefault();
             var currentHighestAmount = highestBid?.Amount ?? item.StartingPrice;
+            var conflict = await _unitOfWork.AutoBids.ExistsActiveAutoBidWithMaxAsync(auction.Id, maxBidAmount, userId);
 
             // Check if maximum bid is enough
             if (maxBidAmount <= currentHighestAmount)
@@ -59,7 +61,13 @@ namespace BidBuzz.Controllers
                 TempData["Error"] = $"Your maximum bid must be higher than the current highest bid ({currentHighestAmount:C}).";
                 return RedirectToAction("Details", "Home", new { itemId });
             }
-
+            if (conflict)
+            {
+                TempData["Error"] =
+                    $"Someone already has an active auto-bid at {maxBidAmount:C}. " +
+                    "Please choose a different maximum.";
+                return RedirectToAction("Details", "Home", new { itemId });
+            }
             // Check if user already has an active auto bid for this auction
             var existingAutoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
 

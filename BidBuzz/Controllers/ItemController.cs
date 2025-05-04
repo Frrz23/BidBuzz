@@ -68,6 +68,7 @@ namespace BidBuzz.Controllers
                 "Sold" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Sold),
                 "NotApproved" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Cancelled),
                 "Unsold" => itemVMs.Where(vm =>vm.AuctionStatus == AuctionStatus.Unsold),
+                "Cancelled" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.Cancelled),    
                 _ => itemVMs  // "All"
             };
 
@@ -167,11 +168,11 @@ namespace BidBuzz.Controllers
                 var endDayOfWeek = (int)Enum.Parse<DayOfWeek>(schedule.EndDay);
 
                 var startTime = new AuctionSchedulerService(null).GetNextUtcForLocal(
-     (DayOfWeek)startDayOfWeek,
-     schedule.StartHour,
-     DateTime.UtcNow,
-     forceNextWeek: true // 👈 This is the fix
- );
+                 (DayOfWeek)startDayOfWeek,
+                 schedule.StartHour,
+                 DateTime.UtcNow,
+                 forceNextWeek: true // 👈 This is the fix
+             );
 
                 var endTime = new AuctionSchedulerService(null).GetNextUtcForLocal(
                     (DayOfWeek)endDayOfWeek,
