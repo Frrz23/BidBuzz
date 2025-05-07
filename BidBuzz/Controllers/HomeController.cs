@@ -95,21 +95,37 @@ namespace BidBuzz.Controllers
 
 
         // GET: /Home/BidHistory
-        public async Task<IActionResult> BidHistory()
+        public async Task<IActionResult> BidHistory(string status = "all")
         {
-            var itemsWithAuctions = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category");
-            var itemsInAuctions = new List<Item>();
+            var itemsWithAuctions = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions");
+            var filteredItems = new List<Item>();
 
             foreach (var item in itemsWithAuctions)
             {
-                var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
+                var auction = item.Auctions.FirstOrDefault();
                 if (auction != null)
                 {
-                    itemsInAuctions.Add(item);
+                    // Filter items based on selected status
+                    if ((status == "all" && (auction.Status == AuctionStatus.Sold || auction.Status == AuctionStatus.InAuction)) ||
+                        (status == "sold" && auction.Status == AuctionStatus.Sold) ||
+                        (status == "inauction" && auction.Status == AuctionStatus.InAuction))
+                    {
+                        filteredItems.Add(item);
+                    }
                 }
             }
 
-            return View(itemsInAuctions); // You will create this view
+            // Pass the current status to the view through ViewBag
+            ViewBag.CurrentStatus = status;
+
+            // Count items in each category for the badge numbers
+            ViewBag.AllCount = itemsWithAuctions.Count(i =>
+                i.Auctions.Any(a => a.Status == AuctionStatus.Sold) &&
+                i.Auctions.Any(a => a.Status == AuctionStatus.InAuction));
+            ViewBag.SoldCount = itemsWithAuctions.Count(i => i.Auctions.Any(a => a.Status == AuctionStatus.Sold));
+            ViewBag.InAuctionCount = itemsWithAuctions.Count(i => i.Auctions.Any(a => a.Status == AuctionStatus.InAuction));
+
+            return View(filteredItems);
         }
 
         // GET: /Home/BidHistoryDetails?itemId=5

@@ -1,32 +1,78 @@
 ﻿@model IEnumerable<Item>
 @{
     ViewData["Title"] = "Bid History";
+    var currentStatus = ViewBag.CurrentStatus ?? "all";
 }
 
-<h2>Bid History - All Auctioned Items</h2>
+<div class="container py-4">
+    <h2 class="mb-4">Bid History</h2>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Item Name</th>
-            <th>Category</th>
-            <th>Condition</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Name</td>
-                <td>@item.Category?.Name</td>
-                <td>@item.Condition</td>
-                <td>
-                    <a href="@Url.Action("BidHistoryDetails", "Home", new { itemId = item.Id })" class="btn btn-sm btn-info">
-                        View Bid History
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "all" ? "active" : "")" href="@Url.Action("BidHistory", "Home", new { status = "all" })">
+                All Items
+                <span class="badge bg-secondary">@ViewBag.AllCount</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "inauction" ? "active" : "")" href="@Url.Action("BidHistory", "Home", new { status = "inauction" })">
+                In Auction
+                <span class="badge bg-primary">@ViewBag.InAuctionCount</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link @(currentStatus == "sold" ? "active" : "")" href="@Url.Action("BidHistory", "Home", new { status = "sold" })">
+                Sold
+                <span class="badge bg-success">@ViewBag.SoldCount</span>
+            </a>
+        </li>
+    </ul>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No items found in this category.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Item Name</th>
+                        <th>Category</th>
+                        <th>Condition</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var auction = item.Auctions?.FirstOrDefault();
+                        string statusClass = auction?.Status == AuctionStatus.Sold ? "text-success" :
+                        auction?.Status == AuctionStatus.InAuction ? "text-primary" : "text-secondary";
+
+                        <tr>
+                            <td>@item.Name</td>
+                            <td>@item.Category?.Name</td>
+                            <td>@item.Condition</td>
+                            <td>
+                                <span class="@statusClass fw-bold">
+                                    @(auction?.Status.ToString() ?? "Unknown")
+                                </span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("BidHistoryDetails", "Home", new { itemId = item.Id })"
+                                   class="btn btn-sm btn-info">
+                                    View Bid History
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

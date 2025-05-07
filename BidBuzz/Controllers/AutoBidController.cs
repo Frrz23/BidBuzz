@@ -32,7 +32,6 @@ namespace BidBuzz.Controllers
             var maxBidAmount = MaxBidAmount;
             var increment = BiddingDefaults.Increment;
 
-            // Debug logging (optional)
             if (maxBidAmount <= 0)
             {
                 TempData["Error"] = "Maximum bid amount must be greater than zero.";
@@ -122,8 +121,11 @@ namespace BidBuzz.Controllers
                 await _unitOfWork.CompleteAsync();
             }
 
-            // Notify clients
+            // Notify clients about bid updates
             await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
+
+            // Send auto-bid update notification
+            await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
 
             TempData["Success"] = "Your auto bid has been set!";
             return RedirectToAction("Details", "Home", new { itemId });
@@ -147,6 +149,10 @@ namespace BidBuzz.Controllers
             {
                 await _unitOfWork.AutoBids.DeactivateAsync(autoBid.Id);
                 await _unitOfWork.CompleteAsync();
+
+                // Send auto-bid update notification
+                await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
+
                 TempData["Success"] = "Your auto bid has been canceled.";
             }
             else
@@ -155,6 +161,32 @@ namespace BidBuzz.Controllers
             }
 
             return RedirectToAction("Details", "Home", new { itemId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAutoBidStatus(int itemId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemId);
+
+            if (auction == null)
+            {
+                return Json(new { hasActiveAutoBid = false });
+            }
+
+            var autoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
+
+            if (autoBid != null)
+            {
+                return Json(new
+                {
+                    hasActiveAutoBid = true,
+                    maxAmount = autoBid.MaxAmount,
+                    maxAmountFormatted = autoBid.MaxAmount.ToString("C")
+                });
+            }
+
+            return Json(new { hasActiveAutoBid = false });
         }
     }
 }

@@ -322,11 +322,16 @@
 
         // Initial load
         loadTop5Bids();
+        loadAutoBidStatus();
     });
 
     connection.on("ReceiveBidUpdate", function (itemId) {
         loadTop5Bids();
+    });
 
+    // Add this new event handler for auto-bid updates
+    connection.on("ReceiveAutoBidUpdate", function (itemId) {
+        loadAutoBidStatus();
     });
 
     function loadTop5Bids() {
@@ -335,16 +340,67 @@
             .then(html => {
                 document.getElementById("top5-bids-container").innerHTML = html;
             });
-              fetch(`/Bid/GetHighest?itemId=${itemId}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("highestAmount").textContent= data.highestFormatted;
-      document.getElementById("nextMinBid").textContent =
-        data.nextMinFormatted.startsWith("Next")
-          ? `Next minimum bid: ${data.nextMinFormatted}`
-          : `Next minimum bid: ${data.nextMinFormatted}`;
-    });
+        fetch(`/Bid/GetHighest?itemId=${itemId}`)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("highestAmount").textContent = data.highestFormatted;
+                document.getElementById("nextMinBid").textContent =
+                    data.nextMinFormatted.startsWith("Next")
+                        ? `Next minimum bid: ${data.nextMinFormatted}`
+                        : `Next minimum bid: ${data.nextMinFormatted}`;
+            });
+    }
 
+    // Add this new function to check auto-bid status
+    function loadAutoBidStatus() {
+        fetch(`/AutoBid/GetAutoBidStatus?itemId=${itemId}`)
+            .then(res => res.json())
+            .then(data => {
+                // Find both auto-bid sections (if they exist)
+                const autoBidActiveSection = document.querySelector('.card-header.bg-success')?.closest('.card');
+                const biddingOptionsSection = document.querySelector('.card-header.bg-primary')?.closest('.card');
+
+                if (data.hasActiveAutoBid) {
+                    // User has an active auto-bid
+                    if (!autoBidActiveSection) {
+                        // If the auto-bid active section doesn't exist, reload the page to show it
+                        window.location.reload();
+                        return;
+                    }
+
+                    // Show the active auto-bid section
+                    autoBidActiveSection.style.display = 'block';
+
+                    // Update maximum bid amount display if present
+                    const maxAmountElement = document.querySelector('p.mb-3.ms-5 strong');
+                    if (maxAmountElement) {
+                        maxAmountElement.textContent = data.maxAmountFormatted;
+                    }
+
+                    // Hide bidding options if visible
+                    if (biddingOptionsSection) {
+                        biddingOptionsSection.style.display = 'none';
+                    }
+                } else {
+                    // User doesn't have an active auto-bid
+                    // Hide active auto-bid section if visible
+                    if (autoBidActiveSection) {
+                        autoBidActiveSection.style.display = 'none';
+                    }
+
+                    // Show bidding options if they exist
+                    if (biddingOptionsSection) {
+                        biddingOptionsSection.style.display = 'block';
+                    } else if (autoBidActiveSection) {
+                        // If bidding options don't exist but we were showing an auto-bid section,
+                        // we need to reload to show the bidding options
+                        window.location.reload();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching auto-bid status:", error);
+            });
     }
 </script>
 

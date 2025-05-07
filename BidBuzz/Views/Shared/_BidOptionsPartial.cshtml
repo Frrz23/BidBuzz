@@ -1,0 +1,102 @@
+﻿@model ItemVM
+@if (!Model.IsOwner && (UserAccessHelper.IsBuyer(Context, User) || UserAccessHelper.IsAdmin(User)) && Model.AuctionStatus == AuctionStatus.InAuction)
+{
+    @if (!Model.HasActiveAutoBid)
+    {
+        <div class="card border-0 shadow-sm mb-4 rounded-3">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Bidding Options</h5>
+            </div>
+            <div class="card-body p-4">
+                <!-- Bidding Option Selector -->
+                <div class="form-check form-switch mb-4">
+                    <input type="checkbox" class="form-check-input" id="bidTypeToggle"
+                           style="width: 3em; height: 1.5em;" />
+                    <label class="form-check-label fs-5 ms-2" for="bidTypeToggle">
+                        <span id="toggleLabelText"><strong>Manual Bidding</strong></span>
+                        <span class="badge bg-info ms-2" id="toggleBadge">Switch to Auto</span>
+                    </label>
+                    <p class="text-muted ms-5 ps-2 mb-0" id="toggleDescription">
+                        Place individual bids manually
+                    </p>
+                </div>
+                <hr class="my-3">
+
+                <!-- Manual Bid Form -->
+                <div id="manualBidSection">
+                    <form method="post" action="@Url.Action("PlaceBid", "Bid")">
+                        <div class="form-group mb-3">
+                            <label for="bidAmount" class="form-label fw-bold">Place Your Bid:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input asp-for="BidModel.BidAmount" class="form-control form-control-lg"
+                                       placeholder="Enter your bid"
+                                       min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
+                                       step="0.01" />
+                            </div>
+                            <span asp-validation-for="BidModel.BidAmount" class="text-danger"></span>
+                            <small class="form-text text-muted">
+                                Bid must be at least @(Model.HighestAmount > 0 ? (Model.HighestAmount + BiddingDefaults.Increment).ToString("C") : Model.Item.StartingPrice.ToString("C"))
+                            </small>
+                        </div>
+                        <input type="hidden" name="ItemId" value="@Model.Item.Id" />
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-gavel me-1"></i> Place Bid
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Auto Bid Form -->
+                <div id="autoBidSection" style="display: none;">
+                    <div class="d-flex align-items-start mb-3">
+                        <i class="bi bi-info-circle text-info mt-1 me-2 fs-5"></i>
+                        <p class="text-info mb-0">
+                            Auto bidding will automatically place bids on your behalf up to your maximum amount.
+                        </p>
+                    </div>
+                    <form method="post" action="@Url.Action("SetAutoBid", "AutoBid")">
+                        <div class="form-group mb-3">
+                            <label for="MaxBidAmount" class="form-label fw-bold">Maximum Bid Amount:</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input name="MaxBidAmount" id="MaxBidAmount"
+                                       class="form-control form-control-lg"
+                                       placeholder="Enter your maximum bid amount"
+                                       min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
+                                       step="0.01"
+                                       required />
+                            </div>
+                            <small class="form-text text-muted">
+                                This is the maximum amount you're willing to pay for this item.
+                            </small>
+                        </div>
+
+                        <input type="hidden" name="ItemId" value="@Model.Item.Id" />
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-robot me-1"></i> Set Auto Bid
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    }
+}
+else if (Model.AuctionStatus != AuctionStatus.InAuction)
+{
+    <div class="alert alert-warning border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3"></i>
+            <p class="mb-0"><strong>The auction is not currently active. Please check back later!</strong></p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-info border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-3 me-3"></i>
+            <p class="mb-0"><strong>Only registered buyers can place bids.</strong></p>
+        </div>
+    </div>
+}
