@@ -8,7 +8,8 @@ namespace Utility
 {
     public enum PaymentStatus
     {
-        Unpaid,
+        Unpaid,//0
+        ToPay,
         Paid
     }
 }

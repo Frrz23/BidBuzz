@@ -258,9 +258,12 @@ namespace BidBuzz.Controllers
                 }
 
                 await _unitOfWork.CompleteAsync();
+                TempData["Success"] = itemVM.Item.Id == 0
+    ? "Item created successfully!"
+    : "Item updated successfully!";
                 return RedirectToAction(nameof(Index));
             }
-          
+            TempData["Error"] = "Something went wrong. Please fix the errors and try again.";
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
             ViewBag.Categories = categories;
             return View(itemVM); // Ensure correct type is returned
@@ -302,11 +305,17 @@ namespace BidBuzz.Controllers
                 {
                     _unitOfWork.Auctions.Delete(auction.Id);
                 }
+                
 
                 await _unitOfWork.CompleteAsync();
+                TempData["Success"] = "Item deleted successfully!";
             }
-           
-            
+            else
+            {
+                TempData["Error"] = "Could not find the item to delete.";
+            }
+
+
 
             return RedirectToAction(nameof(Index));
         }

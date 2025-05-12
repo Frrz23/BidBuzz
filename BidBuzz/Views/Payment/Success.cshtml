@@ -1,9 +1,91 @@
-﻿@{
-    ViewData["Title"] = "Payment Success";
+﻿@model Models.Auction
+@{
+    ViewData["Title"] = "Payment Successful";
+    var highestBid = Model.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+    var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
+    // Fallback to user ID if FullName is null
+    if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
+    {
+        winnerName = highestBid?.UserId ?? "Unknown User";
+    }
 }
-
-<div class="text-center mt-5">
-    <h2 class="text-success">✅ Payment Successful!</h2>
-    <p class="lead mt-3">Thank you for your payment. The seller will now be notified.</p>
-    <a asp-action="Index" class="btn btn-primary mt-3">Back to Payments</a>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="bi bi-check-circle-fill me-2"></i>Payment Successful!</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4 class="card-title text-center mb-4">Thank you for your payment</h4>
+                    <div class="alert alert-success">
+                        <p class="mb-0">Your payment for <strong>@Model.Item.Name</strong> has been processed successfully.</p>
+                    </div>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Payment Details
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="text-muted mb-0">Item:</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <p class="mb-0 fw-bold">@Model.Item.Name</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="text-muted mb-0">Amount Paid:</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <p class="mb-0 fw-bold">@highestBid?.Amount.ToString("C")</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="text-muted mb-0">Winning Bidder:</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <p class="mb-0 fw-bold">@winnerName</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="text-muted mb-0">Date:</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <p class="mb-0">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</p>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <p class="text-muted mb-0">Payment Status:</p>
+                                </div>
+                                <div class="col-md-8">
+                                    <span class="badge bg-success">Paid</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center">The seller will be notified about your payment. They will contact you regarding shipping and delivery details.</p>
+                    <div class="text-center mt-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary me-2">
+                            <i class="bi bi-house-door me-1"></i> Return to Home
+                        </a>
+                        <a asp-controller="Payment" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-credit-card me-1"></i> View All Payments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

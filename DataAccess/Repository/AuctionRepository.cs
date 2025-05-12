@@ -115,9 +115,17 @@ namespace DataAccess.Repository
             foreach (var auction in auctionsToEnd)
             {
                 auction.EndTime = now;
-                auction.Status = auction.Bids.Any()
-                    ? AuctionStatus.Sold
-                    : AuctionStatus.Unsold;
+                // Set the auction status based on whether there are bids
+                if (auction.Bids.Any())
+                {
+                    auction.Status = AuctionStatus.Sold;
+                    // When an auction is sold, set PaymentStatus to ToPay
+                    auction.PaymentStatus = PaymentStatus.ToPay;
+                }
+                else
+                {
+                    auction.Status = AuctionStatus.Unsold;
+                }
                 Console.WriteLine($"Auction {auction.Id} ended as {auction.Status}");
 
             }

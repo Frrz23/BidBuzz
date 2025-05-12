@@ -1,37 +1,172 @@
-﻿@model IEnumerable<Auction>
+﻿@model Models.ViewModels.PaymentVM
 @using System.Security.Claims
+@{
+    ViewData["Title"] = "Payment Management";
+}
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Item</th>
-            <th>Highest Bid</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var auction in Model)
-        {
-            var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            bool isWinner = highestBid?.UserId == currentUserId;
+<div class="container">
+    <h2 class="my-4">Payment Management</h2>
 
-            <tr>
-                <td>@auction.Item.Name</td>
-                <td>@highestBid?.Amount.ToString("C")</td>
-                <td>@auction.PaymentStatus</td>
-                <td>
-                    @if (isWinner && auction.PaymentStatus == PaymentStatus.Unpaid)
-                    {
-                        <a href="@Url.Action("Pay", "Payment", new { auctionId = auction.Id })" class="btn btn-sm btn-success">Pay</a>
-                    }
-                    else
-                    {
-                        <span class="text-muted">View Only</span>
-                    }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["Success"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["Error"]
+        </div>
+    }
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert alert-info">
+            @TempData["Message"]
+        </div>
+    }
+
+    <ul class="nav nav-tabs mb-4" id="paymentTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="to-pay-tab" data-bs-toggle="tab" data-bs-target="#to-pay" type="button" role="tab" aria-controls="to-pay" aria-selected="true">
+                To Pay <span class="badge bg-primary">@Model.ToPay.Count</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button" role="tab" aria-controls="paid" aria-selected="false">
+                Paid <span class="badge bg-success">@Model.Paid.Count</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="paymentTabContent">
+        <!-- To Pay Tab -->
+        <div class="tab-pane fade show active" id="to-pay" role="tabpanel" aria-labelledby="to-pay-tab">
+            @if (Model.ToPay.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped border">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Auction End</th>
+                                <th>Winning Bidder</th>
+                                <th>Final Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var auction in Model.ToPay)
+                            {
+                                var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+                                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                                var isBuyer = highestBid?.UserId == userId;
+                                var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
+                                // Fallback to user ID if FullName is null
+                                if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
+                                {
+                                    winnerName = highestBid?.UserId ?? "Unknown User";
+                                }
+
+                                <tr>
+                                    <td>
+                                        <img src="@auction.Item.ImageUrl" alt="@auction.Item.Name" width="50" height="50" class="img-thumbnail me-2" />
+                                        @auction.Item.Name
+                                    </td>
+                                    <td>@string.Format("{0:MMM dd, yyyy HH:mm}", auction.EndTime)</td>
+                                    <td>@winnerName</td>
+                                    <td>@string.Format("{0:C}", highestBid?.Amount)</td>
+                                    <td>
+                                        @if (isBuyer)
+                                        {
+                                            <a asp-action="Pay" asp-route-auctionId="@auction.Id" class="btn btn-success">
+                                                <i class="bi bi-credit-card"></i> Pay Now
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Awaiting buyer payment</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    No payments pending at this time.
+                </div>
+            }
+        </div>
+
+        <!-- Paid Tab -->
+        <div class="tab-pane fade" id="paid" role="tabpanel" aria-labelledby="paid-tab">
+            @if (Model.Paid.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped border">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Auction End</th>
+                                <th>Winning Bidder</th>
+                                <th>Final Price</th>
+                                <th>Payment Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var auction in Model.Paid)
+                            {
+                                var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
+                                var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
+                                // Fallback to user ID if FullName is null
+                                if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
+                                {
+                                    winnerName = highestBid?.UserId ?? "Unknown User";
+                                }
+
+                                <tr>
+                                    <td>
+                                        <img src="@auction.Item.ImageUrl" alt="@auction.Item.Name" width="50" height="50" class="img-thumbnail me-2" />
+                                        @auction.Item.Name
+                                    </td>
+                                    <td>@string.Format("{0:MMM dd, yyyy HH:mm}", auction.EndTime)</td>
+                                    <td>@winnerName</td>
+                                    <td>@string.Format("{0:C}", highestBid?.Amount)</td>
+                                    <td>
+                                        <span class="badge bg-success">Paid</span>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">
+                    No completed payments found.
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Enable tabs functionality
+            var triggerTabList = [].slice.call(document.querySelectorAll('#paymentTabs button'))
+            triggerTabList.forEach(function (triggerEl) {
+                var tabTrigger = new bootstrap.Tab(triggerEl)
+                triggerEl.addEventListener('click', function (event) {
+                    event.preventDefault()
+                    tabTrigger.show()
+                })
+            })
+        });
+    </script>
+}

@@ -52,7 +52,7 @@
                             </a>
                         </li>
 
-
+                        
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="BidHistory">
                                 <i class="bi bi-clock-history me-1"></i>Bid History
@@ -167,27 +167,28 @@
         };
 
         $(function () {
+        @* Flash messages *@
         @if (TempData["Success"] != null)
         {
-            <text>
-                        toastr.success('@TempData["Success"]');
-            </text>
+                <div class="alert alert-success flash mb-4">
+                @TempData["Success"]
+                </div>
         }
-
         @if (TempData["Error"] != null)
         {
-            <text>
-                        toastr.error('@TempData["Error"]');
-            </text>
+                <div class="alert alert-danger flash mb-4">
+                @TempData["Error"]
+                </div>
         }
+
 
             // Initialize any datatables
             $('.table').DataTable();
 
             // Auto-hide alerts after 5 seconds
-            setTimeout(function() {
-                $('.alert').fadeOut('slow');
-            }, 5000);
+                    setTimeout(function() {
+            $('.alert.flash').fadeOut('slow');
+        }, 5000);
         });
     </script>
 

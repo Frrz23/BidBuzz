@@ -95,6 +95,7 @@ namespace BidBuzz.Controllers
 
 
         // GET: /Home/BidHistory
+        [Authorize]
         public async Task<IActionResult> BidHistory(string status = "all")
         {
             var itemsWithAuctions = await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,Auctions");

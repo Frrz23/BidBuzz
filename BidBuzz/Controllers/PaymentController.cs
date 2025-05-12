@@ -1,10 +1,14 @@
-﻿using DataAccess.Repository.IRepository;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using DataAccess.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models;
 using Models.ViewModels;
 using Stripe.Checkout;
-using System.Security.Claims;
 using Utility;
 
 namespace BidBuzz.Controllers
@@ -19,28 +23,36 @@ namespace BidBuzz.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // GET: Payment
+        // GET: Payment - Show payments relevant to the user
         public async Task<IActionResult> Index()
         {
-
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var isAdmin = User.IsInRole(Roles.Admin); // Replace with your admin role key
+            var isAdmin = User.IsInRole(Roles.Admin);
 
-            var auctions = await _unitOfWork.Auctions.GetAllAsync(includeProperties: "Item,Bids");
+            // 1) pull in seller + bidder nav props via string‐based includes:
+            var auctions = await _unitOfWork.Auctions.GetAllAsync(
+                a => a.Status == AuctionStatus.Sold &&
+                     (a.PaymentStatus == PaymentStatus.ToPay || a.PaymentStatus == PaymentStatus.Paid),
+                includeProperties: "Item,Item.User,Bids.User"
+            );
 
             // Filter auctions visible to this user
-            var visibleAuctions = auctions.Where(a => 
+            var visibleAuctions = auctions.Where(a =>
             {
-                if (a.Status != AuctionStatus.Sold) return false;
                 var highestBid = a.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
                 return highestBid?.UserId == userId // won the auction
                        || a.Item.UserId == userId  // seller
                        || isAdmin;                // admin
             }).ToList();
 
-            return View(visibleAuctions);
-        }
+            var viewModel = new PaymentVM
+            {
+                ToPay = visibleAuctions.Where(a => a.PaymentStatus == PaymentStatus.ToPay).ToList(),
+                Paid = visibleAuctions.Where(a => a.PaymentStatus == PaymentStatus.Paid).ToList()
+            };
 
+            return View(viewModel);
+        }
 
         // GET: Payment/Pay/5
         public async Task<IActionResult> Pay(int auctionId)
@@ -50,19 +62,27 @@ namespace BidBuzz.Controllers
                 includeProperties: "Item,Bids"
             );
 
-            if (auction == null || auction.PaymentStatus == PaymentStatus.Paid)
+            if (auction == null || auction.Status != AuctionStatus.Sold || auction.PaymentStatus != PaymentStatus.ToPay)
             {
-                return NotFound();
+                TempData["Error"] = "This auction is not available for payment.";
+                return RedirectToAction(nameof(Index));
             }
 
             var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-            if (highestBid == null || highestBid.UserId != User.FindFirstValue(ClaimTypes.NameIdentifier))
+            if (highestBid == null)
             {
-                return Unauthorized();
+                TempData["Error"] = "No bids found for this auction.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (highestBid.UserId != userId)
+            {
+                TempData["Error"] = "You are not the winning bidder for this auction.";
+                return RedirectToAction(nameof(Index));
             }
 
             var domain = $"{Request.Scheme}://{Request.Host}";
-
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string> { "card" },
@@ -72,11 +92,12 @@ namespace BidBuzz.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(highestBid.Amount * 100),
+                            UnitAmount = (long)(highestBid.Amount * 100), // Convert to cents
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
-                                Name = auction.Item.Name
+                                Name = auction.Item.Name,
+                                Description = $"Auction #{auction.Id} - {auction.Item.Description?.Substring(0, Math.Min(auction.Item.Description.Length, 100))}"
                             }
                         },
                         Quantity = 1,
@@ -84,11 +105,14 @@ namespace BidBuzz.Controllers
                 },
                 Mode = "payment",
                 SuccessUrl = $"{domain}/Payment/Success?auctionId={auction.Id}",
-                CancelUrl = $"{domain}/Payment/Index",
+                CancelUrl = $"{domain}/Payment/Cancel?auctionId={auction.Id}",
             };
 
             var service = new SessionService();
             var session = await service.CreateAsync(options);
+
+            // Store the session ID in TempData for reference
+            TempData["StripeSessionId"] = session.Id;
 
             return Redirect(session.Url);
         }
@@ -96,16 +120,27 @@ namespace BidBuzz.Controllers
         // GET: Payment/Success
         public async Task<IActionResult> Success(int auctionId)
         {
-            var auction = await _unitOfWork.Auctions.GetByIdAsync(auctionId);
-
-            if (auction != null && auction.PaymentStatus == PaymentStatus.Unpaid)
+            var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(
+       a => a.Id == auctionId,
+       includeProperties: "Item,Bids,Bids.User"
+   );
+            if (auction != null && auction.PaymentStatus == PaymentStatus.ToPay)
             {
                 auction.PaymentStatus = PaymentStatus.Paid;
                 _unitOfWork.Auctions.Update(auction);
                 await _unitOfWork.CompleteAsync();
+
+                TempData["Success"] = "Payment completed successfully!";
             }
 
-            return View();
+            return View(auction);
+        }
+
+        // GET: Payment/Cancel
+        public IActionResult Cancel(int auctionId)
+        {
+            TempData["Message"] = "Payment was canceled. You can try again later.";
+            return RedirectToAction(nameof(Index));
         }
     }
 }

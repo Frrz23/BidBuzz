@@ -112,7 +112,7 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             [Required(ErrorMessage = "Name is required.")]
             public string Full_Name { get; set; }
             [Required(ErrorMessage ="Age is Required")]
-            [Range(0, 120, ErrorMessage = "Age must be between 0 and 120.")]
+            [Range(18, 120, ErrorMessage = "Age must be between 18 and 120.")]
             public int Age { get; set; }
             [Required(ErrorMessage = "Phone Number is required.")]
             // only digits allowed
