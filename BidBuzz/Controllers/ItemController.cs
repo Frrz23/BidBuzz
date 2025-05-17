@@ -259,9 +259,10 @@ namespace BidBuzz.Controllers
 
                 await _unitOfWork.CompleteAsync();
                 TempData["Success"] = itemVM.Item.Id == 0
-    ? "Item created successfully!"
-    : "Item updated successfully!";
+? "Item created successfully!"
+: "Item updated successfully!";
                 return RedirectToAction(nameof(Index));
+
             }
             TempData["Error"] = "Something went wrong. Please fix the errors and try again.";
             var categories = await _unitOfWork.Categories.GetAllAsync(null);

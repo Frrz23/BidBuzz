@@ -49,7 +49,7 @@ namespace Quillia.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MyProfile(UserProfileVm vm)
+        public async Task<IActionResult> MyProfile(UserProfileVm vm, bool changePassword = false)
         {
             // We'll handle basic profile validation normally
             bool profileValid = true;
@@ -91,12 +91,12 @@ namespace Quillia.Areas.Admin.Controllers
 
             await _db.SaveChangesAsync();
 
-            // Handle password separately - all fields must be filled or all must be empty
+            // Check if the hidden input for change password is true (checkbox was checked)
             bool passwordChangeRequested = !string.IsNullOrWhiteSpace(vm.CurrentPassword) ||
-                                         !string.IsNullOrWhiteSpace(vm.NewPassword) ||
-                                         !string.IsNullOrWhiteSpace(vm.ConfirmPassword);
+                                        !string.IsNullOrWhiteSpace(vm.NewPassword) ||
+                                        !string.IsNullOrWhiteSpace(vm.ConfirmPassword);
 
-            // If password change was requested and client-side validation passed, process it
+            // Only process password change if requested via checkbox
             if (passwordChangeRequested)
             {
                 // Double-check that all required fields are provided

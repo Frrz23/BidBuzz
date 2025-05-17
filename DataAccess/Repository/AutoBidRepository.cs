@@ -125,7 +125,6 @@ namespace DataAccess.Repository
                     nextHighestUserId = challenger.UserId;
                 }
 
-                // Place the bid
                 await _bidRepository.AddAsync(new Bid
                 {
                     AuctionId = auctionId,
@@ -137,10 +136,8 @@ namespace DataAccess.Repository
                 currentHighestBid = nextBidAmount;
                 currentHighestBidUserId = nextHighestUserId;
 
-                // Persist both the bid and any deactivations so far
                 await _context.SaveChangesAsync();
 
-                // Deactivate any auto-bids that can no longer compete
                 var exhausted = await _context.AutoBids
                     .Where(ab => ab.AuctionId == auctionId
                               && ab.IsActive

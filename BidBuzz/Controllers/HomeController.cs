@@ -34,7 +34,13 @@ namespace BidBuzz.Controllers
                  || a.Status == AuctionStatus.InAuction),
                 includeProperties: "Category,Auctions"
             );
+            // Get the auction schedules for current and next week
+            var currentWeekSchedule = await _unitOfWork.AuctionSchedules.GetFirstOrDefaultAsync(s => s.Week == "Current");
+            var nextWeekSchedule = await _unitOfWork.AuctionSchedules.GetFirstOrDefaultAsync(s => s.Week == "Next");
 
+            // Pass schedule data to the view using ViewBag
+            ViewBag.CurrentWeekSchedule = currentWeekSchedule;
+            ViewBag.NextWeekSchedule = nextWeekSchedule;
 
             return View(items);
         }

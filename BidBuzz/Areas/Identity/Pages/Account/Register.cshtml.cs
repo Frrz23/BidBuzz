@@ -154,6 +154,20 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
             if (ModelState.IsValid)
             {
+                var existingUsers = _userManager.Users.OfType<ApplicationUser>().Where(u => u.Full_Name == Input.Full_Name).ToList();
+
+                if (existingUsers.Any())
+                {
+                    ModelState.AddModelError("Input.Full_Name", "This name is already registered. Please use a different name.");
+                    // Re-populate role list
+                    Input.RolesList = _roleManager.Roles.Select(u => u.Name).Select(x => new SelectListItem
+                    {
+                        Text = x,
+                        Value = x
+                    });
+                    return Page();
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);

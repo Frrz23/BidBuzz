@@ -1,23 +1,110 @@
-﻿@model IEnumerable<Item>
+﻿@model IEnumerable<Models.Item>
+
 @{
-    var liveAuctions = Model.Where(item => item.Auctions.Any(a => a.Status == AuctionStatus.InAuction));
+    var liveAuctions = Model.Where(item => item.Auctions.Any(a => a.Status ==AuctionStatus.InAuction));
     var upcomingAuctions = Model.Where(item => item.Auctions.Any(a => a.Status == AuctionStatus.Approved));
+
+    // Get schedule data from ViewBag
+    var currentWeekSchedule = ViewBag.CurrentWeekSchedule as Models.AuctionSchedule;
+    var nextWeekSchedule = ViewBag.NextWeekSchedule as Models.AuctionSchedule;
 }
 
 <div class="container py-5">
+    <!-- Auction Schedule Section -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="fw-bold text-primary">
+                <i class="bi bi-calendar-week me-2"></i>Auction Schedule
+            </h2>
+            <p class="text-muted">Stay informed about this week's and next week's auction events.</p>
+            <hr class="text-primary w-25 mx-auto">
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Current Week Schedule -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-gradient text-white bg-primary d-flex justify-content-between align-items-center rounded-top">
+                    <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Current Week</h5>
+                    @if (currentWeekSchedule != null)
+                    {
+                        <span class="badge bg-danger fs-6">LIVE</span>
+                    }
+                </div>
+                <div class="card-body bg-light">
+                    @if (currentWeekSchedule != null)
+                    {
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <strong class="text-dark"><i class="bi bi-play-fill me-2 text-success"></i>Start:</strong>
+                                @currentWeekSchedule.StartDay, @FormatTime(currentWeekSchedule.StartHour)
+                            </li>
+                            <li>
+                                <strong class="text-dark"><i class="bi bi-stop-fill me-2 text-danger"></i>End:</strong>
+                                @currentWeekSchedule.EndDay, @FormatTime(currentWeekSchedule.EndHour)
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center mb-0">
+                            No schedule available for the current week.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Week Schedule -->
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-gradient text-white bg-success d-flex justify-content-between align-items-center rounded-top">
+                    <h5 class="mb-0"><i class="bi bi-calendar-event-fill me-2"></i>Next Week</h5>
+                    @if (nextWeekSchedule != null)
+                    {
+                        <span class="badge bg-warning text-dark fs-6">Upcoming</span>
+                    }
+                </div>
+                <div class="card-body bg-light">
+                    @if (nextWeekSchedule != null)
+                    {
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <strong class="text-dark"><i class="bi bi-play-fill me-2 text-success"></i>Start:</strong>
+                                @nextWeekSchedule.StartDay, @FormatTime(nextWeekSchedule.StartHour)
+                            </li>
+                            <li>
+                                <strong class="text-dark"><i class="bi bi-stop-fill me-2 text-danger"></i>End:</strong>
+                                @nextWeekSchedule.EndDay, @FormatTime(nextWeekSchedule.EndHour)
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <div class="alert alert-info text-center mb-0">
+                            No schedule available for next week yet.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Live Auctions Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold display-6 text-primary">
+            <h2 class="fw-bold text-primary">
                 <i class="bi bi-broadcast me-2"></i>Live Auctions
             </h2>
-            <hr class="text-primary opacity-75">
+            <hr class="text-primary">
         </div>
     </div>
     <div class="row g-4 mb-5">
         @if (liveAuctions.Any())
         {
-            @foreach (var item in liveAuctions)
+            foreach (var item in liveAuctions)
             {
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="card h-100 shadow-sm hover-scale border-primary">
@@ -27,9 +114,7 @@
                                 <span class="badge bg-warning text-dark">@item.Condition</span>
                             </div>
                             <div class="position-absolute top-0 start-0 m-2">
-                                <span class="badge bg-danger">
-                                    <i class="bi bi-circle-fill text-danger me-1 animate-pulse"></i>Live Now
-                                </span>
+                                <span class="badge bg-danger">Live Now</span>
                             </div>
                         </div>
                         <div class="card-body d-flex flex-column">
@@ -39,10 +124,7 @@
                                     <p class="text-muted small mb-0 me-2">Current Bid:</p>
                                     <p class="text-primary fw-bold mb-0">$@item.StartingPrice.ToString("N")</p>
                                 </div>
-                                <a asp-action="Details" asp-route-itemId="@item.Id"
-                                   class="btn btn-primary w-100 stretched-link">
-                                    <i class="bi bi-gavel me-1"></i> Bid Now
-                                </a>
+                                <a asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-primary w-100 stretched-link">Bid Now</a>
                             </div>
                         </div>
                     </div>
@@ -53,7 +135,7 @@
         {
             <div class="col-12">
                 <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle-fill me-2"></i> No live auctions at the moment. Check back soon!
+                    No live auctions at the moment. Check back soon!
                 </div>
             </div>
         }
@@ -62,16 +144,16 @@
     <!-- Upcoming Auctions Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold display-6 text-primary">
+            <h2 class="fw-bold text-primary">
                 <i class="bi bi-calendar-event me-2"></i>Upcoming Auctions
             </h2>
-            <hr class="text-primary opacity-75">
+            <hr class="text-primary">
         </div>
     </div>
     <div class="row g-4">
         @if (upcomingAuctions.Any())
         {
-            @foreach (var item in upcomingAuctions)
+            foreach (var item in upcomingAuctions)
             {
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     <div class="card h-100 shadow-sm hover-scale">
@@ -81,9 +163,7 @@
                                 <span class="badge bg-warning text-dark">@item.Condition</span>
                             </div>
                             <div class="position-absolute top-0 start-0 m-2">
-                                <span class="badge bg-success">
-                                    <i class="bi bi-calendar-check me-1"></i>Coming Soon
-                                </span>
+                                <span class="badge bg-success">Coming Soon</span>
                             </div>
                         </div>
                         <div class="card-body d-flex flex-column">
@@ -93,10 +173,7 @@
                                     <p class="text-muted small mb-0 me-2">Starting Bid:</p>
                                     <p class="text-primary fw-bold mb-0">$@item.StartingPrice.ToString("N")</p>
                                 </div>
-                                <a asp-action="Details" asp-route-itemId="@item.Id"
-                                   class="btn btn-outline-primary w-100 stretched-link">
-                                    <i class="bi bi-eye me-1"></i> View Details
-                                </a>
+                                <a asp-action="Details" asp-route-itemId="@item.Id" class="btn btn-outline-primary w-100 stretched-link">View Details</a>
                             </div>
                         </div>
                     </div>
@@ -107,12 +184,21 @@
         {
             <div class="col-12">
                 <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle-fill me-2"></i> No upcoming auctions scheduled at this time.
+                    No upcoming auctions scheduled at this time.
                 </div>
             </div>
         }
     </div>
 </div>
+
+@functions {
+    public string FormatTime(int hour)
+    {
+        string period = hour >= 12 ? "PM" : "AM";
+        int displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+        return $"{displayHour}:00 {period}";
+    }
+}
 
 <style>
     .hover-scale {
@@ -128,25 +214,7 @@
         object-fit: cover;
     }
 
-    .animate-pulse {
-        animation: pulse 1.5s infinite;
-    }
-
-    @@keyframes pulse {
-        0% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.3;
-        }
-
-        100% {
-            opacity: 1;
-        }
-    }
-
-    .border-primary {
+    .border-primary, .border-success {
         border-width: 2px;
     }
 </style>

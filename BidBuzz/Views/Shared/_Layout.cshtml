@@ -148,13 +148,13 @@
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
     <script src="//cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
@@ -163,32 +163,41 @@
             "closeButton": true,
             "progressBar": true,
             "positionClass": "toast-top-right",
-            "timeOut": "3000"
+            "timeOut": "5000"
         };
 
-        $(function () {
-        @* Flash messages *@
-        @if (TempData["Success"] != null)
-        {
-                <div class="alert alert-success flash mb-4">
-                @TempData["Success"]
-                </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-                <div class="alert alert-danger flash mb-4">
-                @TempData["Error"]
-                </div>
-        }
-
-
+        $(document).ready(function() {
             // Initialize any datatables
             $('.table').DataTable();
 
-            // Auto-hide alerts after 5 seconds
-                    setTimeout(function() {
-            $('.alert.flash').fadeOut('slow');
-        }, 5000);
+            // Display any TempData messages with toastr
+        @if (TempData["Success"] != null)
+        {
+            <text>
+                        toastr.success('@TempData["Success"]');
+            </text>
+        }
+
+        @if (TempData["Error"] != null)
+        {
+            <text>
+                        toastr.error('@TempData["Error"]');
+            </text>
+        }
+
+        @if (TempData["Info"] != null)
+        {
+            <text>
+                        toastr.info('@TempData["Info"]');
+            </text>
+        }
+
+        @if (TempData["Warning"] != null)
+        {
+            <text>
+                        toastr.warning('@TempData["Warning"]');
+            </text>
+        }
         });
     </script>
 
