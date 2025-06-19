@@ -143,7 +143,7 @@ namespace BidBuzz.Controllers
 
             return PartialView("_Top5Partial", top5);
         }
-        // inside BidController, alongside your other actions:
+
 
         [HttpGet]
         public async Task<IActionResult> GetHighest(int itemId)

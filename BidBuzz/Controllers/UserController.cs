@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Models.ViewModels;
 using Models;
 using Utility;
+using System.Security.Claims;
 
 
 namespace Quillia.Areas.Admin.Controllers
@@ -17,11 +18,13 @@ namespace Quillia.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<IdentityUser> _signInManager;
 
-        public UserController(ApplicationDbContext db, UserManager<IdentityUser> userManager)
+        public UserController(ApplicationDbContext db, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager)
         {
             _db = db;
             _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Index()
@@ -229,5 +232,34 @@ namespace Quillia.Areas.Admin.Controllers
         }
 
         #endregion
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleRole(string returnUrl = null)
+        {
+           
+            var current = HttpContext.Session.GetString("_UserRole") ?? "Buyer";
+            var next = current == "Buyer" ? "Seller" : "Buyer";
+
+            
+            HttpContext.Session.SetString("_UserRole", next);
+
+           
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                
+                var identity = (ClaimsIdentity)User.Identity;
+                var oldClaim = identity.FindFirst(ClaimTypes.Role);
+                if (oldClaim != null) identity.RemoveClaim(oldClaim);
+                identity.AddClaim(new Claim(ClaimTypes.Role, next));
+
+                
+                await _signInManager.RefreshSignInAsync(user);
+            }
+
+            
+            returnUrl ??= Url.Action("Index", "Home");
+            return LocalRedirect(returnUrl);
+        }
     }
 }

@@ -178,12 +178,12 @@
                                                     <span class="input-group-text">$</span>
                                                     <input asp-for="BidModel.BidAmount" class="form-control form-control-lg"
                                                            placeholder="Enter your bid"
-                                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice)"
+                                                           min="@(Model.HighestAmount > 0 ? Model.HighestAmount + BiddingDefaults.Increment : Model.Item.StartingPrice +BiddingDefaults.Increment)"
                                                            step="0.01" />
                                                 </div>
                                                 <span asp-validation-for="BidModel.BidAmount" class="text-danger"></span>
                                                 <small class="form-text text-muted">
-                                                    Bid must be at least @(Model.HighestAmount > 0 ? (Model.HighestAmount + BiddingDefaults.Increment).ToString("C") : Model.Item.StartingPrice.ToString("C"))
+                                                    Bid must be at least @(Model.HighestAmount > 0 ? (Model.HighestAmount + BiddingDefaults.Increment).ToString("C") : (Model.Item.StartingPrice+BiddingDefaults.Increment).ToString("C"))
                                                 </small>
                                             </div>
                                             <input type="hidden" name="ItemId" value="@Model.Item.Id" />

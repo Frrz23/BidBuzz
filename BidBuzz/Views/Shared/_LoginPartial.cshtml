@@ -6,6 +6,18 @@
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))
 {
+        <li class="nav-item">
+            <form asp-area="Admin"
+                  asp-controller="User"
+                  asp-action="ToggleRole"
+                  method="post"
+                  class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-outline-warning ">
+                    Switch to @(Context.Session.GetString("_UserRole") == "Buyer" ? "Seller" : "Buyer")
+                </button>
+            </form>
+        </li>
     <li class="nav-item">
             <a class="nav-link text-dark" asp-controller="User" asp-action="MyProfile">
                 Hello @UserManager.GetUserName(User)!
