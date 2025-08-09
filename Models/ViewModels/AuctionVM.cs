@@ -8,8 +8,8 @@ namespace Models.ViewModels
 {
     public class AuctionVM
     {
-        public Auction Auction { get; set; }  // Full Auction model
-        public Item Item { get; set; }  // Item associated with the auction
+        public Auction Auction { get; set; }  
+        public Item Item { get; set; }  
 
     }
 }

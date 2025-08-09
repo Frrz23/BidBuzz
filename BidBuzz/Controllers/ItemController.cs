@@ -18,7 +18,7 @@ namespace BidBuzz.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IAuctionScheduleRepository _scheduleRepo;   // ← new
+        private readonly IAuctionScheduleRepository _scheduleRepo;   
         private readonly IAuctionRepository _auctionRepo;
 
 
@@ -27,7 +27,7 @@ namespace BidBuzz.Controllers
         {
             _unitOfWork = unitOfWork;
             _webHostEnvironment = webHostEnvironment;
-            _scheduleRepo = schedlueRepo; // Extract value from IOptions
+            _scheduleRepo = schedlueRepo; 
             _auctionRepo = auctionRepo;
         }
 
@@ -44,8 +44,6 @@ namespace BidBuzz.Controllers
          ? await _unitOfWork.Items.GetAllAsync(includeProperties: "Category,User,Auctions.Bids")
          : await _unitOfWork.Items.GetAllAsync(i => i.UserId == userId,
                                                includeProperties: "Category,User,Auctions.Bids");
-
-            // 2) Project into your VM
             var itemVMs = items.Select(i => {
                 var latestAuct = i.Auctions
                                    .OrderByDescending(a => a.StartTime)
@@ -59,7 +57,6 @@ namespace BidBuzz.Controllers
             })
             .ToList();
 
-            // 3) Filter
             IEnumerable<ItemVM> filtered = status switch
             {
                 "PendingApproval" => itemVMs.Where(vm => vm.AuctionStatus == AuctionStatus.PendingApproval),
@@ -83,7 +80,6 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> Upsert(int? id)
         {
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
-            // … your existing category-check logic …
 
             var itemVM = new ItemVM { Item = new Item() };
 
@@ -92,14 +88,13 @@ namespace BidBuzz.Controllers
                 var item = await _unitOfWork.Items.GetByIdAsync(id.Value);
                 if (item == null) return NotFound();
 
-                // Get how many times this item ended unsold
                 var unsoldAuctions = await _unitOfWork.Auctions
                     .GetAllAsync(a => a.ItemId == item.Id
                                      && a.Status == AuctionStatus.Unsold);
 
                 int usedAttempts = (await _unitOfWork.Auctions
-    .GetAllAsync(a => a.ItemId == item.Id && a.Status == AuctionStatus.Unsold))
-    .Count();
+                     .GetAllAsync(a => a.ItemId == item.Id && a.Status == AuctionStatus.Unsold))
+                     .Count();
 
                 itemVM = new ItemVM
                 {
@@ -108,13 +103,12 @@ namespace BidBuzz.Controllers
                                         .GetFirstOrDefaultAsync(a => a.ItemId == item.Id))
                                         ?.Status
                                   ?? AuctionStatus.PendingApproval,
-                    RemainingRelistAttempts = usedAttempts // ← just store attempts
+                    RemainingRelistAttempts = usedAttempts 
                 };
 
             }
             else
             {
-                // New item: all 3 attempts still available
                 itemVM.RemainingRelistAttempts = 3;
             }
 
@@ -128,12 +122,11 @@ namespace BidBuzz.Controllers
         public async Task<IActionResult> Upsert(ItemVM itemVM, IFormFile? file)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // 1) Check for duplicate name for this user
             var duplicate = await _unitOfWork.Items
                 .GetFirstOrDefaultAsync(i =>
                     i.UserId == userId
                     && i.Name.Trim().ToLower() == itemVM.Item.Name.Trim().ToLower()
-                    && i.Id != itemVM.Item.Id      // allow updating the same record
+                    && i.Id != itemVM.Item.Id      
                 );
 
             if (duplicate != null)
@@ -149,16 +142,14 @@ namespace BidBuzz.Controllers
 
                 if (itemVM.Item.Id == 0)
                 {
-                    // Only set UserId when creating a new item
                     itemVM.Item.UserId = userId;
                 }
                 else
                 {
-                    // Editing an existing item - preserve the original UserId
                     var existingItem = await _unitOfWork.Items.GetByIdAsNoTrackingAsync(itemVM.Item.Id);
                     if (existingItem != null)
                     {
-                        itemVM.Item.UserId = existingItem.UserId; // Keep original UserId
+                        itemVM.Item.UserId = existingItem.UserId; 
                     }
                 }
                 var schedule = await _scheduleRepo.GetScheduleAsync("Current")
@@ -171,7 +162,7 @@ namespace BidBuzz.Controllers
                  (DayOfWeek)startDayOfWeek,
                  schedule.StartHour,
                  DateTime.UtcNow,
-                 forceNextWeek: true // 👈 This is the fix
+                 forceNextWeek: true 
              );
 
                 var endTime = new AuctionSchedulerService(null).GetNextUtcForLocal(
@@ -194,7 +185,6 @@ namespace BidBuzz.Controllers
 
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
 
-                    // Delete old image if editing
                     if (!string.IsNullOrEmpty(itemVM.Item.ImageUrl) && itemVM.Item.Id != 0)
                     {
                         var oldImagePath = Path.Combine(wwwRootPath, itemVM.Item.ImageUrl.TrimStart('\\'));
@@ -211,13 +201,13 @@ namespace BidBuzz.Controllers
 
                     itemVM.Item.ImageUrl = @"\images\" + fileName;
                 }
-                else if (itemVM.Item.Id != 0) // Editing case, no new file uploaded
+                else if (itemVM.Item.Id != 0) 
                 {
                     var existingItem = await _unitOfWork.Items.GetByIdAsNoTrackingAsync(itemVM.Item.Id);
 
                     if (existingItem != null)
                     {
-                        itemVM.Item.ImageUrl = existingItem.ImageUrl; // Keep existing image
+                        itemVM.Item.ImageUrl = existingItem.ImageUrl; 
                     }
                 }
 
@@ -226,11 +216,9 @@ namespace BidBuzz.Controllers
                 if (itemVM.Item.Id == 0)
                 {
 
-                    // Creating new item
                     await _unitOfWork.Items.AddAsync(itemVM.Item);
                     await _unitOfWork.CompleteAsync();
 
-                    // Create auction for the item
                     var auction = new Auction
                     {
                         ItemId = itemVM.Item.Id,
@@ -242,7 +230,6 @@ namespace BidBuzz.Controllers
                 }
                 else
                 {
-                    // Editing existing item
                     var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == itemVM.Item.Id);
                     if (auction != null)
                     {
@@ -267,11 +254,10 @@ namespace BidBuzz.Controllers
             TempData["Error"] = "Something went wrong. Please fix the errors and try again.";
             var categories = await _unitOfWork.Categories.GetAllAsync(null);
             ViewBag.Categories = categories;
-            return View(itemVM); // Ensure correct type is returned
+            return View(itemVM); 
         }
 
 
-        // GET: Item/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
             var item = await _unitOfWork.Items.GetByIdAsync(id);
@@ -284,7 +270,6 @@ namespace BidBuzz.Controllers
             return View(item);
         }
 
-        // POST: Item/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -293,14 +278,12 @@ namespace BidBuzz.Controllers
             var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(a => a.ItemId == item.Id);
             if (item != null)
             {
-                // Delete the associated image file if it exists
                 var oldImagePath = Path.Combine(_webHostEnvironment.WebRootPath, item.ImageUrl.TrimStart('\\'));
                 if (System.IO.File.Exists(oldImagePath))
                 {
                     System.IO.File.Delete(oldImagePath);
                 }
 
-                // Now delete the item from the database
                 _unitOfWork.Items.Delete(item.Id);
                 if (auction != null)
                 {

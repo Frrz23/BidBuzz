@@ -43,7 +43,7 @@ namespace DataAccess.Repository
         {
             var increment = BiddingDefaults.Increment;
 
-            // 1) Check for any active auto-bids that can still beat the current highest bid
+            
             var autoBids = await _context.AutoBids
                 .Where(ab => ab.AuctionId == auctionId
                           && ab.IsActive
@@ -55,7 +55,7 @@ namespace DataAccess.Repository
 
             if (!autoBids.Any())
             {
-                // No challengers—deactivate every auto-bid whose MaxAmount <= currentHighestBid
+                
                 var exhausted = await _context.AutoBids
                     .Where(ab => ab.AuctionId == auctionId
                               && ab.IsActive
@@ -71,11 +71,11 @@ namespace DataAccess.Repository
                 return;
             }
 
-            // 2) There is at least one challenger—enter the bidding-war loop
+            
             bool continueBidding = true;
             while (continueBidding)
             {
-                // Re-fetch challengers excluding the current winner
+                
                 autoBids = await _context.AutoBids
                     .Where(ab => ab.AuctionId == auctionId
                               && ab.IsActive
@@ -96,31 +96,31 @@ namespace DataAccess.Repository
 
                 if (currentAutoBid != null)
                 {
-                    // Two auto-bidders face off
+                    
                     if (challenger.MaxAmount > currentAutoBid.MaxAmount)
                     {
-                        // Challenger can outbid current
+                        
                         nextBidAmount = Math.Min(challenger.MaxAmount, currentAutoBid.MaxAmount + increment);
                         nextHighestUserId = challenger.UserId;
 
-                        // If current's max is now exceeded, deactivate it
+                        
                         if (currentAutoBid.MaxAmount < nextBidAmount)
                             currentAutoBid.IsActive = false;
                     }
                     else
                     {
-                        // Current bidder stays ahead
+                        
                         nextBidAmount = Math.Min(currentAutoBid.MaxAmount, challenger.MaxAmount + increment);
                         nextHighestUserId = currentAutoBid.UserId;
 
-                        // If challenger can't go further, deactivate them
+                        
                         if (challenger.MaxAmount < nextBidAmount)
                             challenger.IsActive = false;
                     }
                 }
                 else
                 {
-                    // Only challenger has auto-bid
+                    
                     nextBidAmount = Math.Min(challenger.MaxAmount, currentHighestBid + increment);
                     nextHighestUserId = challenger.UserId;
                 }

@@ -40,7 +40,7 @@
     </ul>
 
     <div class="tab-content" id="paymentTabContent">
-        <!-- To Pay Tab -->
+        
         <div class="tab-pane fade show active" id="to-pay" role="tabpanel" aria-labelledby="to-pay-tab">
             @if (Model.ToPay.Any())
             {
@@ -62,7 +62,7 @@
                                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                                 var isBuyer = highestBid?.UserId == userId;
                                 var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
-                                // Fallback to user ID if FullName is null
+                                
                                 if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
                                 {
                                     winnerName = highestBid?.UserId ?? "Unknown User";
@@ -102,7 +102,7 @@
             }
         </div>
 
-        <!-- Paid Tab -->
+        
         <div class="tab-pane fade" id="paid" role="tabpanel" aria-labelledby="paid-tab">
             @if (Model.Paid.Any())
             {
@@ -122,7 +122,7 @@
                             {
                                 var highestBid = auction.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
                                 var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
-                                // Fallback to user ID if FullName is null
+                                
                                 if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
                                 {
                                     winnerName = highestBid?.UserId ?? "Unknown User";
@@ -158,7 +158,7 @@
 @section Scripts {
     <script>
         $(document).ready(function () {
-            // Enable tabs functionality
+            
             var triggerTabList = [].slice.call(document.querySelectorAll('#paymentTabs button'))
             triggerTabList.forEach(function (triggerEl) {
                 var tabTrigger = new bootstrap.Tab(triggerEl)

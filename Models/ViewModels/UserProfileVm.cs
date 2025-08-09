@@ -26,7 +26,7 @@ namespace Models.ViewModels
         [StringLength(100, ErrorMessage = "Address cannot exceed 100 characters.")]
         public string Address { get; set; }
 
-        // --- Password change fields (optional) ---
+        
         [DataType(DataType.Password)]
         [Display(Name = "Current Password")]
         public string CurrentPassword { get; set; }

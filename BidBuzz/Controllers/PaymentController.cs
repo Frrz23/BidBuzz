@@ -23,26 +23,23 @@ namespace BidBuzz.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        // GET: Payment - Show payments relevant to the user
         public async Task<IActionResult> Index()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var isAdmin = User.IsInRole(Roles.Admin);
 
-            // 1) pull in seller + bidder nav props via string‐based includes:
             var auctions = await _unitOfWork.Auctions.GetAllAsync(
                 a => a.Status == AuctionStatus.Sold &&
                      (a.PaymentStatus == PaymentStatus.ToPay || a.PaymentStatus == PaymentStatus.Paid),
                 includeProperties: "Item,Item.User,Bids.User"
             );
 
-            // Filter auctions visible to this user
             var visibleAuctions = auctions.Where(a =>
             {
                 var highestBid = a.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
-                return highestBid?.UserId == userId // won the auction
-                       || a.Item.UserId == userId  // seller
-                       || isAdmin;                // admin
+                return highestBid?.UserId == userId 
+                       || a.Item.UserId == userId  
+                       || isAdmin;               
             }).ToList();
 
             var viewModel = new PaymentVM
@@ -54,7 +51,6 @@ namespace BidBuzz.Controllers
             return View(viewModel);
         }
 
-        // GET: Payment/Pay/5
         public async Task<IActionResult> Pay(int auctionId)
         {
             var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(
@@ -92,7 +88,7 @@ namespace BidBuzz.Controllers
                     {
                         PriceData = new SessionLineItemPriceDataOptions
                         {
-                            UnitAmount = (long)(highestBid.Amount * 100), // Convert to cents
+                            UnitAmount = (long)(highestBid.Amount * 100), 
                             Currency = "usd",
                             ProductData = new SessionLineItemPriceDataProductDataOptions
                             {
@@ -111,13 +107,11 @@ namespace BidBuzz.Controllers
             var service = new SessionService();
             var session = await service.CreateAsync(options);
 
-            // Store the session ID in TempData for reference
             TempData["StripeSessionId"] = session.Id;
 
             return Redirect(session.Url);
         }
 
-        // GET: Payment/Success
         public async Task<IActionResult> Success(int auctionId)
         {
             var auction = await _unitOfWork.Auctions.GetFirstOrDefaultAsync(
@@ -136,7 +130,6 @@ namespace BidBuzz.Controllers
             return View(auction);
         }
 
-        // GET: Payment/Cancel
         public IActionResult Cancel(int auctionId)
         {
             TempData["Message"] = "Payment was canceled. You can try again later.";

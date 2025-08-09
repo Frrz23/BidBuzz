@@ -14,11 +14,11 @@ namespace Models
         public Item Item { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        // Status (Pending, Active, Completed, etc.)
+        
         public AuctionStatus Status { get; set; }
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
-        public int? RelistCount { get; set; } // Defaults to 0
+        public int? RelistCount { get; set; } 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
 
 

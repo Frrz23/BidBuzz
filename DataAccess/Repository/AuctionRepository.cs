@@ -25,18 +25,18 @@ namespace DataAccess.Repository
             _scheduleRepo = new AuctionScheduleRepository(context);
         }
 
-        // Already existing methods...
-        //private DateTime GetDateTimeForDayAndHour(string dayOfWeek, int hour, DateTime reference)
-        //{
-        //    // Get the DayOfWeek enum from string
-        //    var targetDay = Enum.Parse<DayOfWeek>(dayOfWeek);
+        
+        
+        
+        
+        
 
-        //    // Start from the beginning of this week (Sunday) and add days
-        //    int daysUntilTarget = ((int)targetDay - (int)reference.DayOfWeek + 7) % 7;
-        //    var targetDate = reference.Date.AddDays(daysUntilTarget).AddHours(hour);
+        
+        
+        
 
-        //    return targetDate;
-        //}
+        
+        
 
 
         public async Task<List<Auction>> GetAuctionsByStatusAsync(AuctionStatus status)
@@ -115,11 +115,11 @@ namespace DataAccess.Repository
             foreach (var auction in auctionsToEnd)
             {
                 auction.EndTime = now;
-                // Set the auction status based on whether there are bids
+                
                 if (auction.Bids.Any())
                 {
                     auction.Status = AuctionStatus.Sold;
-                    // When an auction is sold, set PaymentStatus to ToPay
+                    
                     auction.PaymentStatus = PaymentStatus.ToPay;
                 }
                 else
@@ -136,7 +136,7 @@ namespace DataAccess.Repository
 
         public async Task RelistUnsoldItemsAsync()
         {
-            //unsold catch
+            
             var unsoldAuctions = await _context.Auctions
                 .Include(a => a.Item)
                 .Where(a => a.Status == AuctionStatus.Unsold)
@@ -147,7 +147,7 @@ namespace DataAccess.Repository
 
                 auction.RelistCount = (auction.RelistCount ?? 0) + 1;
 
-                //remove if more than 3 
+                
                 if (auction.RelistCount >= 3)
                 {
                     Console.WriteLine($"Removing Auction {auction.Id} and Item {auction.Item?.Id} at RelistCount {auction.RelistCount}");

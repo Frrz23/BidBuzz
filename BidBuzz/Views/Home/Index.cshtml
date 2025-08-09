@@ -4,13 +4,13 @@
     var liveAuctions = Model.Where(item => item.Auctions.Any(a => a.Status ==AuctionStatus.InAuction));
     var upcomingAuctions = Model.Where(item => item.Auctions.Any(a => a.Status == AuctionStatus.Approved));
 
-    // Get schedule data from ViewBag
+    
     var currentWeekSchedule = ViewBag.CurrentWeekSchedule as Models.AuctionSchedule;
     var nextWeekSchedule = ViewBag.NextWeekSchedule as Models.AuctionSchedule;
 }
 
 <div class="container py-5">
-    <!-- Auction Schedule Section -->
+    
     <div class="row mb-4">
         <div class="col-12 text-center">
             <h2 class="fw-bold text-primary">
@@ -22,7 +22,7 @@
     </div>
 
     <div class="row g-4 mb-5">
-        <!-- Current Week Schedule -->
+        
         <div class="col-md-6">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-header bg-gradient text-white bg-primary d-flex justify-content-between align-items-center rounded-top">
@@ -56,7 +56,7 @@
             </div>
         </div>
 
-        <!-- Next Week Schedule -->
+        
         <div class="col-md-6">
             <div class="card h-100 shadow-sm border-0">
                 <div class="card-header bg-gradient text-white bg-success d-flex justify-content-between align-items-center rounded-top">
@@ -92,7 +92,7 @@
     </div>
 
 
-    <!-- Live Auctions Section -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="fw-bold text-primary">
@@ -141,7 +141,7 @@
         }
     </div>
 
-    <!-- Upcoming Auctions Section -->
+    
     <div class="row mb-4">
         <div class="col-12">
             <h2 class="fw-bold text-primary">

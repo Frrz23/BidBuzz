@@ -13,7 +13,6 @@
     </nav>
 
     <div class="row g-4">
-        <!-- Item Image Section -->
         <div class="col-lg-5">
             <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
                 <div class="position-relative">
@@ -45,7 +44,6 @@
             </div>
         </div>
 
-        <!-- Item Details Section -->
         <div class="col-lg-7">
             <div class="card border-0 shadow-sm rounded-3 h-100">
                 <div class="card-body p-4">
@@ -80,7 +78,6 @@
                         </div>
                     </div>
 
-                    <!-- Bid Information Card -->
                     <div class="card mb-4 border-0 bg-light">
                         <div class="card-body p-4">
                             <div class="row">
@@ -113,7 +110,6 @@
                         </div>
                     </div>
 
-                    <!-- Auto Bid Status - ACTIVE -->
                     @if (User.Identity.IsAuthenticated && Model.HasActiveAutoBid)
                     {
                         <div class="card border-0 shadow-sm mb-4 rounded-3">
@@ -145,7 +141,6 @@
                         </div>
                     }
 
-                    <!-- Bid Form Options -->
                     @if (!Model.IsOwner&&(UserAccessHelper.IsBuyer(Context, User) || UserAccessHelper.IsAdmin(User)) && Model.AuctionStatus == AuctionStatus.InAuction)
                     {
                         @if (!Model.HasActiveAutoBid)
@@ -155,7 +150,6 @@
                                     <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Bidding Options</h5>
                                 </div>
                                 <div class="card-body p-4">
-                                    <!-- Bidding Option Selector -->
                                     <div class="form-check form-switch mb-4">
                                         <input type="checkbox" class="form-check-input" id="bidTypeToggle"
                                                style="width: 3em; height: 1.5em;" />
@@ -169,7 +163,6 @@
                                     </div>
                                     <hr class="my-3">
 
-                                    <!-- Manual Bid Form -->
                                     <div id="manualBidSection">
                                         <form method="post" action="@Url.Action("PlaceBid", "Bid")">
                                             <div class="form-group mb-3">
@@ -193,7 +186,6 @@
                                         </form>
                                     </div>
 
-                                    <!-- Auto Bid Form -->
                                     <div id="autoBidSection" style="display: none;">
                                         <div class="d-flex align-items-start mb-3">
                                             <i class="bi bi-info-circle text-info mt-1 me-2 fs-5"></i>
@@ -248,7 +240,6 @@
                         </div>
                     }
 
-                    <!-- Tab Navigation -->
                     <ul class="nav nav-tabs" id="itemTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab" aria-controls="description" aria-selected="true">
@@ -262,7 +253,6 @@
                         </li>
                     </ul>
 
-                    <!-- Tab Content -->
                     <div class="tab-content p-4 bg-light rounded-bottom mb-0" id="itemTabsContent">
                         <div class="tab-pane fade show active" id="description" role="tabpanel" aria-labelledby="description-tab">
                             <p class="mb-0">@Model.Item.Description</p>
@@ -282,7 +272,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
 <script>
-    // Toggle between auto bid and manual bid sections
     const bidTypeToggle = document.getElementById('bidTypeToggle');
     const autoBidSection = document.getElementById('autoBidSection');
     const manualBidSection = document.getElementById('manualBidSection');
@@ -293,7 +282,6 @@
     if (bidTypeToggle) {
         bidTypeToggle.addEventListener('change', function() {
             if (this.checked) {
-                // Auto Bidding selected
                 autoBidSection.style.display = 'block';
                 manualBidSection.style.display = 'none';
                 toggleLabelText.innerHTML = '<strong>Auto Bidding</strong>';
@@ -301,7 +289,6 @@
                 toggleBadge.className = 'badge bg-success ms-2';
                 toggleDescription.textContent = 'Let the system bid for you up to your maximum amount';
             } else {
-                // Manual Bidding selected
                 autoBidSection.style.display = 'none';
                 manualBidSection.style.display = 'block';
                 toggleLabelText.innerHTML = '<strong>Manual Bidding</strong>';
@@ -320,7 +307,6 @@
     connection.start().then(() => {
         console.log("SignalR connected");
 
-        // Initial load
         loadTop5Bids();
         loadAutoBidStatus();
     });
@@ -329,7 +315,6 @@
         loadTop5Bids();
     });
 
-    // Add this new event handler for auto-bid updates
     connection.on("ReceiveAutoBidUpdate", function (itemId) {
         loadAutoBidStatus();
     });
@@ -351,49 +336,49 @@
             });
     }
 
-    // Add this new function to check auto-bid status
+    
     function loadAutoBidStatus() {
         fetch(`/AutoBid/GetAutoBidStatus?itemId=${itemId}`)
             .then(res => res.json())
             .then(data => {
-                // Find both auto-bid sections (if they exist)
+                
                 const autoBidActiveSection = document.querySelector('.card-header.bg-success')?.closest('.card');
                 const biddingOptionsSection = document.querySelector('.card-header.bg-primary')?.closest('.card');
 
                 if (data.hasActiveAutoBid) {
-                    // User has an active auto-bid
+                    
                     if (!autoBidActiveSection) {
-                        // If the auto-bid active section doesn't exist, reload the page to show it
+                        
                         window.location.reload();
                         return;
                     }
 
-                    // Show the active auto-bid section
+                    
                     autoBidActiveSection.style.display = 'block';
 
-                    // Update maximum bid amount display if present
+                    
                     const maxAmountElement = document.querySelector('p.mb-3.ms-5 strong');
                     if (maxAmountElement) {
                         maxAmountElement.textContent = data.maxAmountFormatted;
                     }
 
-                    // Hide bidding options if visible
+                    
                     if (biddingOptionsSection) {
                         biddingOptionsSection.style.display = 'none';
                     }
                 } else {
-                    // User doesn't have an active auto-bid
-                    // Hide active auto-bid section if visible
+                    
+                    
                     if (autoBidActiveSection) {
                         autoBidActiveSection.style.display = 'none';
                     }
 
-                    // Show bidding options if they exist
+                    
                     if (biddingOptionsSection) {
                         biddingOptionsSection.style.display = 'block';
                     } else if (autoBidActiveSection) {
-                        // If bidding options don't exist but we were showing an auto-bid section,
-                        // we need to reload to show the bidding options
+                        
+                        
                         window.location.reload();
                     }
                 }

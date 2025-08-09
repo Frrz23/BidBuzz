@@ -97,7 +97,6 @@ namespace BidBuzz.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -105,7 +104,6 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        // Change in the OnPostAsync method in LoginModel.cs
         public async Task<IActionResult> OnPostAsync(string userType, string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
@@ -118,7 +116,7 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                 {
                     throw new Exception("SignInManager is not initialized.");
                 }
-                userType ??= "Buyer"; // Default to Buyer if nothing is received
+                userType ??= "Buyer"; 
                 if (userType != "Buyer" && userType != "Seller")
                 {
                     ModelState.AddModelError(string.Empty, "Invalid user type selected.");
@@ -133,7 +131,6 @@ namespace BidBuzz.Areas.Identity.Pages.Account
 
                 _logger.LogInformation("Session Name: {SessionName}", name);
 
-                // First check if the user exists
                 var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
                 if (user == null)
                 {
@@ -141,8 +138,7 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                     return Page();
                 }
 
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
                 if (result.Succeeded)
                 {
@@ -160,7 +156,6 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    // Password doesn't match
                     ModelState.AddModelError(string.Empty, "Incorrect password. Please try again.");
                     return Page();
                 }

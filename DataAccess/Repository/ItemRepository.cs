@@ -24,8 +24,8 @@ namespace DataAccess.Repository
         public async Task<IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status)
         {
             return await _context.Items
-                .Include(i => i.Auctions) // Ensure Auctions are loaded
-                .Where(i => i.Auctions.Any(a => a.Status == status)) // Check if any auction matches the status
+                .Include(i => i.Auctions) 
+                .Where(i => i.Auctions.Any(a => a.Status == status)) 
                 .ToListAsync();
         }
 
@@ -35,12 +35,12 @@ namespace DataAccess.Repository
             _context.Items.Add(item);
             await _context.SaveChangesAsync();
 
-            // Create Auction entry automatically
+            
             var auction = new Auction
             {
                 ItemId = item.Id,
-                Status = AuctionStatus.PendingApproval,  // Initially Pending Approval
-                StartTime = null, // Will be set when approved
+                Status = AuctionStatus.PendingApproval,  
+                StartTime = null, 
                 EndTime = null
             };
 

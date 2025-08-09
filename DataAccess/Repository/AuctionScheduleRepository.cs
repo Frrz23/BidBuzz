@@ -82,7 +82,7 @@ namespace DataAccess.Repository
             {
                 next.Week = "Current";
 
-                // Create a clone of this as the new "Next"
+                
                 var clonedNext = new AuctionSchedule
                 {
                     Week = "Next",

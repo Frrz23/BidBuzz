@@ -21,7 +21,6 @@
                                     <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;"></span>
                                 </label>
                                 <span class="ms-2 fw-bold fs-5">Seller</span>
-                                <!-- Hidden input to store the user role -->
                                 <input type="hidden" id="userType" name="userType" value="Buyer">
                             </div>
                         </div>
@@ -69,11 +68,11 @@
         document.getElementById("toggleSwitch").addEventListener("change", function () {
             let role = this.checked ? "Seller" : "Buyer";
             document.getElementById("toggleLabel").textContent = role;
-            document.getElementById("userType").value = role; // Set hidden input value
+            document.getElementById("userType").value = role; 
         });
     </script>
     <style>
-        /* Custom toggle switch styling */
+       
         .switch .slider:before {
             position: absolute;
             content: "";

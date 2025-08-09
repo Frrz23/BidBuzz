@@ -28,10 +28,10 @@ namespace BidBuzz.Services
                 localNow.Year, localNow.Month, localNow.Day,
                 0, 0, 0, DateTimeKind.Local);
 
-            // days until the _first_ occurrence
+            
             int daysUntil = ((int)targetDay - (int)localNow.DayOfWeek + 7) % 7;
 
-            // if we’re scheduling for “Next” after rotation add 7 days
+            
 
             if (forceNextWeek)
                 daysUntil += 7;
@@ -70,14 +70,14 @@ namespace BidBuzz.Services
                 forceNextWeek
             );
 
-            // If we’re bootstrapping (forceNextWeek==false) but we’re already past this week’s end, bail out
+            
             if (!forceNextWeek && nowUtc > endUtc)
                 return;
 
             var monitor = JobStorage.Current.GetMonitoringApi();
             var scheduledJobs = monitor.ScheduledJobs(0, int.MaxValue);
 
-            // === NEW: only check for any pending StartAuctionJob, ignore exact time ===
+            
             bool startExists = scheduledJobs.Any(j =>
                 j.Value.Job.Method.Name == nameof(StartAuctionJob) &&
                 j.Value.EnqueueAt > nowUtc);
@@ -85,7 +85,7 @@ namespace BidBuzz.Services
             if (!startExists)
                 BackgroundJob.Schedule(() => StartAuctionJob(), startUtc);
 
-            // === NEW: only check for any pending EndAuctionJob ===
+            
             bool endExists = scheduledJobs.Any(j =>
                 j.Value.Job.Method.Name == nameof(EndAuctionJob) &&
                 j.Value.EnqueueAt > nowUtc);

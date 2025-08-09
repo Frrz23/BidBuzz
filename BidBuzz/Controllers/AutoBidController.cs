@@ -48,13 +48,11 @@ namespace BidBuzz.Controllers
                 return RedirectToAction("Details", "Home", new { itemId });
             }
 
-            // Get current highest bid
             var bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
             var highestBid = bids.FirstOrDefault();
             var currentHighestAmount = highestBid?.Amount ?? item.StartingPrice;
             var conflict = await _unitOfWork.AutoBids.ExistsActiveAutoBidWithMaxAsync(auction.Id, maxBidAmount, userId);
 
-            // Check if maximum bid is enough
             if (maxBidAmount <= currentHighestAmount)
             {
                 TempData["Error"] = $"Your maximum bid must be higher than the current highest bid ({currentHighestAmount:C}).";
@@ -67,17 +65,14 @@ namespace BidBuzz.Controllers
                     "Please choose a different maximum.";
                 return RedirectToAction("Details", "Home", new { itemId });
             }
-            // Check if user already has an active auto bid for this auction
             var existingAutoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
 
             if (existingAutoBid != null)
             {
-                // Update existing auto bid
                 existingAutoBid.MaxAmount = maxBidAmount;
             }
             else
             {
-                // Create new auto bid
                 var autoBid = new AutoBid
                 {
                     AuctionId = auction.Id,
@@ -89,10 +84,8 @@ namespace BidBuzz.Controllers
                 await _unitOfWork.AutoBids.AddAsync(autoBid);
             }
 
-            // If the user is not the current highest bidder, place a bid for them
             if (highestBid == null || highestBid.UserId != userId)
             {
-                // Place initial bid with minimum increment
                 var initialBidAmount = Math.Min(maxBidAmount, currentHighestAmount + increment);
                 var newBid = new Bid
                 {
@@ -107,9 +100,8 @@ namespace BidBuzz.Controllers
 
             await _unitOfWork.CompleteAsync();
 
-            // Process any competing auto bids
             bids = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
-            highestBid = bids.FirstOrDefault(); // Get updated highest bid
+            highestBid = bids.FirstOrDefault(); 
 
             if (highestBid != null)
             {
@@ -121,10 +113,10 @@ namespace BidBuzz.Controllers
                 await _unitOfWork.CompleteAsync();
             }
 
-            // Notify clients about bid updates
+            
             await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
 
-            // Send auto-bid update notification
+            
             await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
 
             TempData["Success"] = "Your auto bid has been set!";
@@ -150,7 +142,6 @@ namespace BidBuzz.Controllers
                 await _unitOfWork.AutoBids.DeactivateAsync(autoBid.Id);
                 await _unitOfWork.CompleteAsync();
 
-                // Send auto-bid update notification
                 await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
 
                 TempData["Success"] = "Your auto bid has been canceled.";

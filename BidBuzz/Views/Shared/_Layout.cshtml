@@ -103,7 +103,6 @@
         </main>
     </div>
 
-        <!-- Footer -->
     <footer class="modern-footer mt-5" >
         <div class="footer-container">
             <div class="footer-section brand">
@@ -142,9 +141,6 @@
     </footer>
 
 
-        <!-- Footer -->
- 
-    <!-- End of .container -->
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
@@ -158,7 +154,6 @@
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
-        // Initialize toastr notifications
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
@@ -167,10 +162,8 @@
         };
 
         $(document).ready(function() {
-            // Initialize any datatables
             $('.table').DataTable();
 
-            // Display any TempData messages with toastr
         @if (TempData["Success"] != null)
         {
             <text>

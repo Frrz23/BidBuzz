@@ -194,7 +194,7 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        // Confirmation for approval status change for admin users
+        
         document.querySelectorAll('input[name="AuctionStatus"]').forEach(radio => {
             radio.addEventListener('change', function() {
                 if (!confirm("Are you sure you want to change the approval status?")) {
@@ -203,14 +203,14 @@
             });
         });
 
-        // Validate form to ensure image is uploaded
+        
         function ValidateForm() {
-            // Get the hidden Item.Id value
+            
             var itemId = parseInt(document.querySelector('input[name="Item.Id"]').value);
-            // Get the file input element
+            
             var fileInput = document.getElementById('imageInput');
 
-            // Only enforce image validation if a new item or a file is selected for an existing item
+            
             if (itemId === 0 || fileInput.value !== "") {
                 if (document.getElementById('ImageUrl').value === "Error") {
                     document.getElementById('imageError').innerText = 'Please upload a valid image.';
@@ -220,17 +220,17 @@
             return true;
         }
 
-        // Preview image and validate file size and dimensions
+        
         document.getElementById('imageInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             const imageError = document.getElementById('imageError');
             const previewPhoto = document.getElementById('previewphoto');
             const imagePlaceholder = document.getElementById('image-placeholder');
-            imageError.innerText = ""; // Clear previous errors
+            imageError.innerText = ""; 
 
             if (file) {
-                // Check file size (1MB maximum)
-                if (file.size > 1 * 1024 * 1024) {  // 1MB = 1 * 1024 * 1024 bytes
+                
+                if (file.size > 1 * 1024 * 1024) {  
                     imageError.innerText = "Image size must be less than 1MB.";
                     e.target.value = "";
                     previewPhoto.src = "";
@@ -244,7 +244,7 @@
                 reader.onload = function (event) {
                     const img = new Image();
                     img.onload = function () {
-                        // Check if dimensions are between 400x400 and 1200x1200
+                        
                         if (img.width < 400 || img.height < 400 || img.width > 1200 || img.height > 1200) {
                             imageError.innerText = "Image dimensions must be between 400x400 and 1200x1200 pixels.";
                             e.target.value = "";
@@ -254,7 +254,7 @@
                             document.getElementById('ImageUrl').value = "Error";
                             return;
                         }
-                        // If valid, set the preview and update hidden field to indicate a valid image
+                        
                         previewPhoto.src = event.target.result;
                         previewPhoto.style.display = "block";
                         if (imagePlaceholder) imagePlaceholder.style.display = "none";

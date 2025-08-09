@@ -115,9 +115,7 @@ namespace BidBuzz.Areas.Identity.Pages.Account
             [Range(18, 120, ErrorMessage = "Age must be between 18 and 120.")]
             public int Age { get; set; }
             [Required(ErrorMessage = "Phone Number is required.")]
-            // only digits allowed
             [RegularExpression(@"^[0-9]+$", ErrorMessage = "Please enter numbers only.")]
-            // exactly 10 digits
             [StringLength(10, MinimumLength = 10, ErrorMessage = "Phone number must be exactly 10 digits.")]
             public string? PhoneNumber { get; set; }
             [Required(ErrorMessage = "Address is required.")]
@@ -159,7 +157,6 @@ namespace BidBuzz.Areas.Identity.Pages.Account
                 if (existingUsers.Any())
                 {
                     ModelState.AddModelError("Input.Full_Name", "This name is already registered. Please use a different name.");
-                    // Re-populate role list
                     Input.RolesList = _roleManager.Roles.Select(u => u.Name).Select(x => new SelectListItem
                     {
                         Text = x,

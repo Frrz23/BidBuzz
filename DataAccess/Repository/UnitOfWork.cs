@@ -7,7 +7,7 @@ using Models;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly ApplicationDbContext _context;
-    private readonly ILogger<AuctionRepository> _logger;  // Add logger
+    private readonly ILogger<AuctionRepository> _logger;  
 
     public ICategoryRepository Categories { get; private set; }
     public IItemRepository Items { get; private set; }
@@ -21,14 +21,14 @@ public class UnitOfWork : IUnitOfWork
     public UnitOfWork(ApplicationDbContext context, ILogger<AuctionRepository> logger)
     {
         _context = context;
-        _logger = logger; // Store logger instance
+        _logger = logger; 
 
         Categories = new CategoryRepository(_context);
         Items = new ItemRepository(_context);
         Bids = new BidRepository(_context);
-        Auctions = new AuctionRepository(_context); // Pass logger
+        Auctions = new AuctionRepository(_context); 
         AuctionSchedules=new AuctionScheduleRepository(_context);
-        AutoBids = new AutoBidRepository(_context, Bids); // <--- Fix this line
+        AutoBids = new AutoBidRepository(_context, Bids); 
 
 
     }

@@ -107,15 +107,15 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function() {
-            // Toggle password section visibility based on checkbox
+            
             $("#changePasswordCheckbox").on("change", function() {
                 var isChecked = $(this).prop("checked");
                 $(".password-section").toggle(isChecked);
 
-                // Enable/disable password fields
+                
                 $(".pwd-field").prop("disabled", !isChecked);
 
-                // Clear validation errors when unchecked
+                
                 if (!isChecked) {
                     $(".pwd-field").val("").trigger("change");
                     $(".pwd-error").addClass("d-none");
@@ -124,50 +124,50 @@
                 }
             });
 
-            // Handle form submission with client-side validation
+            
             $("#profileForm").on("submit", function(e) {
-                // First validate the regular form fields using default validation
+                
                 if (!$(this).valid()) {
                     return false;
                 }
 
-                // Only validate password fields if checkbox is checked
+                
                 var changePassword = $("#changePasswordCheckbox").prop("checked");
                 if (!changePassword) {
-                    // Allow submission without password validation
+                    
                     return true;
                 }
 
-                // Now handle password validation
+                
                 var currentPassword = $("#CurrentPassword").val();
                 var newPassword = $("#NewPassword").val();
                 var confirmPassword = $("#ConfirmPassword").val();
 
-                // Clear previous error messages
+                
                 $(".pwd-error").addClass("d-none");
 
-                // Validate all password fields when checkbox is checked
+                
                 var isValid = true;
 
-                // Check current password
+                
                 if (!currentPassword) {
                     $(".pwd-error[data-for='CurrentPassword']").removeClass("d-none");
                     isValid = false;
                 }
 
-                // Check new password
+                
                 if (!newPassword || newPassword.length < 6) {
                     $(".pwd-error[data-for='NewPassword']").removeClass("d-none");
                     isValid = false;
                 }
 
-                // Check confirm password
+                
                 if (newPassword !== confirmPassword) {
                     $(".pwd-error[data-for='ConfirmPassword']").removeClass("d-none");
                     isValid = false;
                 }
 
-                // Only submit if all validations pass
+                
                 if (!isValid) {
                     e.preventDefault();
                     return false;
@@ -176,16 +176,16 @@
                 return true;
             });
 
-            // Clear password validation errors when user modifies any password field
+            
             $(".pwd-field").on("input", function() {
                 var field = $(this).attr("id");
                 $(".pwd-error[data-for='" + field + "']").addClass("d-none");
             });
 
-            // When the page loads, clear all password fields to prevent autofill issues
-            // This runs after the browser's autofill happens
+            
+            
             setTimeout(function() {
-                // Only clear if all fields have values (likely from autofill)
+                
                 if ($("#CurrentPassword").val() && $("#NewPassword").val() && $("#ConfirmPassword").val()) {
                     $(".pwd-field").val("").trigger("change");
                 }

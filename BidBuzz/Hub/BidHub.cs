@@ -12,8 +12,7 @@ namespace BidBuzz.Hubs
 
         public async Task SendAutoBidUpdate(int itemId)
         {
-            // This will broadcast the auto-bid update to all clients in the item group
-            // The client-side code will determine if this update is relevant to the current user
+
             await Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
         }
 

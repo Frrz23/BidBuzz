@@ -25,13 +25,13 @@ namespace DataAccess.Repository
         {
             IQueryable<T> query = _dbSet;
 
-            // Apply filter only if provided
+            
             if (filter != null)
             {
                 query = query.Where(filter);
             }
 
-            // Handle includes (comma-separated)
+            
             if (!string.IsNullOrWhiteSpace(includeProperties))
             {
                 foreach (var includeProperty in includeProperties.Split(',', StringSplitOptions.RemoveEmptyEntries))

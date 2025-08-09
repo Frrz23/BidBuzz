@@ -4,10 +4,12 @@
 @inject UserManager<IdentityUser> UserManager
 
 <ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-        <li class="nav-item">
-            <form asp-area="Admin"
+    @if (SignInManager.IsSignedIn(User))
+    {
+        @if (!User.IsInRole(Roles.Admin))
+        {
+            <li class="nav-item">
+                <form asp-area="Admin"
                   asp-controller="User"
                   asp-action="ToggleRole"
                   method="post"
@@ -18,6 +20,7 @@
                 </button>
             </form>
         </li>
+        }
     <li class="nav-item">
             <a class="nav-link text-dark" asp-controller="User" asp-action="MyProfile">
                 Hello @UserManager.GetUserName(User)!

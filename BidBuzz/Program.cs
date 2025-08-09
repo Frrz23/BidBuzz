@@ -23,7 +23,6 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information); 
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDistributedMemoryCache();
 
@@ -57,7 +56,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddRazorPages();
 builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
-builder.Services.AddScoped<IBidRepository, BidRepository>(); // Add this line
+builder.Services.AddScoped<IBidRepository, BidRepository>(); 
 builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("dbcs")));
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<AuctionSchedulerService>();
@@ -66,7 +65,6 @@ builder.Services.AddScoped<IAuctionScheduleRepository, AuctionScheduleRepository
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -77,7 +75,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
 app.UseRouting();
-app.UseHangfireDashboard();  // Enables the Hangfire dashboard
+app.UseHangfireDashboard(); 
 
 using (var scope = app.Services.CreateScope())
 {
@@ -87,12 +85,10 @@ using (var scope = app.Services.CreateScope())
 
     await schedRepo.SeedInitialScheduleAsync();
 
-    // load the “Current” schedule
     var sched = await schedRepo.GetScheduleAsync("Current");
     if (sched != null)
     {
         var nowUtc = DateTime.UtcNow;
-        // compute this week’s end
         var endUtc = auctionScheduler
             .GetNextUtcForLocal(
                Enum.Parse<DayOfWeek>(sched.EndDay),
@@ -117,7 +113,6 @@ using (var scope = app.Services.CreateScope())
             }
         }
 
-        // otherwise, let the EndAuctionJob path (below) rotate+schedule the next week
     }
 }
 
@@ -126,10 +121,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
-// Use UTC for time-based operations (this isn't strictly necessary unless needed elsewhere)
 app.Use(async (context, next) =>
 {
-    // Force UTC time on all request/response headers (optional, based on your needs)
     context.Response.Headers["Time-Zone"] = "UTC";
     await next();
 });

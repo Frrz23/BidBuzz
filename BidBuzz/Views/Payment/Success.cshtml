@@ -3,7 +3,7 @@
     ViewData["Title"] = "Payment Successful";
     var highestBid = Model.Bids.OrderByDescending(b => b.Amount).FirstOrDefault();
     var winnerName = highestBid?.User?.Full_Name ?? "Unknown User";
-    // Fallback to user ID if FullName is null
+    
     if (string.IsNullOrEmpty(winnerName) || winnerName == "Unknown User")
     {
         winnerName = highestBid?.UserId ?? "Unknown User";

@@ -73,7 +73,6 @@ namespace BidBuzz.Controllers
                 return View("~/Views/Home/Details.cshtml", model);
             }
 
-            // Check for auto bidding
             if (enableAutoBid && maxBidAmount > 0)
             {
                 if (maxBidAmount < bidAmount)
@@ -86,7 +85,6 @@ namespace BidBuzz.Controllers
                     return View("~/Views/Home/Details.cshtml", model);
                 }
 
-                // Create or update auto bid
                 var existingAutoBid = await _unitOfWork.AutoBids.GetActiveAutoBidForUserAsync(auction.Id, userId);
 
                 if (existingAutoBid != null)
@@ -106,7 +104,6 @@ namespace BidBuzz.Controllers
                 }
             }
 
-            // Create the bid
             var newBid = new Bid
             {
                 Amount = bidAmount,
@@ -118,14 +115,12 @@ namespace BidBuzz.Controllers
             await _unitOfWork.Bids.AddAsync(newBid);
             await _unitOfWork.CompleteAsync();
 
-            // Process auto bids if there are any
             if (highestBid != null && highestBid.UserId != userId)
             {
                 await _unitOfWork.AutoBids.ProcessAutoBidsAsync(auction.Id, bidAmount, userId);
                 await _unitOfWork.CompleteAsync();
             }
 
-            // Notify clients
             await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
 
             TempData["Success"] = "Your bid has been placed successfully!";

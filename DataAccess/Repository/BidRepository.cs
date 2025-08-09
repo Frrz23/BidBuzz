@@ -26,7 +26,7 @@ namespace DataAccess.Repository
         {
             return await _context.Bids
                 .Where(b => b.AuctionId == auctionId)
-                .Include(b => b.User) // Ensure the user is loaded
+                .Include(b => b.User) 
                 .OrderByDescending(b => b.Amount)
                 .ToListAsync();
         }

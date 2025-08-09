@@ -15,7 +15,7 @@ namespace Models
         public decimal Amount { get; set; }
         public DateTime BidTime { get; set; } = DateTime.UtcNow;
         public string? UserId { get; set; }   
-        public ApplicationUser? User { get; set; }  // Navigation property
+        public ApplicationUser? User { get; set; }  
 
 
 

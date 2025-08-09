@@ -54,10 +54,8 @@ namespace Quillia.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MyProfile(UserProfileVm vm, bool changePassword = false)
         {
-            // We'll handle basic profile validation normally
             bool profileValid = true;
 
-            // Check for duplicate Full_Name
             var duplicateName = await _db.ApplicationUsers
                 .AnyAsync(u => u.Full_Name == vm.Full_Name && u.Id != vm.Id);
 
@@ -67,7 +65,6 @@ namespace Quillia.Areas.Admin.Controllers
                 profileValid = false;
             }
 
-            // Validate all non-password fields
             if (string.IsNullOrWhiteSpace(vm.Full_Name) ||
                 vm.Age < 0 || vm.Age > 120 ||
                 string.IsNullOrWhiteSpace(vm.PhoneNumber) ||
@@ -82,11 +79,9 @@ namespace Quillia.Areas.Admin.Controllers
                 return View(vm);
             }
 
-            // At this point, profile data is valid
             var user = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.Id == vm.Id);
             if (user == null) return NotFound();
 
-            // Update basic profile fields
             user.Full_Name = vm.Full_Name;
             user.Age = vm.Age;
             user.PhoneNumber = vm.PhoneNumber;
@@ -94,32 +89,26 @@ namespace Quillia.Areas.Admin.Controllers
 
             await _db.SaveChangesAsync();
 
-            // Check if the hidden input for change password is true (checkbox was checked)
             bool passwordChangeRequested = !string.IsNullOrWhiteSpace(vm.CurrentPassword) ||
                                         !string.IsNullOrWhiteSpace(vm.NewPassword) ||
                                         !string.IsNullOrWhiteSpace(vm.ConfirmPassword);
 
-            // Only process password change if requested via checkbox
             if (passwordChangeRequested)
             {
-                // Double-check that all required fields are provided
                 if (string.IsNullOrWhiteSpace(vm.CurrentPassword) ||
                     string.IsNullOrWhiteSpace(vm.NewPassword) ||
                     string.IsNullOrWhiteSpace(vm.ConfirmPassword))
                 {
-                    // Client-side validation should prevent this, but just in case
                     TempData["error"] = "All password fields are required to change password.";
                     return View(vm);
                 }
 
-                // Check that passwords match (again, client-side validation should catch this)
                 if (vm.NewPassword != vm.ConfirmPassword)
                 {
                     TempData["error"] = "New password and confirmation do not match.";
                     return View(vm);
                 }
 
-                // Attempt to change password
                 var identityUser = await _userManager.FindByIdAsync(vm.Id);
                 var pwdResult = await _userManager.ChangePasswordAsync(
                     identityUser,
@@ -129,7 +118,6 @@ namespace Quillia.Areas.Admin.Controllers
 
                 if (!pwdResult.Succeeded)
                 {
-                    // Show specific error message from Identity
                     TempData["error"] = "Password change failed: " +
                         string.Join(", ", pwdResult.Errors.Select(e => e.Description));
                     return View(vm);
@@ -218,12 +206,10 @@ namespace Quillia.Areas.Admin.Controllers
 
             if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
             {
-                // Unlock user
                 objFromDb.LockoutEnd = DateTime.Now;
             }
             else
             {
-                // Lock user
                 objFromDb.LockoutEnd = DateTime.Now.AddYears(1000);
             }
 

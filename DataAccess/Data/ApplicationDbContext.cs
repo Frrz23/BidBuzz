@@ -28,7 +28,7 @@ namespace DataAccess.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);             // ensures Identity’s database schema (tables, relationships, indexes) is properly configured.
+            base.OnModelCreating(modelBuilder);             
             modelBuilder.Entity<AuctionSchedule>().HasData(
              new AuctionSchedule
              {
@@ -65,37 +65,37 @@ namespace DataAccess.Data
 
 
             
-            // Item Configuration
+            
            
             modelBuilder.Entity<Item>()
                 .Property(i => i.StartingPrice)
-                .HasColumnType("decimal(18,2)"); // Decimal configuration for pricing
+                .HasColumnType("decimal(18,2)"); 
            
 
 
 
 
 
-            // Bid Configuration
+            
             modelBuilder.Entity<Bid>()
-                .HasKey(b => b.Id); // Primary key
+                .HasKey(b => b.Id); 
             modelBuilder.Entity<Bid>()
                 .Property(b => b.Amount)
-                .HasColumnType("decimal(18,2)"); // Decimal configuration for bid amount
+                .HasColumnType("decimal(18,2)"); 
             modelBuilder.Entity<Bid>()
                 .HasOne(b => b.Auction)
                 .WithMany(a => a.Bids)
                 .HasForeignKey(b => b.AuctionId)
-                .OnDelete(DeleteBehavior.Cascade);  // If auction is deleted, its bids are also deleted.
+                .OnDelete(DeleteBehavior.Cascade);  
 
-            // Auction Configuration
+            
             modelBuilder.Entity<Auction>()
-                .HasKey(a => a.Id); // Primary key
+                .HasKey(a => a.Id); 
             modelBuilder.Entity<Auction>()
                 .HasOne(a => a.Item)
                 .WithMany(i => i.Auctions) 
                 .HasForeignKey(a => a.ItemId)
-                .OnDelete(DeleteBehavior.Cascade);  // If item is deleted, its auctions are also deleted.
+                .OnDelete(DeleteBehavior.Cascade);  
             modelBuilder.Entity<Auction>()
                 .Property(a => a.Status)
                 .HasConversion<int>();  
