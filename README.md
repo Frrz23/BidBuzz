@@ -33,6 +33,9 @@ Frontend: HTML, CSS, Bootstrap, JavaScript
 
 Database: Microsoft SQL Server
 
+IDE/Tools: Visual Studio, Git
+
+
 📸 Screenshot
 
 <img width="1208" height="765" alt="Screenshot 2025-08-12 144431" src="https://github.com/user-attachments/assets/4788c195-76c1-43bb-8bf1-e459dffda658" />
@@ -51,5 +54,4 @@ Database: Microsoft SQL Server
 <img width="1889" height="923" alt="Screenshot 2025-08-12 144103" src="https://github.com/user-attachments/assets/b6a98a40-9650-4b54-bb49-b59ed070347c" />
 
 
-IDE/Tools: Visual Studio, Git
 
