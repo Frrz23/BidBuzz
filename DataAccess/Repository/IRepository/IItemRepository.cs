@@ -11,9 +11,10 @@ namespace DataAccess.Repository
 {
     public interface IItemRepository : IRepository<Item>
     {
-        Task <IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status);
+        Task<IEnumerable<Item>> GetItemsByStatusAsync(AuctionStatus status);
         Task AddItemAsync(Item item);
         Task<Item> GetByIdAsNoTrackingAsync(int id);
+        Task<IEnumerable<Item>> GetRecommendedItemsAsync(int itemId, int categoryId, int count = 4);
 
     }
 

@@ -16,7 +16,8 @@ namespace DataAccess.Repository.IRepository
         IAuctionRepository Auctions { get; }
         IAuctionScheduleRepository AuctionSchedules { get; }
         IAutoBidRepository AutoBids { get; }
-
+        IRepository<Notification> Notifications { get; }
+        IRepository<Review> Reviews { get; }
 
         Task<int> CompleteAsync(); // Saves changes to the database
     }

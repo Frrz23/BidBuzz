@@ -46,6 +46,9 @@ namespace Models
 
         public ICollection<Auction> Auctions { get; set; } = new List<Auction>();
 
+        [NotMapped]
+        public decimal CurrentBid { get; set; }
+
         public string? UserId { get; set; }
 
         public ApplicationUser? User { get; set; } 

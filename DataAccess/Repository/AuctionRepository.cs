@@ -19,10 +19,10 @@ namespace DataAccess.Repository
         private readonly ApplicationDbContext _context;
         private readonly IAuctionScheduleRepository _scheduleRepo;
 
-        public AuctionRepository(ApplicationDbContext context) : base(context)
+        public AuctionRepository(ApplicationDbContext context, IAuctionScheduleRepository scheduleRepo) : base(context)
         {
             _context = context;
-            _scheduleRepo = new AuctionScheduleRepository(context);
+            _scheduleRepo = scheduleRepo;
         }
 
         

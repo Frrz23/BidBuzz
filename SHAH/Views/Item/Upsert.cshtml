@@ -1,0 +1,269 @@
+﻿@using Models.ViewModels
+@model ItemVM
+
+@{
+    ViewData["Title"] = Model?.Item?.Id == 0 ? "Create Item" : "Edit Item";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0 fs-4">@ViewData["Title"]</h2>
+                </div>
+                <div class="card-body p-4">
+                    @if (Model.AuctionStatus == AuctionStatus.Unsold)
+                    {
+                        <div class="alert alert-info mb-4">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Relist Attempted Till Now:</strong>
+                            <span class="badge bg-primary ms-2">@Model.RemainingRelistAttempts</span>
+                            <small>(You can relist for max 3 times) </small>
+                        </div>
+                    }
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                                {
+                                    <li>@error.ErrorMessage</li>
+                                }
+                            </ul>
+                        </div>
+                    }
+
+                    <form asp-action="Upsert" method="post" enctype="multipart/form-data" onsubmit="return ValidateForm()" class="needs-validation" novalidate>
+                        <div class="row g-4">
+                            <div class="col-md-8">
+                                <div class="form-group mb-3">
+                                    <label asp-for="Item.Name" class="form-label fw-bold">Item Name</label>
+                                    <input asp-for="Item.Name" class="form-control" placeholder="Enter item name">
+                                    <span asp-validation-for="Item.Name" class="text-danger"></span>
+                                </div>
+
+                                <div class="form-group mb-3">
+                                    <label asp-for="Item.Description" class="form-label fw-bold">Description</label>
+                                    <textarea asp-for="Item.Description" class="form-control" rows="4" placeholder="Provide a detailed description"></textarea>
+                                    <span asp-validation-for="Item.Description" class="text-danger"></span>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Item.Condition" class="form-label fw-bold">Condition</label>
+                                            <select asp-for="Item.Condition" class="form-select" asp-items="Html.GetEnumSelectList<ItemCondition>()">
+                                                <option value="">-- Select Condition --</option>
+                                            </select>
+                                            <span asp-validation-for="Item.Condition" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Item.Quantity" class="form-label fw-bold">Quantity</label>
+                                            <input asp-for="Item.Quantity" type="number" class="form-control" min="1" placeholder="1">
+                                            <span asp-validation-for="Item.Quantity" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Item.StartingPrice" class="form-label fw-bold">Starting Price</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input asp-for="Item.StartingPrice" type="number" step="0.01" class="form-control" placeholder="0.00" min="100">
+                                            </div>
+                                            <span asp-validation-for="Item.StartingPrice" class="text-danger"></span>
+                                            <small class="form-text text-muted">
+                                                Must be greater than $100.00
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label asp-for="Item.CategoryId" class="form-label fw-bold">Category</label>
+                                            <select asp-for="Item.CategoryId" class="form-select" asp-items="@(new SelectList(ViewBag.Categories, "Id", "Name"))">
+                                                <option value="">-- Select Category --</option>
+                                            </select>
+                                            <span asp-validation-for="Item.CategoryId" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (User.IsInRole(Roles.Admin) && Model.Item.Id != 0)
+                                {
+                                    <div class="card mb-4 border-info">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">Admin Controls</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group">
+                                                <label class="form-label fw-bold">Approval Status</label>
+                                                <div class="d-flex gap-4 mt-2">
+                                                    <div class="form-check">
+                                                        <input type="radio" class="form-check-input" asp-for="AuctionStatus" value="@AuctionStatus.PendingApproval" id="pendingRadio" />
+                                                        <label class="form-check-label" for="pendingRadio">Pending Approval</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input type="radio" class="form-check-input" asp-for="AuctionStatus" value="@AuctionStatus.Approved" id="approveRadio" />
+                                                        <label class="form-check-label" for="approveRadio">Approve</label>
+                                                    </div>
+                                                    <div class="form-check">
+                                                        <input type="radio" class="form-check-input" asp-for="AuctionStatus" value="@AuctionStatus.NotApproved" id="declineRadio" />
+                                                        <label class="form-check-label" for="declineRadio">Decline</label>
+                                                    </div>
+                                                </div>
+                                                <span asp-validation-for="AuctionStatus" class="text-danger"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="card h-100 border-0 shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Item Image</h5>
+                                    </div>
+                                    <div class="card-body text-center py-4">
+                                        <input type="hidden" asp-for="@Model.Item.ImageUrl" id="ImageUrl" value="Error" />
+
+                                        <div class="image-upload-container mb-3">
+                                            @if (!string.IsNullOrEmpty(Model.Item.ImageUrl))
+                                            {
+                                                <img id="previewphoto" src="@Model.Item.ImageUrl" class="img-fluid rounded mb-3" style="max-height: 200px; max-width: 100%;" />
+                                            }
+                                            else
+                                            {
+                                                <div id="image-placeholder" class="d-flex justify-content-center align-items-center bg-light rounded" style="height: 200px; width: 100%;">
+                                                    <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                                                </div>
+                                                <img id="previewphoto" src="" class="img-fluid rounded mb-3" style="max-height: 200px; max-width: 100%; display:none;" />
+                                            }
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="imageInput" class="form-label d-block">
+                                                @if (Model.Item.Id == 0)
+                                                {
+                                                    <span class="badge bg-danger mb-2">Required</span>
+                                                }
+                                                <span class="d-block text-muted small mb-1">Image must be 400x400 to 1200x1200 pixels and under 1MB</span>
+                                            </label>
+                                            <div class="input-group">
+                                                @if (Model.Item.Id == 0)
+                                                {
+                                                    <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" required accept=".png,.jpg,.jpeg" id="imageInput" />
+                                                }
+                                                else
+                                                {
+                                                    <input asp-for="Item.ImageUrl" type="file" class="form-control" name="file" accept=".png,.jpg,.jpeg" id="imageInput" />
+                                                }
+                                            </div>
+                                            <span id="imageError" asp-validation-for="Item.ImageUrl" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" asp-for="Item.Id" />
+
+                        <div class="mt-4 d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i> Back to List
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check-lg me-1"></i>
+                                @(Model.Item.Id == 0 ? "Create Item" : "Save Changes")
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        
+        document.querySelectorAll('input[name="AuctionStatus"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (!confirm("Are you sure you want to change the approval status?")) {
+                    this.checked = false;
+                }
+            });
+        });
+
+        
+        function ValidateForm() {
+            
+            var itemId = parseInt(document.querySelector('input[name="Item.Id"]').value);
+            
+            var fileInput = document.getElementById('imageInput');
+
+            
+            if (itemId === 0 || fileInput.value !== "") {
+                if (document.getElementById('ImageUrl').value === "Error") {
+                    document.getElementById('imageError').innerText = 'Please upload a valid image.';
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        
+        document.getElementById('imageInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            const imageError = document.getElementById('imageError');
+            const previewPhoto = document.getElementById('previewphoto');
+            const imagePlaceholder = document.getElementById('image-placeholder');
+            imageError.innerText = ""; 
+
+            if (file) {
+                
+                if (file.size > 1 * 1024 * 1024) {  
+                    imageError.innerText = "Image size must be less than 1MB.";
+                    e.target.value = "";
+                    previewPhoto.src = "";
+                    previewPhoto.style.display = "none";
+                    if (imagePlaceholder) imagePlaceholder.style.display = "flex";
+                    document.getElementById('ImageUrl').value = "Error";
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = new Image();
+                    img.onload = function () {
+                        
+                        if (img.width < 400 || img.height < 400 || img.width > 1200 || img.height > 1200) {
+                            imageError.innerText = "Image dimensions must be between 400x400 and 1200x1200 pixels.";
+                            e.target.value = "";
+                            previewPhoto.src = "";
+                            previewPhoto.style.display = "none";
+                            if (imagePlaceholder) imagePlaceholder.style.display = "flex";
+                            document.getElementById('ImageUrl').value = "Error";
+                            return;
+                        }
+                        
+                        previewPhoto.src = event.target.result;
+                        previewPhoto.style.display = "block";
+                        if (imagePlaceholder) imagePlaceholder.style.display = "none";
+                        document.getElementById('ImageUrl').value = event.target.result;
+                    };
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    </script>
+}

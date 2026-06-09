@@ -17,6 +17,9 @@ namespace Models
         
         public AuctionStatus Status { get; set; }
 
+        public int ExtensionCount { get; set; } = 0;
+        public DateTime? LastExtensionTime { get; set; }
+
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
         public int? RelistCount { get; set; } 
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;

@@ -1,4 +1,4 @@
-﻿using Hangfire;
+using Hangfire;
 using Hangfire.Storage;
 using Hangfire.Storage.Monitoring;
 using DataAccess.Repository.IRepository;
@@ -8,7 +8,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BidBuzz.Services
+namespace SHAH.Services
 {
     public class AuctionSchedulerService
     {
@@ -79,14 +79,16 @@ namespace BidBuzz.Services
 
             
             bool startExists = scheduledJobs.Any(j =>
+                j.Value?.Job != null &&
                 j.Value.Job.Method.Name == nameof(StartAuctionJob) &&
                 j.Value.EnqueueAt > nowUtc);
 
             if (!startExists)
                 BackgroundJob.Schedule(() => StartAuctionJob(), startUtc);
 
-            
+
             bool endExists = scheduledJobs.Any(j =>
+                j.Value?.Job != null &&
                 j.Value.Job.Method.Name == nameof(EndAuctionJob) &&
                 j.Value.EnqueueAt > nowUtc);
 

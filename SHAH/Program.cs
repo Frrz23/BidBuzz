@@ -1,0 +1,135 @@
+using DataAccess.Data;
+using DataAccess.Repository;
+using DataAccess.Repository.IRepository;
+using Hangfire;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Utility;
+using SHAH.Hubs;
+using SHAH.Services;
+using Stripe;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information); 
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddDistributedMemoryCache();
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("BuyerOnly", policy => policy.RequireRole("Buyer"));
+    options.AddPolicy("SellerOnly", policy => policy.RequireRole("Seller"));
+});
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("dbcs")));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Identity/Account/Login";
+    options.LogoutPath = "/Identity/Account/Logout";
+    options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+});
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IEmailSender, EmailSender>();
+builder.Services.AddRazorPages();
+builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
+builder.Services.AddScoped<IBidRepository, BidRepository>(); 
+builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("dbcs")));
+builder.Services.AddHangfireServer();
+builder.Services.AddScoped<AuctionSchedulerService>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<IAuctionScheduleRepository, AuctionScheduleRepository>();
+
+var app = builder.Build();
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseStatusCodePagesWithReExecute("/Home/Error", "?statusCode={0}");
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseSession();
+app.UseRouting();
+app.UseHangfireDashboard(); 
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var schedRepo = services.GetRequiredService<IAuctionScheduleRepository>();
+    var auctionScheduler = services.GetRequiredService<AuctionSchedulerService>();
+
+    await schedRepo.SeedInitialScheduleAsync();
+
+    var sched = await schedRepo.GetScheduleAsync("Current");
+    if (sched != null)
+    {
+        var nowUtc = DateTime.UtcNow;
+        var endUtc = auctionScheduler
+            .GetNextUtcForLocal(
+               Enum.Parse<DayOfWeek>(sched.EndDay),
+               sched.EndHour,
+               nowUtc,
+               forceNextWeek: false
+            );
+
+        if (nowUtc <= endUtc)
+        {
+            var monitor = JobStorage.Current.GetMonitoringApi();
+            var scheduledJobs = monitor.ScheduledJobs(0, 100);
+
+            bool alreadyScheduled = scheduledJobs.Any(j =>
+                j.Value?.Job != null &&
+                j.Value.Job.Type == typeof(AuctionSchedulerService) &&
+                (j.Value.Job.Method.Name == nameof(AuctionSchedulerService.StartAuctionJob) ||
+                 j.Value.Job.Method.Name == nameof(AuctionSchedulerService.EndAuctionJob)));
+
+            if (!alreadyScheduled)
+            {
+                await auctionScheduler.ScheduleNextCycleAsync(forceNextWeek: false);
+            }
+        }
+
+    }
+}
+
+
+app.UseAuthentication();
+app.UseAuthorization();
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Time-Zone"] = "UTC";
+    await next();
+});
+
+app.MapRazorPages();
+app.MapHub<BidHub>("/bidHub");
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();

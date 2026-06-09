@@ -1,1 +1,1 @@
-# BidBuzz
+# SHAH - SecondHand Auction Hub

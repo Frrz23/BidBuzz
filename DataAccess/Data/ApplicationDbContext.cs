@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Models;
 using System;
@@ -22,6 +22,8 @@ namespace DataAccess.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<AuctionSchedule>AuctionSchedules { get; set; }
         public DbSet<AutoBid> AutoBids { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
 
 
@@ -98,7 +100,31 @@ namespace DataAccess.Data
                 .OnDelete(DeleteBehavior.Cascade);  
             modelBuilder.Entity<Auction>()
                 .Property(a => a.Status)
-                .HasConversion<int>();  
+                .HasConversion<int>();
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Reviewer)
+                .WithMany()
+                .HasForeignKey(r => r.ReviewerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.ReviewedUser)
+                .WithMany()
+                .HasForeignKey(r => r.ReviewedUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Review>()
+                .HasOne(r => r.Item)
+                .WithMany()
+                .HasForeignKey(r => r.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

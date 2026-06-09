@@ -1,0 +1,67 @@
+@model IEnumerable<Review>
+
+@{
+    ViewData["Title"] = "Reviews";
+}
+
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2 class="fw-bold text-primary">Reviews</h2>
+            <hr class="text-primary">
+            <p class="text-muted">
+                Average Rating: <strong>@ViewBag.AverageRating.ToString("0.0")</strong> / 5.0
+                (@ViewBag.ReviewCount review@(ViewBag.ReviewCount != 1 ? "s" : ""))
+            </p>
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No reviews yet.</div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var review in Model)
+            {
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-3 h-100">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold mb-0">@review.Reviewer?.Full_Name</h6>
+                                <span class="text-warning">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        if (i <= review.Rating)
+                                        {
+                                            <i class="bi bi-star-fill"></i>
+                                        }
+                                        else
+                                        {
+                                            <i class="bi bi-star"></i>
+                                        }
+                                    }
+                                </span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p class="mb-1">@review.Comment</p>
+                            }
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Item: @review.Item?.Name</small>
+                                <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-controller="Home" asp-action="BidHistory" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Bid History
+        </a>
+    </div>
+</div>

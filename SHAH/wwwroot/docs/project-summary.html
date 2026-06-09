@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHAH - Project Summary</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 40px; color: #333; }
+        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 40px; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }
+        h2 { color: #2980b9; margin-top: 35px; }
+        h3 { color: #555; margin-bottom: 8px; }
+        ul { padding-left: 20px; }
+        li { margin: 6px 0; line-height: 1.6; }
+        .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 10px; margin-left: 6px; }
+        .tag-existing { background: #e8f5e9; color: #2e7d32; }
+        .tag-added { background: #e3f2fd; color: #1565c0; }
+        .tag-future { background: #fff3e0; color: #e65100; }
+        .badge { display: inline-block; background: #3498db; color: #fff; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; }
+        hr { border: none; border-top: 1px solid #eee; margin: 30px 0; }
+        .footer { color: #999; font-size: 13px; text-align: center; margin-top: 40px; }
+        .section-desc { color: #666; font-style: italic; margin: -5px 0 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SHAH — Project Summary</h1>
+        <div class="badge">CACS452 Project III — 8th Semester</div>
+
+        <h2>Existing Features (from 6th Semester)</h2>
+        <ul>
+            <li><span class="tag tag-existing">Existing</span> User Registration &amp; Login (ASP.NET Core Identity)</li>
+            <li><span class="tag tag-existing">Existing</span> Item CRUD (Create / Read / Update / Delete)</li>
+            <li><span class="tag tag-existing">Existing</span> Auction System with Scheduling (Hangfire)</li>
+            <li><span class="tag tag-existing">Existing</span> Proxy / Auto-bidding</li>
+            <li><span class="tag tag-existing">Existing</span> Stripe Payment Integration</li>
+            <li><span class="tag tag-existing">Existing</span> Admin Panel</li>
+            <li><span class="tag tag-existing">Existing</span> Contact &amp; About Pages</li>
+        </ul>
+
+        <h2>What Was Added (Current Work)</h2>
+        <ul>
+            <li><span class="tag tag-added">Added</span> <strong>Rename BidBuzz → SHAH</strong> — solution, project, all files renamed</li>
+            <li><span class="tag tag-added">Added</span> <strong>Security Fixes (10 items)</strong> — Stripe keys to gitignored config, XSS fix, namespace fixes, DI fixes, IdentityUser→ApplicationUser, EF version alignment, DateTime.UtcNow, dead code removal</li>
+            <li><span class="tag tag-added">Added</span> <strong>Dynamic Bid Increment Algorithm</strong> — tiered 5% / 3% / 2% + $1 minimum (<code>Utility/BiddingEngine.cs</code>)</li>
+            <li><span class="tag tag-added">Added</span> <strong>Item Recommendation Algorithm</strong> — same-category suggestions (up to 4) on details page</li>
+            <li><span class="tag tag-added">Added</span> <strong>Time Extension Algorithm</strong> — anti-sniping: extends auction deadline by 2 min if bid placed in last 5 min (max 3 extensions, 2 min cooldown) (<code>DataAccess/AuctionTimeExtension.cs</code>)</li>
+            <li><span class="tag tag-added">Added</span> <strong>In-app Notifications</strong> — bell icon with dropdown, 15s polling, outbid alerts (<code>NotificationController</code>)</li>
+            <li><span class="tag tag-added">Added</span> <strong>Review &amp; Rating</strong> — bidirectional (buyer↔seller), star rating, leave-review on sold items (<code>ReviewController</code>)</li>
+            <li><span class="tag tag-added">Added</span> <strong>Session Timeout</strong> — 30 minutes (was 100s)</li>
+            <li><span class="tag tag-added">Added</span> <strong>404 Error Page</strong> — custom error page via status code re-execute</li>
+            <li><span class="tag tag-added">Added</span> <strong>Code Cleanup</strong> — removed HangfireJobActivator, BiddingDefaults, merged duplicate Schedule endpoints, fixed malformed csproj, removed stale Hangfire jobs</li>
+            <li><span class="tag tag-added">Added</span> <strong>Database Migrations</strong> — <code>AddNotificationsAndReviews</code> migration with proper FK cascade settings</li>
+        </ul>
+
+        <h2>Future Work (Deferred)</h2>
+        <p class="section-desc">Listed in the 6th-semester report recommendations — not implemented.</p>
+        <ul>
+            <li><span class="tag tag-future">Future</span> User Verification (phone / document upload)</li>
+            <li><span class="tag tag-future">Future</span> Logistics &amp; Delivery Tracking</li>
+            <li><span class="tag tag-future">Future</span> Multi-language Support</li>
+            <li><span class="tag tag-future">Future</span> Analytics Dashboard (charts, reports)</li>
+            <li><span class="tag tag-future">Future</span> Scalability (caching, CDN, load balancing)</li>
+        </ul>
+
+        <hr>
+
+        <h2>Algorithms Implemented</h2>
+        <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+            <tr style="background: #f0f4f8;">
+                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">#</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Algorithm</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Location</th>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">1</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">Proxy / Auto-bidding</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/Repository/AutoBidRepository.cs</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">2</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">Dynamic Bid Increment</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>Utility/BiddingEngine.cs</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">3</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">Time Extension (Anti-Sniping)</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/AuctionTimeExtension.cs</code></td>
+            </tr>
+            <tr>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">4</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;">Item Recommendation</td>
+                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/Repository/ItemRepository.cs</code></td>
+            </tr>
+        </table>
+
+        <h2>Login Credentials</h2>
+        <p style="font-size: 14px;">
+            <strong>Admin:</strong> admin@gmail.com / Admin@123<br>
+            <strong>User:</strong> user@gmail.com / User1@
+        </p>
+
+        <div class="footer">SHAH (SecondHand Auction Hub) &mdash; CACS452 Project III &mdash; May 2026</div>
+    </div>
+</body>
+</html>

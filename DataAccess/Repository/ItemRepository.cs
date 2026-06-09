@@ -52,6 +52,18 @@ namespace DataAccess.Repository
             return await _context.Items.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
         }
 
+        public async Task<IEnumerable<Item>> GetRecommendedItemsAsync(int itemId, int categoryId, int count = 4)
+        {
+            return await _context.Items
+                .Include(i => i.Category)
+                .Where(i => i.CategoryId == categoryId
+                         && i.Id != itemId
+                         && i.Auctions.Any(a => a.Status == AuctionStatus.InAuction
+                                              || a.Status == AuctionStatus.Approved))
+                .Take(count)
+                .ToListAsync();
+        }
+
 
 
 

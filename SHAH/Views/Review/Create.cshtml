@@ -1,0 +1,55 @@
+@model int
+
+@{
+    ViewData["Title"] = "Leave a Review";
+    var itemId = Model;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-4">
+                    <h3 class="fw-bold text-primary mb-4">Leave a Review</h3>
+                    <form method="post" action="@Url.Action("Create", "Review")">
+                        <input type="hidden" name="itemId" value="@itemId" />
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Rating</label>
+                            <div class="star-rating">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" name="rating" id="star@(i)" value="@i" class="btn-check" required />
+                                    <label for="star@(i)" class="btn btn-outline-warning star-label"><i class="bi bi-star-fill"></i></label>
+                                }
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label fw-bold">Comment <span class="text-muted">(optional)</span></label>
+                            <textarea name="comment" id="comment" class="form-control" rows="4" maxlength="500" placeholder="Share your experience..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Submit Review</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .star-rating .btn-check + .star-label {
+        font-size: 1.5rem;
+        padding: 0.25rem 0.5rem;
+        border: none;
+    }
+    .star-rating .btn-check:checked + .star-label {
+        color: #ffc107;
+    }
+    .star-rating .star-label {
+        color: #dee2e6;
+        transition: color 0.2s;
+    }
+    .star-rating .star-label:hover,
+    .star-rating .star-label:hover ~ .star-label {
+        color: #ffc107;
+    }
+</style>
