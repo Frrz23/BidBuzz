@@ -182,28 +182,28 @@
         @if (TempData["Success"] != null)
         {
             <text>
-                        toastr.success(@System.Text.Json.JsonSerializer.Serialize(TempData["Success"]));
+                        toastr.success(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Success"])));
             </text>
         }
 
         @if (TempData["Error"] != null)
         {
             <text>
-                        toastr.error(@System.Text.Json.JsonSerializer.Serialize(TempData["Error"]));
+                        toastr.error(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Error"])));
             </text>
         }
 
         @if (TempData["Info"] != null)
         {
             <text>
-                        toastr.info(@System.Text.Json.JsonSerializer.Serialize(TempData["Info"]));
+                        toastr.info(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Info"])));
             </text>
         }
 
         @if (TempData["Warning"] != null)
         {
             <text>
-                        toastr.warning(@System.Text.Json.JsonSerializer.Serialize(TempData["Warning"]));
+                        toastr.warning(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(TempData["Warning"])));
             </text>
         }
         });

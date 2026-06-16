@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,8 +21,15 @@ namespace Models
         public DateTime? LastExtensionTime { get; set; }
 
         public ICollection<Bid> Bids { get; set; } = new List<Bid>();
-        public int? RelistCount { get; set; } 
+        public int? RelistCount { get; set; }
         public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Unpaid;
+
+        /// <summary>
+        /// The UserId of the auction winner — set by the Winner Determination algorithm
+        /// when the auction ends. Null if the auction is Unsold (no bids received).
+        /// </summary>
+        public string? WinnerId { get; set; }
+
 
 
 

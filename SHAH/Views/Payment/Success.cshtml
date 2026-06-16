@@ -61,7 +61,7 @@
                                     <p class="text-muted mb-0">Date:</p>
                                 </div>
                                 <div class="col-md-8">
-                                    <p class="mb-0">@DateTime.Now.ToString("MMM dd, yyyy HH:mm")</p>
+                                    <p class="mb-0">@DateTime.UtcNow.AddHours(5).AddMinutes(45).ToString("MMM dd, yyyy hh:mm tt") NPT</p>
                                 </div>
                             </div>
                             <hr>

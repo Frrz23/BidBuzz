@@ -73,7 +73,7 @@
                                         <img src="@auction.Item.ImageUrl" alt="@auction.Item.Name" width="50" height="50" class="img-thumbnail me-2" />
                                         @auction.Item.Name
                                     </td>
-                                    <td>@string.Format("{0:MMM dd, yyyy HH:mm}", auction.EndTime)</td>
+                                    <td>@string.Format("{0:MMM dd, yyyy hh:mm tt}", auction.EndTime?.AddHours(5).AddMinutes(45)) NPT</td>
                                     <td>@winnerName</td>
                                     <td>@string.Format("{0:C}", highestBid?.Amount)</td>
                                     <td>
@@ -133,7 +133,7 @@
                                         <img src="@auction.Item.ImageUrl" alt="@auction.Item.Name" width="50" height="50" class="img-thumbnail me-2" />
                                         @auction.Item.Name
                                     </td>
-                                    <td>@string.Format("{0:MMM dd, yyyy HH:mm}", auction.EndTime)</td>
+                                    <td>@string.Format("{0:MMM dd, yyyy hh:mm tt}", auction.EndTime?.AddHours(5).AddMinutes(45)) NPT</td>
                                     <td>@winnerName</td>
                                     <td>@string.Format("{0:C}", highestBid?.Amount)</td>
                                     <td>

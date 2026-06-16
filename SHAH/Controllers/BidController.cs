@@ -60,6 +60,15 @@ namespace SHAH.Controllers
                 return View("~/Views/Home/Details.cshtml", model);
             }
 
+            if (auction.EndTime.HasValue && auction.EndTime.Value <= DateTime.UtcNow)
+            {
+                TempData["Error"] = "This auction has ended. No more bids can be placed.";
+                model.Item = item;
+                model.AuctionStatus = auction.Status;
+                model.BidList = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
+                return View("~/Views/Home/Details.cshtml", model);
+            }
+
             var bidsActive = await _unitOfWork.Bids.GetBidsForAuctionAsync(auction.Id);
             var highestBid = bidsActive.FirstOrDefault();
             var highestBidAmount = highestBid?.Amount ?? item.StartingPrice;
@@ -122,7 +131,8 @@ namespace SHAH.Controllers
                 await _unitOfWork.CompleteAsync();
                 await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveBidUpdate", itemId);
                 await _hubContext.Clients.Group($"item-{itemId}").SendAsync("ReceiveAutoBidUpdate", itemId);
-                TempData["Info"] = $"Auction extended to {extendedTo.Value:MMM dd, yyyy HH:mm} UTC due to late bid.";
+                var nepalTime = extendedTo.Value.AddHours(5).AddMinutes(45);
+                TempData["Info"] = $"Auction extended to {nepalTime:MMM dd, yyyy hh:mm tt} NPT due to late bid.";
             }
 
             if (highestBid != null && highestBid.UserId != userId)

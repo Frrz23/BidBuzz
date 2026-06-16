@@ -109,7 +109,7 @@
                                 <tr>
                                     <td>@bid.User?.UserName</td>
                                     <td class="fw-bold text-primary">@bid.Amount.ToString("C")</td>
-                                    <td>@bid.BidTime.ToString("g")</td>
+                                    <td>@bid.BidTime.AddHours(5).AddMinutes(45).ToString("MMM dd, yyyy hh:mm tt") NPT</td>
                                 </tr>
                             }
                         </tbody>

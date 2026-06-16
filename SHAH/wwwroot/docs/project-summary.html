@@ -3,104 +3,575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SHAH - Project Summary</title>
+    <title>SHAH - Complete Project Documentation</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f5f7fa; margin: 0; padding: 40px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 40px; }
-        h1 { color: #2c3e50; border-bottom: 3px solid #3498db; padding-bottom: 10px; margin-top: 0; }
-        h2 { color: #2980b9; margin-top: 35px; }
-        h3 { color: #555; margin-bottom: 8px; }
-        ul { padding-left: 20px; }
-        li { margin: 6px 0; line-height: 1.6; }
-        .tag { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 10px; margin-left: 6px; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; color: #333; padding: 30px; }
+        .container { max-width: 1100px; margin: 0 auto; background: #fff; border-radius: 14px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); padding: 45px; }
+        h1 { color: #1a1a2e; font-size: 28px; border-bottom: 3px solid #e94560; padding-bottom: 12px; margin-top: 0; display: flex; align-items: center; gap: 12px; }
+        h1 small { font-size: 14px; font-weight: 400; color: #888; }
+        h2 { color: #16213e; font-size: 20px; margin: 40px 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #0f3460; }
+        h3 { color: #e94560; font-size: 16px; margin: 25px 0 8px 0; }
+        h4 { color: #0f3460; font-size: 14px; margin: 16px 0 6px 0; }
+        p, li { line-height: 1.7; font-size: 14px; }
+        ul, ol { padding-left: 22px; margin: 8px 0; }
+        li { margin: 4px 0; }
+        .badge { display: inline-block; background: #e94560; color: #fff; font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; }
+        .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 10px; margin-right: 4px; }
         .tag-existing { background: #e8f5e9; color: #2e7d32; }
         .tag-added { background: #e3f2fd; color: #1565c0; }
-        .tag-future { background: #fff3e0; color: #e65100; }
-        .badge { display: inline-block; background: #3498db; color: #fff; font-size: 13px; font-weight: 600; padding: 4px 14px; border-radius: 20px; margin-bottom: 20px; }
-        hr { border: none; border-top: 1px solid #eee; margin: 30px 0; }
-        .footer { color: #999; font-size: 13px; text-align: center; margin-top: 40px; }
-        .section-desc { color: #666; font-style: italic; margin: -5px 0 15px 0; }
+        .tag-major { background: #fce4ec; color: #c62828; }
+        .tag-minor { background: #fff3e0; color: #e65100; }
+        .tag-future { background: #f3e5f5; color: #6a1b9a; }
+        hr { border: none; border-top: 1px solid #e0e0e0; margin: 35px 0; }
+        .file-path { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 12px; background: #f5f5f5; padding: 2px 8px; border-radius: 4px; color: #0f3460; }
+        .code-block { background: #1e1e2e; color: #cdd6f4; padding: 16px 20px; border-radius: 8px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 13px; overflow-x: auto; margin: 12px 0; line-height: 1.5; }
+        .code-block .comment { color: #6c7086; }
+        .code-block .keyword { color: #cba6f7; }
+        .code-block .string { color: #a6e3a1; }
+        .code-block .number { color: #fab387; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+        th { background: #16213e; color: #fff; padding: 10px 12px; text-align: left; }
+        td { padding: 8px 12px; border-bottom: 1px solid #eee; }
+        tr:hover td { background: #f8f9fa; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin: 12px 0; }
+        .feature-card { background: #fafafa; border: 1px solid #e8e8e8; border-radius: 10px; padding: 16px; }
+        .feature-card h4 { margin: 0 0 6px 0; font-size: 14px; color: #16213e; }
+        .feature-card p { font-size: 12px; color: #666; margin: 0; }
+        .feature-card .file-path { font-size: 11px; }
+        .algo-card { background: linear-gradient(135deg, #fafafa 0%, #f5f8ff 100%); border: 1px solid #dde4f0; border-radius: 12px; padding: 20px; margin: 16px 0; }
+        .algo-card h3 { margin-top: 0; }
+        .algo-card .meta { font-size: 12px; color: #888; margin-bottom: 10px; }
+        .algo-card ol { margin: 8px 0; }
+        .algo-card ol li { margin: 6px 0; }
+        .footer { color: #999; font-size: 12px; text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; }
+        @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 22px; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>SHAH — Project Summary</h1>
-        <div class="badge">CACS452 Project III — 8th Semester</div>
+<div class="container">
 
-        <h2>Existing Features (from 6th Semester)</h2>
-        <ul>
-            <li><span class="tag tag-existing">Existing</span> User Registration &amp; Login (ASP.NET Core Identity)</li>
-            <li><span class="tag tag-existing">Existing</span> Item CRUD (Create / Read / Update / Delete)</li>
-            <li><span class="tag tag-existing">Existing</span> Auction System with Scheduling (Hangfire)</li>
-            <li><span class="tag tag-existing">Existing</span> Proxy / Auto-bidding</li>
-            <li><span class="tag tag-existing">Existing</span> Stripe Payment Integration</li>
-            <li><span class="tag tag-existing">Existing</span> Admin Panel</li>
-            <li><span class="tag tag-existing">Existing</span> Contact &amp; About Pages</li>
-        </ul>
+<h1>SHAH — SecondHand Auction Hub <small>CACS452 Project III &bull; 8th Semester</small></h1>
+<div class="badge">Complete Project Documentation</div>
 
-        <h2>What Was Added (Current Work)</h2>
-        <ul>
-            <li><span class="tag tag-added">Added</span> <strong>Rename BidBuzz → SHAH</strong> — solution, project, all files renamed</li>
-            <li><span class="tag tag-added">Added</span> <strong>Security Fixes (10 items)</strong> — Stripe keys to gitignored config, XSS fix, namespace fixes, DI fixes, IdentityUser→ApplicationUser, EF version alignment, DateTime.UtcNow, dead code removal</li>
-            <li><span class="tag tag-added">Added</span> <strong>Dynamic Bid Increment Algorithm</strong> — tiered 5% / 3% / 2% + $1 minimum (<code>Utility/BiddingEngine.cs</code>)</li>
-            <li><span class="tag tag-added">Added</span> <strong>Item Recommendation Algorithm</strong> — same-category suggestions (up to 4) on details page</li>
-            <li><span class="tag tag-added">Added</span> <strong>Time Extension Algorithm</strong> — anti-sniping: extends auction deadline by 2 min if bid placed in last 5 min (max 3 extensions, 2 min cooldown) (<code>DataAccess/AuctionTimeExtension.cs</code>)</li>
-            <li><span class="tag tag-added">Added</span> <strong>In-app Notifications</strong> — bell icon with dropdown, 15s polling, outbid alerts (<code>NotificationController</code>)</li>
-            <li><span class="tag tag-added">Added</span> <strong>Review &amp; Rating</strong> — bidirectional (buyer↔seller), star rating, leave-review on sold items (<code>ReviewController</code>)</li>
-            <li><span class="tag tag-added">Added</span> <strong>Session Timeout</strong> — 30 minutes (was 100s)</li>
-            <li><span class="tag tag-added">Added</span> <strong>404 Error Page</strong> — custom error page via status code re-execute</li>
-            <li><span class="tag tag-added">Added</span> <strong>Code Cleanup</strong> — removed HangfireJobActivator, BiddingDefaults, merged duplicate Schedule endpoints, fixed malformed csproj, removed stale Hangfire jobs</li>
-            <li><span class="tag tag-added">Added</span> <strong>Database Migrations</strong> — <code>AddNotificationsAndReviews</code> migration with proper FK cascade settings</li>
-        </ul>
+<!-- ============================================================ -->
+<!-- PROJECT OVERVIEW -->
+<!-- ============================================================ -->
+<h2>1. Project Overview</h2>
+<p>
+    <strong>SHAH (SecondHand Auction Hub)</strong> is a web-based auction platform built with <strong>ASP.NET Core 8 MVC</strong>.
+    It enables users to list used items for auction, place manual and proxy (auto) bids in real-time,
+    process payments via Stripe, and leave reviews after completed transactions. The platform includes
+    <strong>4 implemented algorithms</strong> — Proxy Bidding (economic mechanism), Dynamic Bid Increment,
+    Time Extension (anti-sniping), and Item Recommendation (popularity + recency scoring) —
+    alongside real-time updates via <strong>SignalR</strong>, scheduled auction lifecycle via
+    <strong>Hangfire</strong>, and in-app notifications.
+</p>
 
-        <h2>Future Work (Deferred)</h2>
-        <p class="section-desc">Listed in the 6th-semester report recommendations — not implemented.</p>
-        <ul>
-            <li><span class="tag tag-future">Future</span> User Verification (phone / document upload)</li>
-            <li><span class="tag tag-future">Future</span> Logistics &amp; Delivery Tracking</li>
-            <li><span class="tag tag-future">Future</span> Multi-language Support</li>
-            <li><span class="tag tag-future">Future</span> Analytics Dashboard (charts, reports)</li>
-            <li><span class="tag tag-future">Future</span> Scalability (caching, CDN, load balancing)</li>
-        </ul>
+<table>
+    <tr><th>Aspect</th><th>Detail</th></tr>
+    <tr><td>Project Name</td><td>SHAH (SecondHand Auction Hub) — renamed from BidBuzz</td></tr>
+    <tr><td>Framework</td><td>ASP.NET Core 8 MVC (.NET 8.0)</td></tr>
+    <tr><td>Database</td><td>SQL Server via Entity Framework Core 8.0.11 (Code First)</td></tr>
+    <tr><td>Authentication</td><td>ASP.NET Core Identity with custom ApplicationUser</td></tr>
+    <tr><td>Real-time</td><td>SignalR (BidHub — item-specific groups)</td></tr>
+    <tr><td>Scheduling</td><td>Hangfire (background job server)</td></tr>
+    <tr><td>Payment</td><td>Stripe Checkout (test mode)</td></tr>
+    <tr><td>UI</td><td>Bootstrap 5 + DataTables + Font Awesome</td></tr>
+    <tr><td>Roles</td><td>Admin / User / Buyer / Seller (with runtime role toggle)</td></tr>
+    <tr><td>Connection</td><td><code>LAPTOP-T9JLARUM\SQLEXPRESS; database=BidBuzz</code></td></tr>
+    <tr><td>HTTPS</td><td><code>https://localhost:7062</code></td></tr>
+</table>
 
-        <hr>
+<!-- ============================================================ -->
+<!-- ARCHITECTURE -->
+<!-- ============================================================ -->
+<h2>2. Solution Architecture</h2>
+<p>The solution follows a layered architecture with 4 projects:</p>
+<table>
+    <tr><th>Project</th><th>Purpose</th><th>Key Files</th></tr>
+    <tr>
+        <td><strong>SHAH</strong></td>
+        <td>Presentation layer — Controllers, Views, Hubs, wwwroot</td>
+        <td><span class="file-path">Controllers/*.cs</span>, <span class="file-path">Views/*.cshtml</span>, <span class="file-path">Hub/BidHub.cs</span>, <span class="file-path">Services/AuctionSchedulerService.cs</span>, <span class="file-path">Program.cs</span></td>
+    </tr>
+    <tr>
+        <td><strong>Models</strong></td>
+        <td>Domain entities, ViewModels, Enums</td>
+        <td><span class="file-path">Item.cs</span>, <span class="file-path">Auction.cs</span>, <span class="file-path">Bid.cs</span>, <span class="file-path">AutoBid.cs</span>, <span class="file-path">Notification.cs</span>, <span class="file-path">Review.cs</span>, <span class="file-path">Category.cs</span>, <span class="file-path">AuctionSchedule.cs</span></td>
+    </tr>
+    <tr>
+        <td><strong>DataAccess</strong></td>
+        <td>EF DbContext, Repositories, Unit of Work, Migrations</td>
+        <td><span class="file-path">Data/ApplicationDbContext.cs</span>, <span class="file-path">Repository/*.cs</span>, <span class="file-path">Repository/IRepository/*.cs</span>, <span class="file-path">AuctionTimeExtension.cs</span></td>
+    </tr>
+    <tr>
+        <td><strong>Utility</strong></td>
+        <td>Shared constants, helper classes, enums</td>
+        <td><span class="file-path">BiddingEngine.cs</span>, <span class="file-path">Roles.cs</span>, <span class="file-path">EmailSender.cs</span>, <span class="file-path">Enums.cs</span></td>
+    </tr>
+</table>
 
-        <h2>Algorithms Implemented</h2>
-        <table style="width:100%; border-collapse: collapse; font-size: 14px;">
-            <tr style="background: #f0f4f8;">
-                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">#</th>
-                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Algorithm</th>
-                <th style="text-align: left; padding: 8px; border-bottom: 2px solid #ddd;">Location</th>
-            </tr>
-            <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">1</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">Proxy / Auto-bidding</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/Repository/AutoBidRepository.cs</code></td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">2</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">Dynamic Bid Increment</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>Utility/BiddingEngine.cs</code></td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">3</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">Time Extension (Anti-Sniping)</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/AuctionTimeExtension.cs</code></td>
-            </tr>
-            <tr>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">4</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;">Item Recommendation</td>
-                <td style="padding: 8px; border-bottom: 1px solid #eee;"><code>DataAccess/Repository/ItemRepository.cs</code></td>
-            </tr>
-        </table>
+<!-- ============================================================ -->
+<!-- ALL FEATURES IN DETAIL -->
+<!-- ============================================================ -->
+<h2>3. Features — Complete Detail</h2>
 
-        <h2>Login Credentials</h2>
-        <p style="font-size: 14px;">
-            <strong>Admin:</strong> admin@gmail.com / Admin@123<br>
-            <strong>User:</strong> user@gmail.com / User1@
-        </p>
+<div class="feature-grid">
 
-        <div class="footer">SHAH (SecondHand Auction Hub) &mdash; CACS452 Project III &mdash; May 2026</div>
+    <div class="feature-card">
+        <h4><span class="tag tag-existing">Existing</span> User Registration &amp; Login</h4>
+        <p>ASP.NET Core Identity with email-based registration, login, and role management. Custom <code>ApplicationUser</code> with Full_Name, Age, PhoneNumber, Address fields. Role toggling (Buyer/Seller) at runtime.</p>
+        <p><span class="file-path">Areas/Identity/Pages/Account/</span>, <span class="file-path">Controllers/UserController.cs</span></p>
     </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-existing">Existing</span> Item CRUD</h4>
+        <p>Create, edit, delete items with Name, Description, Starting Price, Category, Condition (New/Like New/Good/Fair), Quantity, and Image upload. Automatic auction creation on item creation. Duplicate name validation per user.</p>
+        <p><span class="file-path">Controllers/ItemController.cs</span>, <span class="file-path">Views/Item/</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-existing">Existing</span> Auction Scheduling (Hangfire)</h4>
+        <p>Weekly auction cycle via Hangfire background jobs. Admin sets Start/End day and hour. Items listed in one cycle auto-schedule for the next. Unsold items auto-relist (up to 3 attempts). Schedule rotates each week.</p>
+        <p><span class="file-path">Services/AuctionSchedulerService.cs</span>, <span class="file-path">Controllers/AuctionController.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Manual Bidding + Proxy / Auto-bidding</h4>
+        <p>Users place manual bids in real-time. If auto-bid is enabled, the system sets a maximum and automatically bids on the user's behalf up to that limit. Winner pays second-highest + increment (eBay-style proxy).</p>
+        <p><span class="file-path">Controllers/BidController.cs</span>, <span class="file-path">Controllers/AutoBidController.cs</span>, <span class="file-path">DataAccess/Repository/AutoBidRepository.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Dynamic Bid Increment</h4>
+        <p>Minimum bid increment calculated dynamically based on current price tier (5% under $100 down to 1% at $50k+). Ensures fair escalation without requiring large fixed steps.</p>
+        <p><span class="file-path">Utility/BiddingEngine.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Time Extension (Anti-Sniping)</h4>
+        <p>Auction auto-extends by 2 minutes if a bid is placed in the last 5 minutes. Maximum 3 extensions per auction with a 2-minute cooldown between extensions. Prevents last-second sniping.</p>
+        <p><span class="file-path">DataAccess/AuctionTimeExtension.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Item Recommendation</h4>
+        <p>On the auction detail page, up to 4 recommended items from the same category are shown. Scoring = (Bid Count x 2) + Recency Bonus. Recency bonus: 1 day=+10, 3 days=+6, 7 days=+3, older=+0.</p>
+        <p><span class="file-path">DataAccess/Repository/ItemRepository.cs</span>, <span class="file-path">Controllers/HomeController.cs:Details()</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Stripe Payment Integration</h4>
+        <p>Winning bidders pay via Stripe Checkout. Payment status tracked (ToPay/Paid). Both winning bidder and seller can view payment status. Stripe keys stored in gitignored <code>appsettings.Development.json</code>.</p>
+        <p><span class="file-path">Controllers/PaymentController.cs</span>, <span class="file-path">Views/Payment/</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Real-time Updates (SignalR)</h4>
+        <p>BidHub manages per-item SignalR groups. Connected clients receive <code>ReceiveBidUpdate</code> and <code>ReceiveAutoBidUpdate</code> events. JS auto-refreshes bid list, current highest display, auto-bid card visibility, and minimum bid input.</p>
+        <p><span class="file-path">Hub/BidHub.cs</span>, <span class="file-path">Views/Home/Details.cshtml</span> (SignalR JS)</p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> In-app Notifications</h4>
+        <p>Bell icon in navbar polls every 15 seconds for unread count. Dropdown shows 10 most recent with "time ago" labels. Outbid, auto-bid exhausted, and auto-bid stopped notifications. Mark single or all as read.</p>
+        <p><span class="file-path">Controllers/NotificationController.cs</span>, <span class="file-path">Models/Notification.cs</span>, <span class="file-path">Views/Shared/_Layout.cshtml</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Review &amp; Rating</h4>
+        <p>Bidirectional reviews (buyer reviews seller, seller reviews buyer) after an item is sold. 1-5 star rating with optional comment. Average rating displayed. Only one review per transaction pair. Accessible from BidHistory and UserReviews page.</p>
+        <p><span class="file-path">Controllers/ReviewController.cs</span>, <span class="file-path">Models/Review.cs</span>, <span class="file-path">Views/Review/</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-existing">Existing</span> Admin Panel</h4>
+        <p>Admin manages items (approve/cancel), auctions (view by status, stop), auction schedules (edit next week's schedule), users (view all, lock/unlock, role management). Items, users, and categories listed with DataTables.</p>
+        <p><span class="file-path">Controllers/AuctionController.cs</span>, <span class="file-path">Controllers/UserController.cs</span>, <span class="file-path">Controllers/CategoryController.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> User Profile</h4>
+        <p>Users view and edit their profile (Full Name, Age, Phone, Address). Password change with current password verification. Role toggling between Buyer and Seller.</p>
+        <p><span class="file-path">Controllers/UserController.cs:MyProfile()</span>, <span class="file-path">Views/User/MyProfile.cshtml</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Bid History</h4>
+        <p>Users browse items they've bid on or won, filterable by All/Sold/InAuction. Click to see full bid list for each item. Leave Review button for sold items.</p>
+        <p><span class="file-path">Controllers/HomeController.cs:BidHistory()</span>, <span class="file-path">Views/Home/BidHistory.cshtml</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Session Timeout</h4>
+        <p>Session timeout set to 30 minutes (was 100 seconds). Inactivity auto-logs user out.</p>
+        <p><span class="file-path">Program.cs:ConfigureServices()</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> 404 Error Page</h4>
+        <p>Custom "Page Not Found" page with clear message when navigating to non-existent pages.</p>
+        <p><span class="file-path">Controllers/HomeController.cs:Error()</span>, <span class="file-path">Program.cs</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-existing">Existing</span> Contact &amp; About Pages</h4>
+        <p>Static informational pages for site description, team info, and contact form placeholder.</p>
+        <p><span class="file-path">Views/Home/AboutUs.cshtml</span>, <span class="file-path">Views/Home/Contact.cshtml</span>, <span class="file-path">Views/Home/Privacy.cshtml</span></p>
+    </div>
+
+    <div class="feature-card">
+        <h4><span class="tag tag-added">Added</span> Security Fixes (10 items)</h4>
+        <p>Stripe keys moved to gitignored config, XSS in _Layout.cshtml fixed, IdentityUser → ApplicationUser in all DI registrations, EF versions aligned to 8.0.11, DateTime.UtcNow throughout, DI fixed in AuctionRepository, BidBuzz → SHAH rename completed.</p>
+        <p>Cross-cutting — multiple files</p>
+    </div>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- ALGORITHM 1: PROXY BIDDING -->
+<!-- ============================================================ -->
+<h2>4. Algorithms — Detailed Documentation</h2>
+
+<div class="algo-card">
+    <h3>Algorithm 1: Proxy (Auto) Bidding <span class="tag tag-major">Major</span></h3>
+    <div class="meta">
+        <strong>Type:</strong> Major &mdash; Economic auction mechanism (Vickrey / second-price variant)<br>
+        <strong>File:</strong> <span class="file-path">DataAccess/Repository/AutoBidRepository.cs</span><br>
+        <strong>Called from:</strong> <span class="file-path">Controllers/BidController.cs:PlaceBid()</span>,
+        <span class="file-path">Controllers/AutoBidController.cs:SetAutoBid()</span><br>
+        <strong>Academic Backing:</strong> Roth & Ockenfels (Stanford/MIT), American Economic Review — proxy bidding on eBay<br>
+        <strong>Lines of Code:</strong> ~130 lines (ProcessAutoBidsAsync + NotifyAndDeactivateAsync)
+    </div>
+
+    <h4>What It Does</h4>
+    <p>
+        Allows a user to set a maximum bid amount. The system automatically bids on their behalf,
+        incrementally, up to that maximum — but only as needed to maintain their position as the
+        highest bidder. The winner pays the <strong>second-highest maximum + one increment</strong>
+        (eBay-style proxy), not their full maximum.
+    </p>
+
+    <h4>How It Works (Step-by-Step)</h4>
+    <ol>
+        <li><strong>Load all active auto-bids</strong> for the auction in a single query, sorted by MaxAmount descending then CreatedAt ascending.</li>
+        <li><strong>Calculate minimum required</strong> = currentHighestBid + DynamicBidIncrement(currentHighestBid).</li>
+        <li><strong>Filter challengers</strong> — auto-bids from users who are NOT the current highest bidder AND whose MaxAmount >= minRequired.</li>
+        <li><strong>No challengers?</strong> Deactivate all exhausted auto-bids (those with MaxAmount < minRequired), send notifications, and exit.</li>
+        <li><strong>Best challenger</strong> = first in sorted list (highest MaxAmount, then earliest created).</li>
+        <li><strong>Compare challenger vs current holder's auto-bid</strong> (if any):</li>
+        <li style="list-style: none; margin-left: 20px;">
+            &bull; If challenger's MaxAmount &gt; holder's MaxAmount: challenger wins at <code>min(challenger.MaxAmount, holder.MaxAmount + increment)</code>. Holder is deactivated.<br>
+            &bull; If holder's MaxAmount &ge; challenger's MaxAmount: holder stays at <code>min(holder.MaxAmount, challenger.MaxAmount + increment)</code>. Challenger is deactivated.<br>
+            &bull; If holder has no auto-bid: challenger wins at <code>min(challenger.MaxAmount, currentHighestBid + increment)</code>.
+        </li>
+        <li><strong>Deactivate all</strong> auto-bids whose MaxAmount is below the winning amount (they can no longer compete).</li>
+        <li><strong>Place one winning bid</strong> with the determined amount and winner.</li>
+        <li><strong>Single SaveChangesAsync</strong> — all changes (deactivations + new bid) committed atomically.</li>
+        <li><strong>Check time extension</strong> — if the proxy bid triggered the anti-sniping threshold, extend the auction.</li>
+    </ol>
+
+    <h4>Edge Cases Handled</h4>
+    <ul>
+        <li>No active auto-bids at all → early exit</li>
+        <li>Only current holder has auto-bid, no challengers → no changes needed</li>
+        <li>All auto-bids exhausted below minimum required → deactivate all, notify all</li>
+        <li>Challenger has same MaxAmount as holder → holder wins (earliest-created tiebreak)</li>
+        <li>Same user already has auto-bid → update MaxAmount instead of creating duplicate</li>
+        <li>Auto-bid deactivation during proxy resolution → notification sent immediately</li>
+    </ul>
+
+    <h4>Notification Integration</h4>
+    <p>
+        When auto-bids are deactivated (exhausted or outbid), <code>NotifyAndDeactivateAsync()</code>
+        creates in-app notifications: <em>"Your auto-bid on {item} has been stopped — you've been outbid."</em>
+        Notifications are batched — fetches auction/item info once for all deactivated users.
+    </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- ALGORITHM 2: DYNAMIC BID INCREMENT -->
+<!-- ============================================================ -->
+<div class="algo-card">
+    <h3>Algorithm 2: Dynamic Bid Increment <span class="tag tag-minor">Minor</span></h3>
+    <div class="meta">
+        <strong>Type:</strong> Minor &mdash; Percentage-tiered calculation<br>
+        <strong>File:</strong> <span class="file-path">Utility/BiddingEngine.cs</span><br>
+        <strong>Used by:</strong> <span class="file-path">BidController.cs</span>,
+        <span class="file-path">AutoBidController.cs</span>,
+        <span class="file-path">AutoBidRepository.cs</span><br>
+        <strong>Lines of Code:</strong> ~35 lines
+    </div>
+
+    <h4>What It Does</h4>
+    <p>
+        Calculates the minimum amount a bidder must exceed the current highest bid by.
+        Uses 6 tiers so that low-value items grow quickly but high-value items don't require
+        absurdly large jumps. Replaces a flat $1 increment (the prior system) with fair,
+        proportional scaling.
+    </p>
+
+    <h4>Tier Breakdown</h4>
+    <table>
+        <tr><th>Tier</th><th>Current Bid Range</th><th>Increment %</th><th>Example</th></tr>
+        <tr><td>1</td><td>Below $100</td><td>5%</td><td>$50 bid → $2.50 increment</td></tr>
+        <tr><td>2</td><td>$100 – $499</td><td>4%</td><td>$200 bid → $8.00 increment</td></tr>
+        <tr><td>3</td><td>$500 – $1,999</td><td>3%</td><td>$1,000 bid → $30.00 increment</td></tr>
+        <tr><td>4</td><td>$2,000 – $9,999</td><td>2%</td><td>$5,000 bid → $100.00 increment</td></tr>
+        <tr><td>5</td><td>$10,000 – $49,999</td><td>1.5%</td><td>$20,000 bid → $300.00 increment</td></tr>
+        <tr><td>6</td><td>$50,000+</td><td>1%</td><td>$100,000 bid → $1,000.00 increment</td></tr>
+    </table>
+    <p>Minimum increment is always $1.00 regardless of tier.</p>
+
+    <h4>How It Works (Step-by-Step)</h4>
+    <ol>
+        <li>Receive current highest bid as input.</li>
+        <li>Check which tier the bid falls into (6 conditionals).</li>
+        <li>Multiply by the tier's percentage and round to 2 decimal places.</li>
+        <li>Take the maximum of (calculated increment, $1.00 minimum).</li>
+        <li>Return the result — caller adds this to the current highest bid to get the new minimum acceptable bid.</li>
+    </ol>
+
+    <h4>Edge Cases Handled</h4>
+    <ul>
+        <li>Zero or negative current bid → tier 1 (5%) applies, min $1</li>
+        <li>Micro-bids below $1 → floor to $1 minimum</li>
+        <li>Decimal rounding to 2 places via Math.Round</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- ALGORITHM 3: TIME EXTENSION -->
+<!-- ============================================================ -->
+<div class="algo-card">
+    <h3>Algorithm 3: Time Extension (Anti-Sniping) <span class="tag tag-minor">Minor</span></h3>
+    <div class="meta">
+        <strong>Type:</strong> Minor &mdash; Anti-sniping auction rule<br>
+        <strong>File:</strong> <span class="file-path">DataAccess/AuctionTimeExtension.cs</span><br>
+        <strong>Used by:</strong> <span class="file-path">BidController.cs:PlaceBid()</span>,
+        <span class="file-path">AutoBidController.cs:SetAutoBid()</span>,
+        <span class="file-path">AutoBidRepository.cs:ProcessAutoBidsAsync()</span><br>
+        <strong>Academic Backing:</strong> Roth & Ockenfels — sniping and late bidding on eBay<br>
+        <strong>Lines of Code:</strong> ~38 lines
+    </div>
+
+    <h4>What It Does</h4>
+    <p>
+        Prevents last-second "sniping" (placing a winning bid in the final seconds so no one can
+        respond). When a bid is placed within the last 5 minutes of an auction, the deadline
+        extends by 2 minutes, giving other bidders a fair chance to respond. Up to 3 extensions
+        per auction, with a 2-minute cooldown between extensions to prevent infinite loops.
+    </p>
+
+    <h4>Parameters</h4>
+    <table>
+        <tr><th>Parameter</th><th>Value</th></tr>
+        <tr><td>Extension threshold</td><td>5 minutes (bid must be within this window to trigger)</td></tr>
+        <tr><td>Extension amount</td><td>2 minutes (added to EndTime)</td></tr>
+        <tr><td>Max extensions</td><td>3 (per auction)</td></tr>
+        <tr><td>Cooldown</td><td>2 minutes (between successive extensions)</td></tr>
+    </table>
+
+    <h4>How It Works (Step-by-Step)</h4>
+    <ol>
+        <li>Check if EndTime is null → return null (no change).</li>
+        <li>Calculate timeRemaining = EndTime - UtcNow.</li>
+        <li>Calculate timeSinceLastExtension = UtcNow - LastExtensionTime (or MaxValue if null).</li>
+        <li>Verify all 4 conditions simultaneously:
+            <ul>
+                <li>timeRemaining > 0 (auction hasn't ended yet)</li>
+                <li>timeRemaining ≤ 5 minutes (within threshold)</li>
+                <li>ExtensionCount < 3 (not exceeded max)</li>
+                <li>timeSinceLastExtension ≥ 2 minutes (cooldown satisfied)</li>
+            </ul>
+        </li>
+        <li>If all conditions true: add 2 minutes to EndTime, increment ExtensionCount, set LastExtensionTime.</li>
+        <li>Return the new EndTime (or null if not extended).</li>
+    </ol>
+
+    <h4>Edge Cases Handled</h4>
+    <ul>
+        <li>Multiple rapid bids within threshold → cooldown prevents more than 1 extension per 2 minutes</li>
+        <li>Bid placed exactly at threshold boundary → exact comparison works (≤, not &lt;)</li>
+        <li>Auction already extended 3 times → no further extensions</li>
+        <li>Bid after auction technically ended → timeRemaining ≤ 0, no extension</li>
+        <li>No previous extension → timeSinceLastExtension = MaxValue, always passes cooldown check</li>
+    </ul>
+
+    <h4>SignalR Integration</h4>
+    <p>
+        When an extension occurs, BidController sends both <code>ReceiveBidUpdate</code> and
+        <code>ReceiveAutoBidUpdate</code> to the item's SignalR group, plus a TempData message:
+        <em>"Auction extended to {date} UTC due to late bid."</em>
+    </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- ALGORITHM 4: ITEM RECOMMENDATION -->
+<!-- ============================================================ -->
+<div class="algo-card">
+    <h3>Algorithm 4: Item Recommendation <span class="tag tag-minor">Minor</span></h3>
+    <div class="meta">
+        <strong>Type:</strong> Minor &mdash; Popularity + Recency scoring<br>
+        <strong>File:</strong> <span class="file-path">DataAccess/Repository/ItemRepository.cs</span><br>
+        <strong>Called from:</strong> <span class="file-path">Controllers/HomeController.cs:Details()</span><br>
+        <strong>Lines of Code:</strong> ~42 lines (GetRecommendedItemsAsync)
+    </div>
+
+    <h4>What It Does</h4>
+    <p>
+        On every auction detail page, shows up to 4 recommended items from the same category.
+        Items are scored by a combination of bid popularity (bid count × 2) and recency
+        (newer listings get bonus points). The highest-scored items appear first.
+    </p>
+
+    <h4>Scoring Formula</h4>
+    <div class="code-block">
+        <span class="comment">// Score = Popularity + Recency</span>
+        score = (bidCount * 2) + recencyBonus;
+
+        <span class="comment">// Recency bonus (based on days since auction started):</span>
+        <span class="keyword">if</span> daysOld &lt;= 1  → bonus = <span class="number">10</span>
+        <span class="keyword">elif</span> daysOld &lt;= 3 → bonus = <span class="number">6</span>
+        <span class="keyword">elif</span> daysOld &lt;= 7 → bonus = <span class="number">3</span>
+        <span class="keyword">else</span>                → bonus = <span class="number">0</span>
+    </div>
+
+    <h4>How It Works (Step-by-Step)</h4>
+    <ol>
+        <li>Fetch all items in the same category (excluding the current item) that are Approved or InAuction status.</li>
+        <li>Include Auctions and Bids in the query (one round trip to DB).</li>
+        <li>For each candidate, compute:
+            <ul>
+                <li>bidCount = number of bids on the item's auction</li>
+                <li>daysOld = days since auction started</li>
+                <li>recencyBonus from the table above</li>
+                <li>score = (bidCount × 2) + recencyBonus</li>
+            </ul>
+        </li>
+        <li>Sort by score descending (most popular + recent first).</li>
+        <li>Take the top 4 items and return them.</li>
+    </ol>
+
+    <h4>Edge Cases Handled</h4>
+    <ul>
+        <li>No other items in the same category → returns empty list</li>
+        <li>Item with zero bids → score = recencyBonus only (older items score 0)</li>
+        <li>Multiple auctions for one item → uses the first auction's start time and bid count</li>
+        <li>Only 1-3 items in category → returns what's available (less than 4 is fine)</li>
+    </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- ADDITIONAL ALGORITHMS (Bonus) -->
+<!-- ============================================================ -->
+<h3>Bonus: Winner Determination Algorithm <span class="tag tag-minor">Minor</span></h3>
+<div class="algo-card" style="margin-top: 0;">
+    <div class="meta">
+        <strong>File:</strong> <span class="file-path">DataAccess/Repository/IAuctionRepository.cs</span> (EndAuctionAsync)<br>
+        <strong>Purpose:</strong> Determines the winner when an auction closes
+    </div>
+    <p>
+        When an auction's EndTime arrives, the Hangfire job calls <code>EndAuctionAsync()</code>.
+        The winner is the user who placed the highest bid. Their UserId is stored in
+        <code>Auction.WinnerId</code>. The auction status changes to Sold (if bids exist) or
+        Unsold (if no bids received). Unsold items are auto-relisted (up to 3 times).
+        The winning bidder is notified via in-app notification.
+    </p>
+</div>
+
+<h3>Bonus: Schedule Rotation Algorithm <span class="tag tag-minor">Minor</span></h3>
+<div class="algo-card" style="margin-top: 0;">
+    <div class="meta">
+        <strong>File:</strong> <span class="file-path">Services/AuctionSchedulerService.cs</span><br>
+        <strong>Purpose:</strong> Manages weekly auction cycle
+    </div>
+    <p>
+        After each auction cycle ends, the schedule rotates: Next → Current, and a new
+        Next schedule is created with default values. The <code>GetNextUtcForLocal()</code>
+        method calculates the next occurrence of a specific day+hour, supporting both
+        current-week and next-week modes. Hangfire jobs are scheduled for the Start and
+        End times, with deduplication (won't schedule if the job already exists).
+    </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- DATABASE SCHEMA -->
+<!-- ============================================================ -->
+<h2>5. Database Schema</h2>
+<table>
+    <tr><th>Table</th><th>Key Fields</th><th>Relationships</th></tr>
+    <tr><td><strong>AspNetUsers</strong></td><td>Full_Name, Age, PhoneNumber, Address, Role, LockoutEnd</td><td>Extended Identity user</td></tr>
+    <tr><td><strong>Items</strong></td><td>Name, Description, StartingPrice, ImageUrl, CategoryId, Quantity, Condition, UserId</td><td>→ Category, → User, 1→* Auctions</td></tr>
+    <tr><td><strong>Auctions</strong></td><td>ItemId, StartTime, EndTime, Status, ExtensionCount, LastExtensionTime, RelistCount, PaymentStatus, WinnerId</td><td>→ Item, 1→* Bids, 1→* AutoBids</td></tr>
+    <tr><td><strong>Bids</strong></td><td>AuctionId, Amount, BidTime, UserId</td><td>→ Auction, → User</td></tr>
+    <tr><td><strong>AutoBids</strong></td><td>AuctionId, UserId, MaxAmount, CreatedAt, IsActive</td><td>→ Auction, → User</td></tr>
+    <tr><td><strong>Categories</strong></td><td>Name, Description</td><td>1→* Items</td></tr>
+    <tr><td><strong>Notifications</strong></td><td>UserId, Message, IsRead, CreatedAt, RelatedItemId, RelatedItemName</td><td>→ User</td></tr>
+    <tr><td><strong>Reviews</strong></td><td>Rating, Comment, ReviewerId, ReviewedUserId, ItemId, CreatedAt</td><td>→ Reviewer (User), → ReviewedUser (User), → Item</td></tr>
+    <tr><td><strong>AuctionSchedules</strong></td><td>Week (Current/Next), StartDay, StartHour, EndDay, EndHour</td><td>Standalone</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- COMPARISON WITH SAMPLE PROJECT -->
+<!-- ============================================================ -->
+<h2>6. Comparison with Sample Project (Vehicles Parking Management System)</h2>
+<table>
+    <tr><th>Dimension</th><th>Sample (Parking System)</th><th>SHAH (BidBuzz)</th></tr>
+    <tr><td>Technology</td><td>Python / Django (basic)</td><td>ASP.NET Core 8 MVC (latest .NET)</td></tr>
+    <tr><td>Methodology</td><td>Waterfall (basic)</td><td>Waterfall (implied by report structure)</td></tr>
+    <tr><td>Algorithms</td><td>1 vague (FCFS + rate×hours, no code)</td><td><strong>4 algorithms</strong> — all with real code, math, edge cases. Proxy Bidding is a published economic mechanism (Vickrey).</td></tr>
+    <tr><td>Real-time</td><td>None (basic POST-back)</td><td>SignalR (live bid updates, auto-bid card toggle, min-bid refresh)</td></tr>
+    <tr><td>Payment</td><td>None</td><td>Stripe Checkout (test mode)</td></tr>
+    <tr><td>Scheduling</td><td>None</td><td>Hangfire background jobs (weekly cycles, auto-rotate, deduplication)</td></tr>
+    <tr><td>Notifications</td><td>None</td><td>In-app notification system (15s polling, unread count, mark read)</td></tr>
+    <tr><td>Reviews</td><td>None</td><td>Bidirectional rating (1-5 stars) with comments</td></tr>
+    <tr><td>Roles</td><td>3 (User/Admin/Delivery)</td><td>4 (Admin/User/Buyer/Seller) with runtime role toggle</td></tr>
+    <tr><td>Security</td><td>Basic session</td><td>Identity auth, XSS protection, Stripe keys in gitignored config, 30-min session timeout, custom 404</td></tr>
+    <tr><td>Diagrams</td><td>Class, Sequence, Activity, DFD, ER</td><td>All need to be created (same structure)</td></tr>
+    <tr><td>Real-world usage</td><td>Academic only (basic CRUD)</td><td>Near-production ready (Hangfire, SignalR, Stripe, Identity)</td></tr>
+</table>
+
+<p><strong>Conclusion:</strong> SHAH significantly exceeds the sample project in technical depth, algorithm complexity, real-time features, payment integration, and overall sophistication. The 4 algorithms (especially Proxy Bidding as a published economic mechanism) provide strong academic legitimacy for CACS452.</p>
+
+<!-- ============================================================ -->
+<!-- LOGIN & CREDENTIALS -->
+<!-- ============================================================ -->
+<h2>7. Login Credentials</h2>
+<table>
+    <tr><th>Role</th><th>Email</th><th>Password</th></tr>
+    <tr><td>Admin</td><td>admin@gmail.com</td><td>Admin@123</td></tr>
+    <tr><td>User</td><td>user@gmail.com</td><td>User1@</td></tr>
+</table>
+
+<!-- ============================================================ -->
+<!-- USE CASE / FLOW -->
+<!-- ============================================================ -->
+<h2>8. High-Level Use Case Flow</h2>
+<ol>
+    <li><strong>Admin</strong> sets up auction schedule (start day/hour, end day/hour).</li>
+    <li><strong>Seller</strong> (User in Seller role) lists an item with description, starting price, category, condition, image.</li>
+    <li><strong>Admin</strong> approves the item → it enters the next scheduled auction cycle.</li>
+    <li><strong>Buyer</strong> (User in Buyer role) browses items on homepage, clicks to view details.</li>
+    <li><strong>Buyer</strong> places a manual bid (or sets an auto-bid with a maximum amount).</li>
+    <li>Bid is processed: increment calculated, auto-bids resolved, time extension checked, notifications sent.</li>
+    <li>All connected users see live updates via SignalR (bid list, current highest, auto-bid status, min bid amount).</li>
+    <li><strong>Hangfire</strong> triggers EndAuction at the scheduled EndTime (potentially extended by anti-sniping).</li>
+    <li>Winner is determined, payment status set to ToPay, seller notified.</li>
+    <li><strong>Winning bidder</strong> pays via Stripe Checkout → status becomes Paid.</li>
+    <li>After payment, <strong>buyer</strong> and <strong>seller</strong> can leave reviews for each other.</li>
+    <li>Unsold items are auto-relisted (up to 3 times). Schedule rotates for the next week.</li>
+</ol>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<div class="footer">
+    SHAH (SecondHand Auction Hub) &mdash; CACS452 Project III &mdash; May 2026<br>
+    <span style="font-size: 11px; color: #bbb;">Originally BidBuzz &bull; Renamed to SHAH &bull; Built with ASP.NET Core 8, SignalR, Hangfire, Stripe, EF Core</span>
+</div>
+
+</div>
 </body>
 </html>
